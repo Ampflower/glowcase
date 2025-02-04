@@ -2,24 +2,8 @@ package dev.hephaestus.glowcase;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import dev.hephaestus.glowcase.block.HyperlinkBlock;
-import dev.hephaestus.glowcase.block.ItemAcceptorBlock;
-import dev.hephaestus.glowcase.block.ItemDisplayBlock;
-import dev.hephaestus.glowcase.block.OutlineBlock;
-import dev.hephaestus.glowcase.block.ParticleDisplayBlock;
-import dev.hephaestus.glowcase.block.PopupBlock;
-import dev.hephaestus.glowcase.block.SoundPlayerBlock;
-import dev.hephaestus.glowcase.block.SpriteBlock;
-import dev.hephaestus.glowcase.block.TextBlock;
-import dev.hephaestus.glowcase.block.entity.HyperlinkBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ItemAcceptorBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
-import dev.hephaestus.glowcase.block.entity.OutlineBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
-import dev.hephaestus.glowcase.block.entity.PopupBlockEntity;
-import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
-import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
-import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
+import dev.hephaestus.glowcase.block.*;
+import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.compat.PolydexCompatibility;
 import dev.hephaestus.glowcase.item.LockItem;
 import net.fabricmc.api.ModInitializer;
@@ -28,6 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -71,6 +56,10 @@ public class Glowcase implements ModInitializer {
 	public static final Supplier<BlockItem> POPUP_BLOCK_ITEM = registerItem("popup_block", () -> new BlockItem(POPUP_BLOCK.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<PopupBlockEntity>> POPUP_BLOCK_ENTITY = registerBlockEntity("popup_block", () -> BlockEntityType.Builder.create(PopupBlockEntity::new, POPUP_BLOCK.get()).build(null));
 
+	public static final Supplier<ScreenBlock> SCREEN_BLOCK = registerBlock("screen_block", ScreenBlock::new);
+	public static final Supplier<BlockItem> SCREEN_BLOCK_ITEM = registerItem("screen_block", () -> new BlockItem(SCREEN_BLOCK.get(), new Item.Settings()));
+	public static final Supplier<BlockEntityType<ScreenBlockEntity>> SCREEN_BLOCK_ENTITY = registerBlockEntity("screen_block", () -> BlockEntityType.Builder.create(ScreenBlockEntity::new, SCREEN_BLOCK.get()).build(null));
+
 	public static final Supplier<SpriteBlock> SPRITE_BLOCK = registerBlock("sprite_block", SpriteBlock::new);
 	public static final Supplier<BlockItem> SPRITE_BLOCK_ITEM = registerItem("sprite_block", () -> new BlockItem(SPRITE_BLOCK.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<SpriteBlockEntity>> SPRITE_BLOCK_ENTITY = registerBlockEntity("sprite_block", () -> BlockEntityType.Builder.create(SpriteBlockEntity::new, SPRITE_BLOCK.get()).build(null));
@@ -98,6 +87,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(ITEM_ACCEPTOR_BLOCK_ITEM.get());
 			entries.add(HYPERLINK_BLOCK_ITEM.get());
 			entries.add(POPUP_BLOCK_ITEM.get());
+			entries.add(SCREEN_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
 		})
 		.build()
