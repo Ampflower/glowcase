@@ -13,15 +13,22 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class ScreenBlockEntity extends BlockEntity {
+	public static final int URL_MAX_LENGTH = 1024;
+	public static final int ALT_MAX_LENGTH = 1024;
+
 	public String url = "";
 	public String alt = "";
 
 	public float width = 1f;
 	public float height = 1f;
-	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.CENTER;
+	public ZOffset zOffset = ZOffset.CENTER;
 
 	public boolean stretch = false;
 	public boolean eink = true;
+
+	public enum ZOffset {
+		FRONT, CENTER, BACK
+	}
 
 	public ScreenBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.SCREEN_BLOCK_ENTITY.get(), pos, state);
@@ -49,7 +56,7 @@ public class ScreenBlockEntity extends BlockEntity {
 		height = nbt.getFloat("height");
 		stretch = nbt.getBoolean("stretch");
 		eink = nbt.getBoolean("eink");
-		this.zOffset = TextBlockEntity.ZOffset.valueOf(nbt.getString("z_offset"));
+		this.zOffset = ZOffset.valueOf(nbt.getString("z_offset"));
 
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");
@@ -59,20 +66,18 @@ public class ScreenBlockEntity extends BlockEntity {
 	}
 
 	public void setImage(String url, String alt, boolean stretch) {
-		this.url = url;
-		this.alt = alt;
+		this.url = url.substring(0, Math.min(url.length(), URL_MAX_LENGTH));
+		this.alt = alt.substring(0, Math.min(alt.length(), ALT_MAX_LENGTH));
 		this.stretch = stretch;
 		markDirty();
 		dispatch();
 	}
 
-	public void setupScreen(float width, float height, TextBlockEntity.ZOffset zOffset, boolean eink) {
-		this.width = Math.min(0.05f, width);
-		this.height = Math.min(0.05f, height);
+	public void setupScreen(float width, float height, ZOffset zOffset, boolean eink) {
+		this.width = Math.clamp(0.05f, Integer.MAX_VALUE, width);
+		this.height = Math.clamp(0.05f, Integer.MAX_VALUE, height);
 		this.zOffset = zOffset;
 		this.eink = eink;
-		markDirty();
-		dispatch();
 	}
 
 	public void dispatch() {
