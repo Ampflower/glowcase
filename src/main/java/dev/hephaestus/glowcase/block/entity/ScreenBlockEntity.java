@@ -66,8 +66,8 @@ public class ScreenBlockEntity extends BlockEntity {
 	}
 
 	public void setImage(String url, String alt, boolean stretch) {
-		this.url = url.substring(0, Math.min(url.length(), URL_MAX_LENGTH));
-		this.alt = alt.substring(0, Math.min(alt.length(), ALT_MAX_LENGTH));
+		this.url = url;
+		this.alt = alt;
 		this.stretch = stretch;
 		markDirty();
 		dispatch();
