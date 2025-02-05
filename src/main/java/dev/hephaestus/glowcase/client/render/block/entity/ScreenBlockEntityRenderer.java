@@ -215,7 +215,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		// Apply
 		matrices.scale(-font_scale_factor, -font_scale_factor, -0.1f);
-		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, .01f); // Remove offset of string
+		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, .05f); // Remove offset of string
 
 		textRenderer.draw(text, 0, 0, color, true, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 	}
@@ -252,10 +252,10 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getDebugFilledBox());
 		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
-		buffer.vertex(matrix4f, x1, y1, 0f).color(color);
-		buffer.vertex(matrix4f, x1, y2, 0f).color(color);
-		buffer.vertex(matrix4f, x2, y1, 0f).color(color);
-		buffer.vertex(matrix4f, x2, y2, 0f).color(color);
+		buffer.vertex(matrix4f, x1, y1, 0f).color(color).light(light);
+		buffer.vertex(matrix4f, x1, y2, 0f).color(color).light(light);
+		buffer.vertex(matrix4f, x2, y1, 0f).color(color).light(light);
+		buffer.vertex(matrix4f, x2, y2, 0f).color(color).light(light);
 	}
 
 	@Override
