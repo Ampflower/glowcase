@@ -146,7 +146,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		// Alt-Text
 
-		String alt = Text.translatableWithFallback("gui.glowcase.screen.alt", "%s").getString().formatted(entity.alt);
+		String alt = Text.translatable("gui.glowcase.screen.alt", entity.alt).getString();
 		ArrayList<String> lines = wrap(alt, font_scale, txt_width, textRenderer);
 
 		matrices.translate(0, textRenderer.fontHeight * ((int) (SCR_MAX_LINES / 2) - 1), 0f);  // Move to second half of screen
@@ -174,8 +174,8 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		matrices.translate(0, textRenderer.fontHeight * 4, 0f);
 
-		String hint = Text.translatableWithFallback("gui.glowcase.screen.hint."+code, "").getString();
-		String error_msg = Text.translatableWithFallback("gui.glowcase.screen.error", "%s").append(" ").append(hint).getString().formatted(""+code);
+		MutableText hint = Text.translatableWithFallback("gui.glowcase.screen.hint." + code, "");
+		String error_msg = Text.translatable("gui.glowcase.screen.error", ""+code).append(" ").append(hint).getString();
 		lines = wrap(error_msg, font_scale, txt_width, textRenderer);
 
 		moved_lines = 0;
