@@ -59,15 +59,15 @@ public class ScreenImageCache {
 					return 902; // Unable to create a connection
 				}
 
-				int result = MinecraftClient.getInstance().submit(() -> {
-					// Parse image
-					NativeImage nativeImage;
-					try {
-						nativeImage = NativeImage.read(stream);
-					} catch (IOException e) {
-						return 903; // Invalid response; Only .PNGs are allowed
-					}
+				// Parse image
+				NativeImage nativeImage;
+				try {
+					nativeImage = NativeImage.read(stream);
+				} catch (IOException e) {
+					return 903; // Unable to parse image.
+				}
 
+				int result = MinecraftClient.getInstance().submit(() -> {
 					width = nativeImage.getWidth();
 					height = nativeImage.getHeight();
 
@@ -82,7 +82,7 @@ public class ScreenImageCache {
 
 				connection.disconnect();
 				return result;
-			}, Util.getDownloadWorkerExecutor());
+			}, Util.getMainWorkerExecutor());
 		}
 
 		public Pair<Integer, Identifier> getTexture() {
