@@ -46,8 +46,8 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 		String trimmed_url = url.substring(0, Math.min(url.length(), ScreenBlockEntity.URL_MAX_LENGTH));
 		String trimmed_alt = alt.substring(0, Math.min(alt.length(), ScreenBlockEntity.ALT_MAX_LENGTH));
 
-		be.setupScreen(this.width, this.height, this.zOffset, this.eink);
-		be.setImage(trimmed_url, trimmed_alt, this.stretch); // Does markDirty and dispatch for us
+		be.setupScreen(this.width, this.height, this.zOffset, this.eink, this.stretch);
+		be.setImage(trimmed_url, trimmed_alt); // Does markDirty and dispatch for us
 	}
 
 	@Override

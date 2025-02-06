@@ -65,19 +65,19 @@ public class ScreenBlockEntity extends BlockEntity {
 		dispatch();
 	}
 
-	public void setImage(String url, String alt, boolean stretch) {
+	public void setImage(String url, String alt) {
 		this.url = url;
 		this.alt = alt;
-		this.stretch = stretch;
 		markDirty();
 		dispatch();
 	}
 
-	public void setupScreen(float width, float height, ZOffset zOffset, boolean eink) {
-		this.width = Math.clamp(0.05f, Integer.MAX_VALUE, width);
-		this.height = Math.clamp(0.05f, Integer.MAX_VALUE, height);
+	public void setupScreen(float width, float height, ZOffset zOffset, boolean eink, boolean stretch) {
+		this.width = Math.clamp(width, 0.05f, Integer.MAX_VALUE);
+		this.height = Math.clamp(height, 0.05f, Integer.MAX_VALUE);
 		this.zOffset = zOffset;
 		this.eink = eink;
+		this.stretch = stretch;
 	}
 
 	public void dispatch() {

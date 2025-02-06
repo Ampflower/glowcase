@@ -2,28 +2,36 @@ package dev.hephaestus.glowcase;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import dev.hephaestus.glowcase.block.*;
 import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.compat.PolydexCompatibility;
 import dev.hephaestus.glowcase.item.LockItem;
+import dev.hephaestus.glowcase.item.TabletItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.component.ComponentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.math.BlockPos;
+
+import java.util.List;
 
 public class Glowcase implements ModInitializer {
 	public static final String MODID = "glowcase";
@@ -74,6 +82,17 @@ public class Glowcase implements ModInitializer {
 
 	public static final Supplier<Item> LOCK_ITEM = registerItem("lock", () -> new LockItem(new Item.Settings()));
 
+	public static final Supplier<Item> TABLET_ITEM = registerItem("tablet", () -> new TabletItem(new Item.Settings()));
+	public static final Supplier<ComponentType<BlockPos>> LINKED_SCREEN_COMPONENT = registerComponent("linked_screen", () -> ComponentType.<BlockPos>builder().codec(BlockPos.CODEC).packetCodec(PacketCodecs.registryCodec(BlockPos.CODEC)).build());
+	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> ComponentType.<Integer>builder().codec(Codecs.POSITIVE_INT).packetCodec(PacketCodecs.registryCodec(Codecs.POSITIVE_INT)).build());
+	public static final Supplier<ComponentType<List<Pair<String,String>>>> SLIDESHOW_COMPONENT = registerComponent("slideshow", () -> {
+		Codec<List<Pair<String, String>>> codec = Codec.mapPair(Codec.STRING.fieldOf("url"), Codec.STRING.fieldOf("alt")).codec().listOf();
+		return ComponentType.<List<Pair<String,String>>>builder()
+			.codec(codec)
+			.packetCodec(PacketCodecs.registryCodec(codec))
+			.build();
+	});
+
 	public static final Supplier<ItemGroup> ITEM_GROUP = registerItemGroup("items", () -> FabricItemGroup.builder()
 		.displayName(Text.translatable("itemGroup.glowcase.items"))
 		.icon(() -> new ItemStack(Items.GLOWSTONE))
@@ -89,6 +108,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(POPUP_BLOCK_ITEM.get());
 			entries.add(SCREEN_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
+			entries.add(TABLET_ITEM.get());
 		})
 		.build()
 	);
@@ -103,6 +123,10 @@ public class Glowcase implements ModInitializer {
 
 	public static <T extends Item> Supplier<T> registerItem(String path, Supplier<T> supplier) {
 		return Suppliers.ofInstance(Registry.register(Registries.ITEM, id(path), supplier.get()));
+	}
+
+	public static <T extends ComponentType<U>, U> Supplier<T> registerComponent(String path, Supplier<T> supplier) {
+		return Suppliers.ofInstance(Registry.register(Registries.DATA_COMPONENT_TYPE, id(path), supplier.get()));
 	}
 
 	public static <T extends ItemGroup> Supplier<T> registerItemGroup(String path, Supplier<T> supplier) {

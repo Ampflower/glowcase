@@ -28,7 +28,6 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 	@Override
 	protected void init() {
 		super.init();
-
 		if (this.client == null) return;
 
 		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 - 70, 2 * width / 10, 20, Text.empty());
@@ -116,10 +115,10 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 	@Override
 	public void close() {
 		screenBlockEntity.eink = einkCheckWidget.isChecked();
+		screenBlockEntity.stretch = stretchCheckWidget.isChecked();
 		screenBlockEntity.setImage(
 			urlEntryWidget.getText(),
-			altEntryWidget.getText(),
-			stretchCheckWidget.isChecked()
+			altEntryWidget.getText()
 		);
 
 		C2SEditScreenBlock.of(screenBlockEntity).send();
