@@ -6,6 +6,7 @@ import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseClient;
 import dev.hephaestus.glowcase.client.ScreenImageCache.ScreenTexture;
+import dev.hephaestus.glowcase.packet.C2SEditSlideTablet;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -17,7 +18,6 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TabletEditScreen extends GlowcaseScreen {
 	private static final Identifier TEXTURE = Glowcase.id("textures/gui/tablet.png");
@@ -37,10 +37,9 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 	// The data to be manipulated
 	private int current;
-	private List<Pair<String, String>> slides;
 	@Nullable private BlockPos screen_pos;
+	private final ArrayList<Pair<String, String>> slides;
 
-	private boolean dirty = false;
 	private boolean slide_dirty = false;
 
 	// Currently shown pictures
@@ -57,9 +56,12 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 	public TabletEditScreen(ItemStack stack) {
 		this.current = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
-		this.slides = stack.getOrDefault(Glowcase.SLIDESHOW_COMPONENT.get(), new ArrayList<>());
+
 		if (stack.contains(Glowcase.LINKED_SCREEN_COMPONENT.get()))
 			this.screen_pos = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
+
+		this.slides = new ArrayList<>();
+		slides.addAll(stack.getOrDefault(Glowcase.SLIDESHOW_COMPONENT.get(), new ArrayList<>()));
 	}
 
 	@Override
@@ -90,12 +92,13 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 		ButtonWidget updateButton = ButtonWidget.builder(
 			Text.translatable("gui.glowcase.refresh"),
-			action -> saveSlide()
+			action -> syncSlide()
 		).dimensions(width/2 + BG_WIDTH/2 - 55, height/2 + 30 - 1, 50, 20).build();
 
 		previousButton = ButtonWidget.builder(
 			Text.translatable("gui.glowcase.previous"),
 			action -> {
+				syncSlide();
 				current--;
 				getSlides();
 			}
@@ -104,6 +107,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 		nextButton = ButtonWidget.builder(
 			Text.translatable("gui.glowcase.next"),
 			action -> {
+				syncSlide();
 				current++;
 				getSlides();
 			}
@@ -190,10 +194,10 @@ public class TabletEditScreen extends GlowcaseScreen {
 	/**
 	 * <p>Updates the values of the current slide, if any changes have been made.</p>
 	 */
-	public void saveSlide() {
+	public void syncSlide() {
 		if (slide_dirty) {
 			slides.set(current, new Pair<>(this.urlEntryWidget.getText(), this.altEntryWidget.getText()));
-			dirty = true;
+			C2SEditSlideTablet.of(current, this.urlEntryWidget.getText(), this.altEntryWidget.getText()).send();
 		}
 
 		getSlides();
@@ -252,33 +256,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 	@Override
 	public void close() {
-		// TODO: Send new list to server
+		syncSlide();
 		super.close();
 	}
-
-	//private void skip() {
-		//// Ensure the required components exist yet
-		//if (!(stack.contains(Glowcase.LINKED_SCREEN_COMPONENT.get()) && stack.contains(Glowcase.SLIDESHOW_COMPONENT.get())))
-		//	return TypedActionResult.pass(user.getStackInHand(hand));
-		//
-		//// Gather needed components
-		//BlockPos pos = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
-		//List<Pair<String, String>> slides = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
-		//int current = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
-		//
-		//if (slides == null || slides.isEmpty()) // Current can't be negative due to the components datatype
-		//	return TypedActionResult.pass(user.getStackInHand(hand));
-		//
-		//// Get linked Screen Block
-		//if (!(world.getBlockEntity(pos) instanceof ScreenBlockEntity be))
-		//	return TypedActionResult.pass(user.getStackInHand(hand));
-		//
-		//// Goto Next Slide
-		//Pair<String, String> slide = (current < slides.size()) ? slides.get(current) : slides.getLast();
-		//be.setImage(slide.getFirst(), slide.getSecond());
-		//
-		//// Update on which slide we are
-		//if (current++ < slides.size())
-		//	stack.set(Glowcase.CURRENT_SLIDE_COMPONENT.get(), current);
-	//}
 }

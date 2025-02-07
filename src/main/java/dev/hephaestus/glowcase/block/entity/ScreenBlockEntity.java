@@ -1,5 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
+import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -25,6 +26,18 @@ public class ScreenBlockEntity extends BlockEntity {
 
 	public boolean stretch = false;
 	public boolean eink = true;
+
+	/**
+	 * <p>Used in network code to ensure maximum length.</p>
+	 *
+	 * <p>Can be avoided by directly editing the NBT on purpose (which kinda acts as a sanity check).</p>
+	 */
+	public static Pair<String, String> trimStr(String url, String alt) {
+		String trimmed_url = url.substring(0, Math.min(url.length(), ScreenBlockEntity.URL_MAX_LENGTH));
+		String trimmed_alt = alt.substring(0, Math.min(alt.length(), ScreenBlockEntity.ALT_MAX_LENGTH));
+
+		return new Pair<>(trimmed_url, trimmed_alt);
+	}
 
 	public enum ZOffset {
 		FRONT, CENTER, BACK

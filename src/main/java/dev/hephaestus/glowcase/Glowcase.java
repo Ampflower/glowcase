@@ -82,9 +82,9 @@ public class Glowcase implements ModInitializer {
 
 	public static final Supplier<Item> LOCK_ITEM = registerItem("lock", () -> new LockItem(new Item.Settings()));
 
-	public static final Supplier<Item> TABLET_ITEM = registerItem("tablet", () -> new TabletItem(new Item.Settings()));
+	public static final Supplier<Item> TABLET_ITEM = registerItem("tablet", () -> new TabletItem(new Item.Settings().maxCount(1)));
 	public static final Supplier<ComponentType<BlockPos>> LINKED_SCREEN_COMPONENT = registerComponent("linked_screen", () -> ComponentType.<BlockPos>builder().codec(BlockPos.CODEC).packetCodec(PacketCodecs.registryCodec(BlockPos.CODEC)).build());
-	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> ComponentType.<Integer>builder().codec(Codecs.POSITIVE_INT).packetCodec(PacketCodecs.registryCodec(Codecs.POSITIVE_INT)).build());
+	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.registryCodec(Codecs.NONNEGATIVE_INT)).build());
 	public static final Supplier<ComponentType<List<Pair<String,String>>>> SLIDESHOW_COMPONENT = registerComponent("slideshow", () -> {
 		Codec<List<Pair<String, String>>> codec = Codec.mapPair(Codec.STRING.fieldOf("url"), Codec.STRING.fieldOf("alt")).codec().listOf();
 		return ComponentType.<List<Pair<String,String>>>builder()

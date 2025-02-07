@@ -67,6 +67,10 @@ public class ScreenImageCache {
 					return 903; // Unable to parse image.
 				}
 
+				// TODO: GIF support? STBImage _should_ support gif, but I didn't manage to make it work yet
+
+				// TODO: Perhaps adding a local file cache might be wise
+
 				int result = MinecraftClient.getInstance().submit(() -> {
 					width = nativeImage.getWidth();
 					height = nativeImage.getHeight();

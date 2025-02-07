@@ -1,18 +1,20 @@
 package dev.hephaestus.glowcase.item;
 
+import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -28,13 +30,39 @@ public class TabletItem extends Item {
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack stack = user.getStackInHand(hand);
 
-		if (world.isClient() && !user.isSneaking()) {
-			// Open Editor on Client
-			Glowcase.proxy.openTabletEditScreen(stack);
+		if (world.isClient() || !stack.contains(Glowcase.SLIDESHOW_COMPONENT.get()) || !stack.contains(Glowcase.LINKED_SCREEN_COMPONENT.get()))
+			return TypedActionResult.pass(user.getStackInHand(hand));
+
+		// Get components
+
+		BlockPos screenPos = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
+
+		List<Pair<String, String>> slideshow = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
+		assert slideshow != null;
+
+		int index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
+		if (user.isSneaking())
+			index -= 1;
+		else
+			index += 1;
+
+		// Ensure boundaries
+		if (index >= slideshow.size())
+			index = slideshow.size()-1;
+		if (index < 0)
+			index = 0;
+
+		stack.set(Glowcase.CURRENT_SLIDE_COMPONENT.get(), index);
+
+		if (world.getBlockEntity(screenPos) instanceof ScreenBlockEntity screen) {
+			// Set image
+			Pair<String, String> slide = slideshow.get(index);
+			screen.setImage(slide.getFirst(), slide.getSecond());
+
 			return TypedActionResult.success(user.getStackInHand(hand));
 		}
 
-		return TypedActionResult.success(user.getStackInHand(hand));
+		return TypedActionResult.pass(user.getStackInHand(hand));
 	}
 
 	@Override
@@ -44,25 +72,67 @@ public class TabletItem extends Item {
 		ItemStack stack = context.getStack();
 		World world = context.getWorld();
 
-		if (world.isClient())
+		if (world.isClient() || player == null)
 			return ActionResult.PASS;
 
-		// Update linked block
-		if (player != null && player.isSneaking() && world.getBlockEntity(pos) instanceof ScreenBlockEntity) {
+		if (player.isSneaking() && world.getBlockEntity(pos) instanceof ScreenBlockEntity) {
+			// Update linked block
 			if (canEditGlowcase(player, pos)) {
 				stack.set(Glowcase.LINKED_SCREEN_COMPONENT.get(), pos);
 				player.sendMessage(Text.translatable("gui.glowcase.updated_linked_screen", pos.toShortString()), true);
-
-				return ActionResult.SUCCESS;
 			} else
 				player.sendMessage(Text.translatable("gui.glowcase.linking_denied"), true);
+
+			return ActionResult.SUCCESS;
 		}
+
+		// Pass to use method instead for slideshow controls
 
 		return ActionResult.PASS;
 	}
 
 	@Override
+	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+		if (clickType == ClickType.RIGHT && otherStack.isEmpty()) {
+			// Open Editor on Client
+			Glowcase.proxy.openTabletEditScreen(stack);
+			return true;
+		}
+		return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
+	}
+
+	@Override
+	public boolean isItemBarVisible(ItemStack stack) {
+		if (stack.contains(Glowcase.LINKED_SCREEN_COMPONENT.get()) && stack.contains(Glowcase.SLIDESHOW_COMPONENT.get()) && stack.contains(Glowcase.CURRENT_SLIDE_COMPONENT.get())) {
+			List<Pair<String, String>> slideshow = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
+			Integer index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
+
+			if (slideshow != null && !slideshow.isEmpty() && (index > 0 && index < slideshow.size()))
+				return true;
+		}
+
+		return super.isItemBarVisible(stack);
+	}
+
+	@Override
+	public int getItemBarStep(ItemStack stack) {
+		List<Pair<String, String>> slideshow = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
+
+		int max = (slideshow != null && !slideshow.isEmpty()) ? slideshow.size()-1 : 0;
+		Integer index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
+
+		return MathHelper.clamp(Math.round((float)index * 13.0F / (float)max), 0, 13);
+	}
+
+	@Override
+	public int getItemBarColor(ItemStack stack) {
+		return 0xB5E7CB;
+	}
+
+	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("item.glowcase.tablet.tooltip.0").formatted(Formatting.GRAY));
+		tooltip.add(Text.translatable("item.glowcase.tablet.tooltip.1").formatted(Formatting.DARK_GRAY));
+		tooltip.add(Text.translatable("item.glowcase.tablet.tooltip.2").formatted(Formatting.DARK_GRAY));
 	}
 }
