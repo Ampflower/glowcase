@@ -118,7 +118,8 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		screenBlockEntity.stretch = stretchCheckWidget.isChecked();
 		screenBlockEntity.setImage(
 			urlEntryWidget.getText(),
-			altEntryWidget.getText()
+			altEntryWidget.getText(),
+			null
 		);
 
 		C2SEditScreenBlock.of(screenBlockEntity).send();

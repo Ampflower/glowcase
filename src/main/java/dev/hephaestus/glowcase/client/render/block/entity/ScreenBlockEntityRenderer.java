@@ -62,6 +62,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		String url = entity.url;
 
+		// Screen width.height
 		float width = entity.width;
 		float height = entity.height;
 
@@ -78,12 +79,31 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 			renderTextCentered(Text.stringifiedTranslatable("gui.glowcase.screen.blank"), COLOR_TXT_NORMAL, width, height, matrices, vertexConsumers, textRenderer, brightness);
 		} else {
 			ScreenImageCache screenImageCache = GlowcaseClient.screenImageCache;
-			Pair<Integer, Identifier> response = screenImageCache.getImage(url).getTexture();
+			ScreenImageCache.ScreenTexture image = screenImageCache.getImage(url);
+			Pair<Integer, Identifier> response = image.getTexture();
 
 			int code = response.getFirst();
 			@Nullable Identifier texture = response.getSecond();
 
 			if (texture != null) {
+				if (!entity.stretch) {
+					int cur_width = image.getWidth();
+					int cur_height = image.getHeight();
+
+					float width_scale = width / cur_width;
+					float height_scale = height / cur_height;
+					float final_scale = Math.min(width_scale, height_scale);
+
+					// Scale width and height
+					int scaled_width = (int) (cur_width * final_scale);
+					int scaled_height = (int) (cur_height * final_scale);
+
+					x1 = -scaled_width / 2f;
+					x2 = scaled_width / 2f;
+					y1 = -scaled_height / 2f;
+					y2 = scaled_height / 2f;
+				}
+
 				// Actual picture
 				renderPicture(texture, x1, x2, y1, y2, vertexConsumers, matrices, brightness);
 			} else if (code/100 == 1) {

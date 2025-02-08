@@ -2,6 +2,7 @@ package dev.hephaestus.glowcase.block.entity;
 
 import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.client.GlowcaseClient;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -19,6 +20,8 @@ public class ScreenBlockEntity extends BlockEntity {
 
 	public String url = "";
 	public String alt = "";
+
+	public String preview = "";
 
 	public float width = 1f;
 	public float height = 1f;
@@ -59,6 +62,8 @@ public class ScreenBlockEntity extends BlockEntity {
 
 		nbt.putString("url", url);
 		nbt.putString("alt", alt);
+
+		nbt.putString("preview", preview);
 	}
 
 	@Override
@@ -74,13 +79,22 @@ public class ScreenBlockEntity extends BlockEntity {
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");
 
+		// Cache preview before needed for smooth experience
+		preview = nbt.getString("preview");
+		if (this.getWorld() != null && this.getWorld().isClient())
+			GlowcaseClient.screenImageCache.getImage(preview);
+
 		markDirty();
 		dispatch();
 	}
 
-	public void setImage(String url, String alt) {
+	public void setImage(String url, String alt, @Nullable String preview) {
 		this.url = url;
 		this.alt = alt;
+
+		if (preview != null)
+			this.preview = preview;
+
 		markDirty();
 		dispatch();
 	}

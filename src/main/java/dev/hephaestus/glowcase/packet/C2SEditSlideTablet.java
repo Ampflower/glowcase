@@ -30,7 +30,7 @@ public record C2SEditSlideTablet(int index, String url, String alt) implements C
 
 	public void receive(ServerPlayNetworking.Context context) {
 		ItemStack stack = context.player().getMainHandStack();
-		if (!(stack.getItem() instanceof TabletItem)) return;
+		if (!(stack.isOf(Glowcase.TABLET_ITEM.get()))) return;
 
 		Pair<String, String> trimmed = ScreenBlockEntity.trimStr(this.url, this.alt);
 		Pair<String, String> slide = new Pair<>(trimmed.getFirst(), trimmed.getSecond());

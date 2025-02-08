@@ -46,7 +46,7 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 		Pair<String, String> trimmed = ScreenBlockEntity.trimStr(url, alt);
 
 		be.setupScreen(this.width, this.height, this.zOffset, this.eink, this.stretch);
-		be.setImage(trimmed.getFirst(), trimmed.getSecond()); // Does markDirty and dispatch for us
+		be.setImage(trimmed.getFirst(), trimmed.getSecond(), null); // Does markDirty and dispatch for us
 	}
 
 	@Override

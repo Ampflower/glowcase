@@ -3,7 +3,6 @@ package dev.hephaestus.glowcase.item;
 import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
@@ -41,10 +40,8 @@ public class TabletItem extends Item {
 		assert slideshow != null;
 
 		int index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
-		if (user.isSneaking())
-			index -= 1;
-		else
-			index += 1;
+		int step = user.isSneaking() ? -1 : 1;
+		index += step;
 
 		// Ensure boundaries
 		if (index >= slideshow.size())
@@ -55,9 +52,14 @@ public class TabletItem extends Item {
 		stack.set(Glowcase.CURRENT_SLIDE_COMPONENT.get(), index);
 
 		if (world.getBlockEntity(screenPos) instanceof ScreenBlockEntity screen) {
-			// Set image
 			Pair<String, String> slide = slideshow.get(index);
-			screen.setImage(slide.getFirst(), slide.getSecond());
+
+			if (index+step >= 0 && index+step < slideshow.size()) {
+				// Add potential next image for pre-caching
+				Pair<String, String> next_slide = slideshow.get(index+step);
+				screen.setImage(slide.getFirst(), slide.getSecond(), next_slide.getFirst());
+			} else
+				screen.setImage(slide.getFirst(), slide.getSecond(), null);
 
 			return TypedActionResult.success(user.getStackInHand(hand));
 		}
@@ -107,7 +109,7 @@ public class TabletItem extends Item {
 			List<Pair<String, String>> slideshow = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
 			Integer index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
 
-			if (slideshow != null && !slideshow.isEmpty() && (index > 0 && index < slideshow.size()))
+			if (slideshow != null && !slideshow.isEmpty() && (index >= 0 && index < slideshow.size()))
 				return true;
 		}
 
@@ -126,7 +128,7 @@ public class TabletItem extends Item {
 
 	@Override
 	public int getItemBarColor(ItemStack stack) {
-		return 0xB5E7CB;
+		return 0xFFFFFF;
 	}
 
 	@Override
