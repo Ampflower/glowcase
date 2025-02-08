@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 public class TabletEditScreen extends GlowcaseScreen {
 	private static final Identifier TEXTURE = Glowcase.id("textures/gui/tablet.png");
+	private static final int TXT_COLOR = 0x8af4b9;
 
 	private static final int BG_WIDTH = 256;
 	private static final int BG_HEIGHT = 160;
@@ -29,7 +30,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 	private static final int SCREEN_X1 = 5;
 	private static final int SCREEN_Y1 = 20;
 	private static final int SCREEN_X2 = 251;
-	private static final int SCREEN_Y2 = 101;
+	private static final int SCREEN_Y2 = 102;
 
 	// maximum size a picture can take (ensures it does not go out of bounds while scaling)
 	private static final int IMG_WIDTH = (int) ((SCREEN_X2 - SCREEN_X1) / 3f);
@@ -71,6 +72,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 		this.progressText = new TextWidget(width/2 - BG_WIDTH/2 + 5, height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.1), this.client.textRenderer.fontHeight,
 			Text.empty(), this.client.textRenderer)
+			.setTextColor(TXT_COLOR)
 			.alignLeft();
 
 		Text linkedText = (screen_pos == null) ? Text.translatable("gui.glowcase.tablet.not_linked")
@@ -78,6 +80,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 		TextWidget linkedTextWidget = new TextWidget(width/2 - BG_WIDTH/2 + 7 + (int) (BG_WIDTH*.1), height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.9) - 13, this.client.textRenderer.fontHeight,
 			linkedText, this.client.textRenderer)
+			.setTextColor(TXT_COLOR)
 			.alignRight();
 
 		this.urlEntryWidget = new TextFieldWidget(this.client.textRenderer, width/2 - BG_WIDTH/2 + 5, height/2 + 30 - 1, BG_WIDTH - 10 - 55, 20, Text.empty());
@@ -92,7 +95,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 		ButtonWidget updateButton = ButtonWidget.builder(
 			Text.translatable("gui.glowcase.refresh"),
-			action -> syncSlide()
+			action -> { syncSlide(); getSlides(); }
 		).dimensions(width/2 + BG_WIDTH/2 - 55, height/2 + 30 - 1, 50, 20).build();
 
 		previousButton = ButtonWidget.builder(
@@ -191,16 +194,11 @@ public class TabletEditScreen extends GlowcaseScreen {
 			x - scaled_width/2, y - scaled_height/2 , 0, 0, scaled_width, scaled_height, scaled_width, scaled_height);
 	}
 
-	/**
-	 * <p>Updates the values of the current slide, if any changes have been made.</p>
-	 */
 	public void syncSlide() {
 		if (slide_dirty) {
 			slides.set(current, new Pair<>(this.urlEntryWidget.getText(), this.altEntryWidget.getText()));
 			C2SEditSlideTablet.of(current, this.urlEntryWidget.getText(), this.altEntryWidget.getText()).send();
 		}
-
-		getSlides();
 	}
 
 	/**
@@ -250,7 +248,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 		// Update shown values
 		this.urlEntryWidget.setText(slide.getFirst());
 		this.altEntryWidget.setText(slide.getSecond());
-		this.progressText.setMessage(Text.translatable("gui.glowcase.tablet.progress", ""+(current+1), slides.size()));
+		this.progressText.setMessage(Text.translatable("gui.glowcase.progress", ""+(current+1), slides.size()));
 		slide_dirty = false;
 	}
 
