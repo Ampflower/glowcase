@@ -16,6 +16,15 @@ import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
 public class ScreenImageCache {
+	private final HashMap<String, ScreenTexture> cache = new HashMap<>();
+
+	public ScreenTexture getImage(String url) {
+		if (!cache.containsKey(url))
+			cache.put(url, new ScreenTexture(url));
+
+		return cache.get(url);
+	}
+
 	public static class ScreenTexture {
 		private final CompletableFuture<Integer> loader;
 		@Nullable
@@ -23,6 +32,21 @@ public class ScreenImageCache {
 
 		private int width = 0;
 		private int height = 0;
+
+		public Pair<Integer, Identifier> getTexture() {
+			if (loader.isDone())
+				return new Pair<>(loader.join(), texture);
+
+			return new Pair<>(102, texture);
+		}
+
+		public int getWidth() {
+			return width;
+		}
+
+		public int getHeight() {
+			return height;
+		}
 
 		public ScreenTexture(String raw_url) {
 			loader = CompletableFuture.supplyAsync(() -> {
@@ -88,29 +112,5 @@ public class ScreenImageCache {
 				return result;
 			}, Util.getMainWorkerExecutor());
 		}
-
-		public Pair<Integer, Identifier> getTexture() {
-			if (loader.isDone())
-				return new Pair<>(loader.join(), texture);
-
-			return new Pair<>(102, texture);
-		}
-
-		public int getWidth() {
-			return width;
-		}
-
-		public int getHeight() {
-			return height;
-		}
-	}
-
-	private final HashMap<String, ScreenTexture> cache = new HashMap<>();
-
-	public ScreenTexture getImage(String url) {
-		if (!cache.containsKey(url))
-			cache.put(url, new ScreenTexture(url));
-
-		return cache.get(url);
 	}
 }
