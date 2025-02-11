@@ -10,7 +10,6 @@
 		"glowcase:outline_block",
 		"glowcase:particle_display",
 		"glowcase:sound_block",
-		"glowcase:item_acceptor_block",
-		"glowcase:tablet"
+		"glowcase:item_acceptor_block"
 	]
 }
