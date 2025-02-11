@@ -70,7 +70,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 		super.init();
 		if (this.client == null) return;
 
-		this.progressText = new TextWidget(width/2 - BG_WIDTH/2 + 5, height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.1), this.client.textRenderer.fontHeight,
+		this.progressText = new TextWidget(width/2 - BG_WIDTH/2 + 5, height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.2), this.client.textRenderer.fontHeight,
 			Text.empty(), this.client.textRenderer)
 			.setTextColor(TXT_COLOR)
 			.alignLeft();
@@ -78,7 +78,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 		Text linkedText = (screen_pos == null) ? Text.translatable("gui.glowcase.tablet.not_linked")
 			: Text.translatable("gui.glowcase.tablet.linked", screen_pos.toShortString());
 
-		TextWidget linkedTextWidget = new TextWidget(width/2 - BG_WIDTH/2 + 7 + (int) (BG_WIDTH*.1), height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.9) - 13, this.client.textRenderer.fontHeight,
+		TextWidget linkedTextWidget = new TextWidget(width/2 - BG_WIDTH/2 + 7 + (int) (BG_WIDTH*.2), height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.8) - 13, this.client.textRenderer.fontHeight,
 			linkedText, this.client.textRenderer)
 			.setTextColor(TXT_COLOR)
 			.alignRight();

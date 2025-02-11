@@ -36,9 +36,6 @@ public class MixinHeldItemRenderer {
 	@Unique
 	private static final Identifier TABLET_TEXTURE = Glowcase.id("textures/gui/tablet_hand.png");
 
-	@Unique
-	private static final float TEXTURE_SIZE = 64f;
-
 	@Inject(method = "renderFirstPersonMap", at = @At("HEAD"), cancellable = true)
 	void glowcase$renderFirstPersonTablet(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, ItemStack stack, CallbackInfo ci) {
 		if (MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
