@@ -6,11 +6,13 @@ import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseClient;
 import dev.hephaestus.glowcase.client.ScreenImageCache;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -36,7 +38,8 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 	@Override
 	public void render(ScreenBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos()))
+		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos()) ||
+			(MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get())))
 			BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers, context.getRenderDispatcher().camera);
 
 		matrices.push();
@@ -87,16 +90,10 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 			if (texture != null) {
 				if (!entity.stretch) {
-					int cur_width = image.getWidth();
-					int cur_height = image.getHeight();
+					Pair<Float, Float> scale = getScale(width, height, image.getWidth(), image.getHeight());
 
-					float width_scale = width / cur_width;
-					float height_scale = height / cur_height;
-					float final_scale = Math.min(width_scale, height_scale);
-
-					// Scale width and height
-					int scaled_width = (int) (cur_width * final_scale);
-					int scaled_height = (int) (cur_height * final_scale);
+					Float scaled_width = scale.getFirst();
+					Float scaled_height = scale.getSecond();
 
 					x1 = -scaled_width / 2f;
 					x2 = scaled_width / 2f;
@@ -127,7 +124,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		matrices.pop();
 	}
 
-	private void renderPicture(@NotNull Identifier texture, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
+	public static void renderPicture(@NotNull Identifier texture, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
 		RenderLayer renderLayer = RenderLayer.getEntityTranslucent(texture);
 		VertexConsumer buffer = vertexConsumers.getBuffer(renderLayer);
 
@@ -153,7 +150,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	 * @param width Width of the screen
 	 * @param height Height of the screen
 	 */
-	private void renderErrCode(int code, ScreenBlockEntity entity, float width, float height, VertexConsumerProvider vertexConsumers, MatrixStack matrices, TextRenderer textRenderer, int light) {
+	public static void renderErrCode(int code, ScreenBlockEntity entity, float width, float height, VertexConsumerProvider vertexConsumers, MatrixStack matrices, TextRenderer textRenderer, int light) {
 		// Setup font
 		float lineHeight = height / SCR_MAX_LINES;
 		float font_scale = lineHeight / textRenderer.fontHeight;
@@ -241,6 +238,20 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	}
 
 	/**
+	 * Returns the scale factors needed to ensure a picture does not go out of bounds of the given width/height.
+	 */
+	public static Pair<Float, Float> getScale(float width, float height, int img_width, int img_height) {
+		float width_scale = width / img_width;
+		float height_scale = height / img_height;
+		float final_scale = Math.min(width_scale, height_scale);
+
+		float scaled_width = (img_width * final_scale);
+		float scaled_height = (img_height * final_scale);
+
+		return new Pair<>(scaled_width, scaled_height);
+	}
+
+	/**
 	 * Used to trim off the string to fit the given width in a way where words are not broken apart.
 	 * (aka Word wrapping)
 	 *
@@ -249,7 +260,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	 *
 	 * @return A list of strings where all fit in the expected width.
 	 */
-	private ArrayList<String> wrap(String text, float font_scale, float txt_width, TextRenderer textRenderer) {
+	private static ArrayList<String> wrap(String text, float font_scale, float txt_width, TextRenderer textRenderer) {
 		ArrayList<String> result = new ArrayList<>();
 
 		StringBuilder lineBuilder = new StringBuilder();
@@ -268,7 +279,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		return result;
 	}
 
-	private void renderFilledRectangle(int color, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
+	private static void renderFilledRectangle(int color, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
 		VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getDebugFilledBox());
 		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
