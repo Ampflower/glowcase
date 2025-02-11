@@ -8,6 +8,7 @@ import dev.hephaestus.glowcase.client.GlowcaseClient;
 import dev.hephaestus.glowcase.client.ScreenImageCache;
 import dev.hephaestus.glowcase.client.render.block.entity.ScreenBlockEntityRenderer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -15,6 +16,8 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -44,6 +47,8 @@ public class MixinHeldItemRenderer {
 		matrices.push();
 		RenderSystem.enableBlend();
 
+		// Render background
+
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F));
 		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
 		matrices.scale(0.38F, 0.38F, 0.38F);
@@ -72,6 +77,31 @@ public class MixinHeldItemRenderer {
 			ci.cancel();
 			return;
 		}
+
+		// Render current slide text
+
+		{
+			TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+			MutableText literal = Text.translatable("gui.glowcase.progress", index + 1, slideshow.size());
+
+			float font_scale = 1f;
+			float font_width = textRenderer.getWidth(literal);
+			float font_max_width = 142f/64f*14f;
+			if (font_width >= font_max_width) {
+				font_scale = font_max_width / font_width;
+			}
+
+			float off_x = 142f/64f*29.2f - (font_width * font_scale)/2f;
+			float off_y = 142f/64f*8.2f;
+
+			matrices.translate(off_x, off_y, -.01f);
+			matrices.scale(font_scale, font_scale, 1f);
+			textRenderer.draw(literal, 0, 0, 0xFFFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+			matrices.translate(-off_x, -off_y, .01f);
+			matrices.scale(1f/font_scale, 1f/font_scale, 1f);
+		}
+
+		// Render current picture
 
 		String url = slideshow.get(index).getFirst();
 
