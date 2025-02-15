@@ -12,7 +12,6 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -82,7 +81,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 			renderTextCentered(Text.stringifiedTranslatable("gui.glowcase.screen.blank"), COLOR_TXT_NORMAL, width, height, matrices, vertexConsumers, textRenderer, brightness);
 		} else {
 			ScreenImageCache screenImageCache = GlowcaseClient.screenImageCache;
-			ScreenImageCache.ScreenTexture image = screenImageCache.getImage(url);
+			ScreenImageCache.ScreenTexture image = screenImageCache.getImage(url, entity.getPos());
 			Pair<Integer, Identifier> response = image.getTexture();
 
 			int code = response.getFirst();

@@ -228,20 +228,20 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 		// Current slide
 		Pair<String, String> slide = slides.get(current);
-		current_slide = GlowcaseClient.screenImageCache.getImage(slide.getFirst());
+		current_slide = GlowcaseClient.screenImageCache.getImage(slide.getFirst(), null);
 
 
 		// Previous slide
 		if (current-1 >= 0) {
 			Pair<String, String> slide1 = slides.get(current-1);
-			previous_slide = GlowcaseClient.screenImageCache.getImage(slide1.getFirst());
+			previous_slide = GlowcaseClient.screenImageCache.getImage(slide1.getFirst(), null);
 		} else
 			previous_slide = null;
 
 		// Next slide
 		if (current+1 < slides.size()) {
 			Pair<String, String> slide1 = slides.get(current+1);
-			next_slide = GlowcaseClient.screenImageCache.getImage(slide1.getFirst());
+			next_slide = GlowcaseClient.screenImageCache.getImage(slide1.getFirst(), null);
 		} else
 			next_slide = null;
 

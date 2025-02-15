@@ -30,12 +30,16 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockPos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Glowcase implements ModInitializer {
 	public static final String MODID = "glowcase";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
+	public static final GlowcaseConfig CONFIG = GlowcaseConfig.createToml(FabricLoader.getInstance().getConfigDir(), "", MODID, GlowcaseConfig.class);
 	public static GlowcaseCommonProxy proxy = new GlowcaseCommonProxy(); //Overridden in GlowcaseClient
 
 	public static final TagKey<Item> ITEM_TAG = TagKey.of(RegistryKeys.ITEM, id("items"));

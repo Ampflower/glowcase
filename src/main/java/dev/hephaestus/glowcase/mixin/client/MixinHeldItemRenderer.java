@@ -102,7 +102,7 @@ public class MixinHeldItemRenderer {
 
 		String url = slideshow.get(index).getFirst();
 
-		ScreenImageCache.ScreenTexture image = GlowcaseClient.screenImageCache.getImage(url);
+		ScreenImageCache.ScreenTexture image = GlowcaseClient.screenImageCache.getImage(url, null);
 		Identifier texture = image.getTexture().getSecond();
 		if (texture == null) {
 			matrices.pop();

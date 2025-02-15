@@ -82,7 +82,7 @@ public class ScreenBlockEntity extends BlockEntity {
 		// Cache preview before needed for smooth experience
 		preview = nbt.getString("preview");
 		if (this.getWorld() != null && this.getWorld().isClient())
-			GlowcaseClient.screenImageCache.getImage(preview);
+			GlowcaseClient.screenImageCache.getImage(preview, null);
 
 		markDirty();
 		dispatch();

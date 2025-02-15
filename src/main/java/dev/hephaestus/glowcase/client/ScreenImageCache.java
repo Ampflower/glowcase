@@ -1,30 +1,141 @@
 package dev.hephaestus.glowcase.client;
 
 import com.mojang.datafixers.util.Pair;
+import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.client.util.HTTPException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * <p>This class is a simple screen texture cache.
+ * The cache itself is very simple: It attempts to fetch new urls if they are not in the cache yet.</p>
+ *
+ * <p>As of right now, the cache has no garbage collector. Only restarting the game helps, though,
+ * the textures itself are registered as dynamic textures.</p>
+ */
 public class ScreenImageCache {
 	private final HashMap<String, ScreenTexture> cache = new HashMap<>();
 
-	public ScreenTexture getImage(String url) {
-		if (!cache.containsKey(url))
-			cache.put(url, new ScreenTexture(url));
+	/**
+	 * @param blockpos Only needed for logging to make it a bit easier to locate invalid screens.
+	 */
+	public ScreenTexture getImage(String address, @Nullable BlockPos blockpos) {
+		if (!cache.containsKey(address))
+			createImage(address, blockpos);
 
-		return cache.get(url);
+		return cache.get(address);
 	}
 
+	private void createImage(String address, @Nullable BlockPos blockPos) {
+		try {
+			URL url = getURL(address);
+			cache.put(address, new ScreenTexture(url));
+		} catch (HTTPException e) {
+			if (blockPos != null && Glowcase.CONFIG.logInvalidScreens.value())
+				Glowcase.LOGGER.warn("Screen at [{}] failed: {} ({}). It's url was: '{}'", blockPos.toShortString(), e.getMessage(), e.getCode(), address);
+
+			cache.put(address, new ScreenTexture(e.getCode()));
+		}
+	}
+
+	/**
+	 * Parses a given address and ensures it is valid.
+	 */
+	private URL getURL(String address) throws HTTPException {
+		// Validate Format
+		URI uri;
+		URL url;
+		try {
+			uri = new URI(address);
+			if (uri.getHost() == null)
+				throw new Exception();
+
+			url = uri.toURL();
+		} catch (Exception e) {
+			throw new HTTPException("Malformed URL", 400);
+		}
+
+		validateURI(uri);
+		ensureRules(uri);
+
+		return url;
+	}
+
+	/**
+	 * Check if url is well formatted. IPs are not allowed (for now) because I can't be bothered.
+	 */
+	private void validateURI(URI uri) throws HTTPException {
+		// Validate Scheme
+		if (uri.getScheme() == null)
+			throw new HTTPException("Protocol must be specified (http or https)", 901);
+
+		String scheme = uri.getScheme().toLowerCase(Locale.ROOT);
+		if (!(scheme.equals("http") || scheme.equals("https")))
+			throw new HTTPException("Invalid protocol; Only http or https are allowed", 901);
+
+		// For now, all IP addresses will be filtered for the sake of the whitelist and blacklist.
+		if (uri.getHost().chars().noneMatch(Character::isLetter))
+			throw new HTTPException("Host has to be a domain", 403);
+	}
+
+	/**
+	 * Ensures we are allowed to use this url.
+	 */
+	private void ensureRules(URI uri) throws HTTPException {
+		String host = uri.getHost();
+
+		for (String rule : Glowcase.CONFIG.whitelist.value()) {
+			if (matches(host, rule))
+				return;
+		}
+
+		for (String rule : Glowcase.CONFIG.blacklist.value()) {
+			if (matches(host, rule))
+				throw new HTTPException("Given url is not whitelisted", 403);
+		}
+	}
+
+	/**
+	 * <p>Compares the host with the given rule.</p>
+	 *
+	 * <p>This method attempts to add support for wildcards.</p>
+	 */
+	private boolean matches(String host, String rule) {
+		if (rule.contains("*")) {
+			if (rule.equals("*"))
+				return true;
+
+			if (rule.startsWith("*.")) {
+				String ruleDomain = rule.substring(2);
+				if (host.endsWith(ruleDomain)) {
+					// Ensure the wildcard matches only one level
+					String hostWithoutRule = host.substring(0, host.length() - ruleDomain.length() - 1);
+					return !hostWithoutRule.contains(".");
+				}
+				return false;
+			}
+		}
+
+		return host.equals(rule);
+	}
+
+	/**
+	 * Container for a texture. Will attempt to fetch the actual texture on creation.
+	 * If an error happened, the texture will be null.
+	 */
 	public static class ScreenTexture {
 		private final CompletableFuture<Integer> loader;
 		@Nullable
@@ -48,21 +159,18 @@ public class ScreenImageCache {
 			return height;
 		}
 
-		public ScreenTexture(String raw_url) {
+		/**
+		 * Creates a new empty texture with the given status code;
+		 */
+		public ScreenTexture(int code) {
+			loader = CompletableFuture.completedFuture(code);
+		}
+
+		/**
+		 * Attempts to create a new texture by fetching a image from the given url.
+		 */
+		public ScreenTexture(URL url) {
 			loader = CompletableFuture.supplyAsync(() -> {
-				// Ensure valid URL
-				URL url;
-				try {
-					url = new URI(raw_url).toURL();
-				} catch (Exception e) {
-					return 900; // Not a valid URL
-				}
-
-				String protocol = url.getProtocol();
-				if (!(protocol.equals("http") || protocol.equals("https"))) {
-					return 901; // Invalid protocol, only HTTP and HTTPS are supported
-				}
-
 				// Fetch URL
 				HttpURLConnection connection;
 				InputStream stream;
