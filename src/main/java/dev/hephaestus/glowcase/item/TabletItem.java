@@ -80,8 +80,14 @@ public class TabletItem extends Item {
 		if (player.isSneaking() && world.getBlockEntity(pos) instanceof ScreenBlockEntity) {
 			// Update linked block
 			if (canEditGlowcase(player, pos)) {
-				stack.set(Glowcase.LINKED_SCREEN_COMPONENT.get(), pos);
-				player.sendMessage(Text.translatable("gui.glowcase.updated_linked_screen", pos.toShortString()), true);
+				BlockPos blockPos = stack.getOrDefault(Glowcase.LINKED_SCREEN_COMPONENT.get(), null);
+				if (blockPos != null && blockPos.equals(pos)) {
+					stack.remove(Glowcase.LINKED_SCREEN_COMPONENT.get());
+					player.sendMessage(Text.translatable("gui.glowcase.unlinked_screen"), true);
+				} else {
+					stack.set(Glowcase.LINKED_SCREEN_COMPONENT.get(), pos);
+					player.sendMessage(Text.translatable("gui.glowcase.updated_linked_screen", pos.toShortString()), true);
+				}
 			} else
 				player.sendMessage(Text.translatable("gui.glowcase.linking_denied"), true);
 
