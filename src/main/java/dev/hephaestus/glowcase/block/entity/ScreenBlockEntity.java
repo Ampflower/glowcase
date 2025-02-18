@@ -29,7 +29,9 @@ public class ScreenBlockEntity extends BlockEntity {
 
 	public float width = 1f;
 	public float height = 1f;
-	public ZOffset zOffset = ZOffset.CENTER;
+	public Offset xOffset = Offset.NULL;
+	public Offset yOffset = Offset.NULL;
+	public Offset zOffset = Offset.NULL;
 
 	public boolean stretch = false;
 	public boolean eink = true;
@@ -46,8 +48,22 @@ public class ScreenBlockEntity extends BlockEntity {
 		return new Pair<>(trimmed_url, trimmed_alt);
 	}
 
-	public enum ZOffset {
-		FRONT, CENTER, BACK
+	public enum Offset {
+		NEGATIVE(-1), NULL(0), POSITIVE(1);
+
+		public final int offset;
+		Offset(int offset) {
+			this.offset = offset;
+		}
+
+		public static Offset fromOffset(int offset) {
+			if (offset < 0)
+				return NEGATIVE;
+			else if (offset > 0)
+				return POSITIVE;
+
+			return NULL;
+		}
 	}
 
 	public ScreenBlockEntity(BlockPos pos, BlockState state) {
@@ -64,7 +80,9 @@ public class ScreenBlockEntity extends BlockEntity {
 		nbt.putFloat("height", height);
 		nbt.putBoolean("stretch", stretch);
 		nbt.putBoolean("eink", eink);
-		nbt.putString("z_offset", this.zOffset.name());
+		nbt.putInt("x_offset", this.xOffset.offset);
+		nbt.putInt("y_offset", this.yOffset.offset);
+		nbt.putInt("z_offset", this.zOffset.offset);
 
 		nbt.putString("url", url);
 		nbt.putString("alt", alt);
@@ -82,7 +100,9 @@ public class ScreenBlockEntity extends BlockEntity {
 		height = nbt.getFloat("height");
 		stretch = nbt.getBoolean("stretch");
 		eink = nbt.getBoolean("eink");
-		zOffset = ZOffset.valueOf(nbt.getString("z_offset"));
+		xOffset = Offset.fromOffset(nbt.getInt("x_offset"));
+		yOffset = Offset.fromOffset(nbt.getInt("y_offset"));
+		zOffset = Offset.fromOffset(nbt.getInt("z_offset"));
 
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");
@@ -107,9 +127,11 @@ public class ScreenBlockEntity extends BlockEntity {
 		dispatch();
 	}
 
-	public void setupScreen(float width, float height, ZOffset zOffset, boolean eink, boolean stretch) {
+	public void setupScreen(float width, float height, Offset xOffset, Offset yOffset, Offset zOffset, boolean eink, boolean stretch) {
 		this.width = Math.clamp(width, 0.05f, Integer.MAX_VALUE);
 		this.height = Math.clamp(height, 0.05f, Integer.MAX_VALUE);
+		this.xOffset = xOffset;
+		this.yOffset = yOffset;
 		this.zOffset = zOffset;
 		this.eink = eink;
 		this.stretch = stretch;

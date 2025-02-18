@@ -10,7 +10,7 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
-public record C2SEditScreenBlock(BlockPos pos, float width, float height, ScreenBlockEntity.ZOffset zOffset, boolean eink, boolean stretch, String url, String alt) implements C2SEditBlockEntity {
+public record C2SEditScreenBlock(BlockPos pos, float width, float height, ScreenBlockEntity.Offset xOffset, ScreenBlockEntity.Offset yOffset, ScreenBlockEntity.Offset zOffset, boolean eink, boolean stretch, String url, String alt) implements C2SEditBlockEntity {
 	public static final Id<C2SEditScreenBlock> ID = new Id<>(Glowcase.id("channel.screen_block"));
 	public static final PacketCodec<RegistryByteBuf, C2SEditScreenBlock> PACKET_CODEC = PacketCodec.of(
 		(packet, buf) -> {
@@ -19,6 +19,8 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 			BlockPos.PACKET_CODEC.encode(buf, packet.pos);
 			PacketCodecs.FLOAT.encode(buf, packet.width);
 			PacketCodecs.FLOAT.encode(buf, packet.height);
+			PacketCodecs.BYTE.encode(buf, (byte) packet.xOffset.ordinal());
+			PacketCodecs.BYTE.encode(buf, (byte) packet.yOffset.ordinal());
 			PacketCodecs.BYTE.encode(buf, (byte) packet.zOffset.ordinal());
 			PacketCodecs.BOOL.encode(buf, packet.eink);
 			PacketCodecs.BOOL.encode(buf, packet.stretch);
@@ -28,7 +30,9 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 		(buf) -> new C2SEditScreenBlock(BlockPos.PACKET_CODEC.decode(buf),
 			PacketCodecs.FLOAT.decode(buf),
 			PacketCodecs.FLOAT.decode(buf),
-			ScreenBlockEntity.ZOffset.values()[PacketCodecs.BYTE.decode(buf)],
+			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
+			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
+			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
 			PacketCodecs.BOOL.decode(buf),
 			PacketCodecs.BOOL.decode(buf),
 			PacketCodecs.STRING.decode(buf),
@@ -36,7 +40,7 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 	);
 
 	public static C2SEditScreenBlock of(ScreenBlockEntity be) {
-		return new C2SEditScreenBlock(be.getPos(), be.width, be.height, be.zOffset, be.eink, be.stretch, be.url, be.alt);
+		return new C2SEditScreenBlock(be.getPos(), be.width, be.height, be.xOffset, be.yOffset, be.zOffset, be.eink, be.stretch, be.url, be.alt);
 	}
 
 	@Override
@@ -45,7 +49,7 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 
 		Pair<String, String> trimmed = ScreenBlockEntity.trimStr(url, alt);
 
-		be.setupScreen(this.width, this.height, this.zOffset, this.eink, this.stretch);
+		be.setupScreen(this.width, this.height, this.xOffset, this.yOffset, this.zOffset, this.eink, this.stretch);
 		be.setImage(trimmed.getFirst(), trimmed.getSecond(), null); // Does markDirty and dispatch for us
 	}
 

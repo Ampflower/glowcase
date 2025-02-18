@@ -51,9 +51,20 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
 
+		switch (entity.xOffset) {
+			case POSITIVE -> matrices.translate(entity.width/2 - .5f, 0f, 0f);
+			case NEGATIVE -> matrices.translate(-entity.width/2 + .5f, 0f, 0f);
+		}
+
+		switch (entity.yOffset) {
+			case POSITIVE -> matrices.translate(0f, entity.height/2 - .5f, 0f);
+			case NEGATIVE -> matrices.translate(0f, -entity.height/2 + .5f, 0f);
+		}
+
 		switch (entity.zOffset) {
-			case FRONT -> matrices.translate(0f, 0f, -0.49f);
-			case BACK -> matrices.translate(0f, 0f, 0.49f);
+			case POSITIVE -> matrices.translate(0f, 0f, -0.49f);
+			case NEGATIVE -> matrices.translate(0f, 0f, 0.49f);
+			default -> matrices.translate(0f, 0f, 0.01f); // To make it easier to spot the block, even when centered
 		}
 
 		// Gather needed variables
