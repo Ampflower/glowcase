@@ -14,9 +14,13 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class ScreenBlockEntity extends BlockEntity {
 	public static final int URL_MAX_LENGTH = 1024;
 	public static final int ALT_MAX_LENGTH = 1024;
+
+	public UUID macaddress = UUID.randomUUID();
 
 	public String url = "";
 	public String alt = "";
@@ -54,6 +58,8 @@ public class ScreenBlockEntity extends BlockEntity {
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(nbt, registryLookup);
 
+		nbt.putUuid("macaddress", macaddress);
+
 		nbt.putFloat("width", width);
 		nbt.putFloat("height", height);
 		nbt.putBoolean("stretch", stretch);
@@ -70,11 +76,13 @@ public class ScreenBlockEntity extends BlockEntity {
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(nbt, registryLookup);
 
+		macaddress = nbt.getUuid("macaddress");
+
 		width = nbt.getFloat("width");
 		height = nbt.getFloat("height");
 		stretch = nbt.getBoolean("stretch");
 		eink = nbt.getBoolean("eink");
-		this.zOffset = ZOffset.valueOf(nbt.getString("z_offset"));
+		zOffset = ZOffset.valueOf(nbt.getString("z_offset"));
 
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");

@@ -17,6 +17,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.List;
+import java.util.UUID;
 
 import static dev.hephaestus.glowcase.block.GlowcaseBlock.canEditGlowcase;
 
@@ -34,10 +35,11 @@ public class TabletItem extends Item {
 
 		// Get components
 
-		BlockPos screenPos = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
+		Pair<UUID, BlockPos> screenPos = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
 
 		List<Pair<String, String>> slideshow = stack.get(Glowcase.SLIDESHOW_COMPONENT.get());
 		assert slideshow != null;
+		assert screenPos != null;
 
 		int index = stack.getOrDefault(Glowcase.CURRENT_SLIDE_COMPONENT.get(), 0);
 		int step = user.isSneaking() ? -1 : 1;
@@ -51,20 +53,22 @@ public class TabletItem extends Item {
 
 		stack.set(Glowcase.CURRENT_SLIDE_COMPONENT.get(), index);
 
-		if (world.getBlockEntity(screenPos) instanceof ScreenBlockEntity screen) {
-			Pair<String, String> slide = slideshow.get(index);
-
-			if (index+step >= 0 && index+step < slideshow.size()) {
-				// Add potential next image for pre-caching
-				Pair<String, String> next_slide = slideshow.get(index+step);
-				screen.setImage(slide.getFirst(), slide.getSecond(), next_slide.getFirst());
-			} else
-				screen.setImage(slide.getFirst(), slide.getSecond(), null);
-
-			return TypedActionResult.success(user.getStackInHand(hand));
+		if (!(world.getBlockEntity(screenPos.getSecond()) instanceof ScreenBlockEntity screen && screen.macaddress.equals(screenPos.getFirst()))) {
+			// Link is invalid
+			stack.remove(Glowcase.LINKED_SCREEN_COMPONENT.get());
+			return TypedActionResult.pass(user.getStackInHand(hand));
 		}
 
-		return TypedActionResult.pass(user.getStackInHand(hand));
+		Pair<String, String> slide = slideshow.get(index);
+
+		if (index+step >= 0 && index+step < slideshow.size()) {
+			// Add potential next image for pre-caching
+			Pair<String, String> next_slide = slideshow.get(index+step);
+			screen.setImage(slide.getFirst(), slide.getSecond(), next_slide.getFirst());
+		} else
+			screen.setImage(slide.getFirst(), slide.getSecond(), null);
+
+		return TypedActionResult.success(user.getStackInHand(hand));
 	}
 
 	@Override
@@ -77,32 +81,42 @@ public class TabletItem extends Item {
 		if (world.isClient() || player == null)
 			return ActionResult.PASS;
 
-		if (player.isSneaking() && world.getBlockEntity(pos) instanceof ScreenBlockEntity) {
-			// Update linked block
-			if (canEditGlowcase(player, pos)) {
-				BlockPos blockPos = stack.getOrDefault(Glowcase.LINKED_SCREEN_COMPONENT.get(), null);
-				if (blockPos != null && blockPos.equals(pos)) {
-					stack.remove(Glowcase.LINKED_SCREEN_COMPONENT.get());
-					player.sendMessage(Text.translatable("gui.glowcase.unlinked_screen"), true);
-				} else {
-					stack.set(Glowcase.LINKED_SCREEN_COMPONENT.get(), pos);
-					player.sendMessage(Text.translatable("gui.glowcase.updated_linked_screen", pos.toShortString()), true);
-				}
-			} else
-				player.sendMessage(Text.translatable("gui.glowcase.linking_denied"), true);
+		if (!(player.isSneaking() && world.getBlockEntity(pos) instanceof ScreenBlockEntity screen))
+			return ActionResult.PASS;
 
+		if (!canEditGlowcase(player, pos)) {
+			player.sendMessage(Text.translatable("gui.glowcase.linking_denied"), true);
 			return ActionResult.SUCCESS;
 		}
 
-		// Pass to use method instead for slideshow controls
+		// Update linked block
 
-		return ActionResult.PASS;
+		Pair<UUID, BlockPos> linkedScreen = stack.getOrDefault(Glowcase.LINKED_SCREEN_COMPONENT.get(), null);
+		if (linkedScreen != null && screen.macaddress.equals(linkedScreen.getFirst()) && linkedScreen.getSecond().equals(pos)) {
+			stack.remove(Glowcase.LINKED_SCREEN_COMPONENT.get());
+			player.sendMessage(Text.translatable("gui.glowcase.unlinked_screen"), true);
+		} else {
+			stack.set(Glowcase.LINKED_SCREEN_COMPONENT.get(), new Pair<>(screen.macaddress, pos));
+			player.sendMessage(Text.translatable("gui.glowcase.updated_linked_screen", pos.toShortString()), true);
+		}
+
+		return ActionResult.SUCCESS;
 	}
 
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
 		if (clickType == ClickType.RIGHT && otherStack.isEmpty()) {
 			// Open Editor on Client
+
+			if (stack.contains(Glowcase.LINKED_SCREEN_COMPONENT.get())) {
+				// Ensure linked screen is correct before we send the client a wrong connection
+				Pair<UUID, BlockPos> linkedScreen = stack.get(Glowcase.LINKED_SCREEN_COMPONENT.get());
+				assert linkedScreen != null;
+				if (!(player.getWorld().getBlockEntity(linkedScreen.getSecond()) instanceof ScreenBlockEntity screen && screen.macaddress.equals(linkedScreen.getFirst()))) {
+					stack.remove(Glowcase.LINKED_SCREEN_COMPONENT.get());
+				}
+			}
+
 			Glowcase.proxy.openTabletEditScreen(stack);
 			return true;
 		}

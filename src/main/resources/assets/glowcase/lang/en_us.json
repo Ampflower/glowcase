@@ -64,6 +64,7 @@
 	"gui.glowcase.linking_denied": "No permission to link to a screen.",
 	"gui.glowcase.unlinked_screen": "Screen Tablet now unlinked.",
 	"gui.glowcase.tablet.linked": "Linked Screen: [%s]",
+	"gui.glowcase.screen.mac_address": "MAC Address: %s",
 	"gui.glowcase.tablet.not_linked": "No Screen linked",
 	"block.glowcase.generic.tooltip": "Interact with a glowcase item to edit",
 	"block.glowcase.text_block.tooltip.0": "Displays formatted text",

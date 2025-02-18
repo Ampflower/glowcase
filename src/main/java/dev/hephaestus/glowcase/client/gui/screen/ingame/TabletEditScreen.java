@@ -18,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class TabletEditScreen extends GlowcaseScreen {
 	private static final Identifier TEXTURE = Glowcase.id("textures/gui/tablet.png");
@@ -38,7 +39,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 
 	// The data to be manipulated
 	private int current;
-	@Nullable private BlockPos screen_pos;
+	@Nullable private Pair<UUID, BlockPos> screen_pos;
 	private final ArrayList<Pair<String, String>> slides;
 
 	private boolean slide_dirty = false;
@@ -76,7 +77,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 			.alignLeft();
 
 		Text linkedText = (screen_pos == null) ? Text.translatable("gui.glowcase.tablet.not_linked")
-			: Text.translatable("gui.glowcase.tablet.linked", screen_pos.toShortString());
+			: Text.translatable("gui.glowcase.tablet.linked", screen_pos.getSecond().toShortString());
 
 		TextWidget linkedTextWidget = new TextWidget(width/2 - BG_WIDTH/2 + 7 + (int) (BG_WIDTH*.2), height/2 - BG_HEIGHT/2 + 5, (int) (BG_WIDTH*.8) - 13, this.client.textRenderer.fontHeight,
 			linkedText, this.client.textRenderer)

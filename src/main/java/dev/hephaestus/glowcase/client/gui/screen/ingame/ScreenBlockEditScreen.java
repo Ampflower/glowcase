@@ -82,6 +82,14 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		this.altEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.alt"));
 		this.altEntryWidget.setChangedListener(string -> screenBlockEntity.alt = string);
 
+		if (this.client.options.advancedItemTooltips)
+			this.addDrawableChild(new TextWidget(
+				3, height - this.client.textRenderer.fontHeight - 1,
+				width, this.client.textRenderer.fontHeight,
+				Text.translatableWithFallback("gui.glowcase.screen.mac_address", "%s", this.screenBlockEntity.macaddress),
+				this.client.textRenderer).alignLeft().setTextColor(0x696969)
+			);
+
 		this.addDrawableChild(this.widthEntryWidget);
 		this.addDrawableChild(timesLabel);
 		this.addDrawableChild(this.heightEntryWidget);
