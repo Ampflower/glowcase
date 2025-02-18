@@ -5,6 +5,7 @@
 		"glowcase:item_display_block",
 		"glowcase:text_block",
 		"glowcase:popup_block",
+		"glowcase:screen_block",
 		"glowcase:sprite_block",
 		"glowcase:outline_block",
 		"glowcase:particle_display",

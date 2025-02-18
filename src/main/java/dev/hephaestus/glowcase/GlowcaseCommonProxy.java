@@ -1,5 +1,6 @@
 package dev.hephaestus.glowcase;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
 public class GlowcaseCommonProxy {
@@ -27,6 +28,10 @@ public class GlowcaseCommonProxy {
 		//No-op
 	}
 
+	public void openScreenBlockEditScreen(BlockPos pos) {
+		//No-op
+	}
+
 	public void openSpriteBlockEditScreen(BlockPos pos) {
 		//No-op
 	}
@@ -44,6 +49,10 @@ public class GlowcaseCommonProxy {
 	}
 
 	public void openItemAcceptorBlockEditScreen(BlockPos pos) {
+		//No-op
+	}
+
+	public void openTabletEditScreen(ItemStack stack) {
 		//No-op
 	}
 }

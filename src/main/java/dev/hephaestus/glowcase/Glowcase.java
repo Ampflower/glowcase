@@ -2,47 +2,48 @@ package dev.hephaestus.glowcase;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import dev.hephaestus.glowcase.block.HyperlinkBlock;
-import dev.hephaestus.glowcase.block.ItemAcceptorBlock;
-import dev.hephaestus.glowcase.block.ItemDisplayBlock;
-import dev.hephaestus.glowcase.block.OutlineBlock;
-import dev.hephaestus.glowcase.block.ParticleDisplayBlock;
-import dev.hephaestus.glowcase.block.PopupBlock;
-import dev.hephaestus.glowcase.block.SoundPlayerBlock;
-import dev.hephaestus.glowcase.block.SpriteBlock;
-import dev.hephaestus.glowcase.block.TextBlock;
-import dev.hephaestus.glowcase.block.entity.HyperlinkBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ItemAcceptorBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
-import dev.hephaestus.glowcase.block.entity.OutlineBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
-import dev.hephaestus.glowcase.block.entity.PopupBlockEntity;
-import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
-import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
-import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import dev.hephaestus.glowcase.block.*;
+import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.compat.PolydexCompatibility;
 import dev.hephaestus.glowcase.item.LockItem;
+import dev.hephaestus.glowcase.item.TabletItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.Uuids;
+import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.math.BlockPos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class Glowcase implements ModInitializer {
 	public static final String MODID = "glowcase";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
+	public static final GlowcaseConfig CONFIG = GlowcaseConfig.createToml(FabricLoader.getInstance().getConfigDir(), "", MODID, GlowcaseConfig.class);
 	public static GlowcaseCommonProxy proxy = new GlowcaseCommonProxy(); //Overridden in GlowcaseClient
 
 	public static final TagKey<Item> ITEM_TAG = TagKey.of(RegistryKeys.ITEM, id("items"));
@@ -71,6 +72,10 @@ public class Glowcase implements ModInitializer {
 	public static final Supplier<BlockItem> POPUP_BLOCK_ITEM = registerItem("popup_block", () -> new BlockItem(POPUP_BLOCK.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<PopupBlockEntity>> POPUP_BLOCK_ENTITY = registerBlockEntity("popup_block", () -> BlockEntityType.Builder.create(PopupBlockEntity::new, POPUP_BLOCK.get()).build(null));
 
+	public static final Supplier<ScreenBlock> SCREEN_BLOCK = registerBlock("screen_block", ScreenBlock::new);
+	public static final Supplier<BlockItem> SCREEN_BLOCK_ITEM = registerItem("screen_block", () -> new BlockItem(SCREEN_BLOCK.get(), new Item.Settings()));
+	public static final Supplier<BlockEntityType<ScreenBlockEntity>> SCREEN_BLOCK_ENTITY = registerBlockEntity("screen_block", () -> BlockEntityType.Builder.create(ScreenBlockEntity::new, SCREEN_BLOCK.get()).build(null));
+
 	public static final Supplier<SpriteBlock> SPRITE_BLOCK = registerBlock("sprite_block", SpriteBlock::new);
 	public static final Supplier<BlockItem> SPRITE_BLOCK_ITEM = registerItem("sprite_block", () -> new BlockItem(SPRITE_BLOCK.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<SpriteBlockEntity>> SPRITE_BLOCK_ENTITY = registerBlockEntity("sprite_block", () -> BlockEntityType.Builder.create(SpriteBlockEntity::new, SPRITE_BLOCK.get()).build(null));
@@ -85,6 +90,24 @@ public class Glowcase implements ModInitializer {
 
 	public static final Supplier<Item> LOCK_ITEM = registerItem("lock", () -> new LockItem(new Item.Settings()));
 
+	public static final Supplier<Item> TABLET_ITEM = registerItem("tablet", () -> new TabletItem(new Item.Settings().maxCount(1)));
+	public static final Supplier<ComponentType<Pair<UUID, BlockPos>>> LINKED_SCREEN_COMPONENT = registerComponent("linked_screen", () -> {
+		Codec<UUID> uuidCodec = Codec.INT_STREAM.comapFlatMap(stream -> Util.decodeFixedLengthArray(stream, 4).map(Uuids::toUuid), uuid -> Arrays.stream(Uuids.toIntArray(uuid)));
+		Codec<Pair<UUID, BlockPos>> codec = Codec.mapPair(uuidCodec.fieldOf("uuid"), BlockPos.CODEC.fieldOf("pos")).codec();
+		return ComponentType.<Pair<UUID, BlockPos>>builder()
+			.codec(codec)
+			.packetCodec(PacketCodecs.registryCodec(codec))
+			.build();
+	});
+	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.registryCodec(Codecs.NONNEGATIVE_INT)).build());
+	public static final Supplier<ComponentType<List<Pair<String,String>>>> SLIDESHOW_COMPONENT = registerComponent("slideshow", () -> {
+		Codec<List<Pair<String, String>>> codec = Codec.mapPair(Codec.STRING.fieldOf("url"), Codec.STRING.fieldOf("alt")).codec().listOf();
+		return ComponentType.<List<Pair<String,String>>>builder()
+			.codec(codec)
+			.packetCodec(PacketCodecs.registryCodec(codec))
+			.build();
+	});
+
 	public static final Supplier<ItemGroup> ITEM_GROUP = registerItemGroup("items", () -> FabricItemGroup.builder()
 		.displayName(Text.translatable("itemGroup.glowcase.items"))
 		.icon(() -> new ItemStack(Items.GLOWSTONE))
@@ -98,7 +121,9 @@ public class Glowcase implements ModInitializer {
 			entries.add(ITEM_ACCEPTOR_BLOCK_ITEM.get());
 			entries.add(HYPERLINK_BLOCK_ITEM.get());
 			entries.add(POPUP_BLOCK_ITEM.get());
+			entries.add(SCREEN_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
+			entries.add(TABLET_ITEM.get());
 		})
 		.build()
 	);
@@ -113,6 +138,10 @@ public class Glowcase implements ModInitializer {
 
 	public static <T extends Item> Supplier<T> registerItem(String path, Supplier<T> supplier) {
 		return Suppliers.ofInstance(Registry.register(Registries.ITEM, id(path), supplier.get()));
+	}
+
+	public static <T extends ComponentType<U>, U> Supplier<T> registerComponent(String path, Supplier<T> supplier) {
+		return Suppliers.ofInstance(Registry.register(Registries.DATA_COMPONENT_TYPE, id(path), supplier.get()));
 	}
 
 	public static <T extends ItemGroup> Supplier<T> registerItemGroup(String path, Supplier<T> supplier) {
