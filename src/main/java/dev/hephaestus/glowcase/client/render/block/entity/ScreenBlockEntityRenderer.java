@@ -17,6 +17,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -168,7 +169,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		float txt_width = width * 0.95f;
 		float txt_gap = width * 0.05f;
 
-		matrices.translate(txt_width/2f - (txt_gap/2f), height/2f - (lineHeight/2f), -.01f); // Upper-Left corner
+		matrices.translate(txt_width/2f - (txt_gap/2f), height/2f - (lineHeight/2f), -.1f); // Upper-Left corner
 		matrices.scale(-font_scale, -font_scale, -.1f);
 
 		// Alt-Text
@@ -242,7 +243,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		// Apply
 		matrices.scale(-font_scale_factor, -font_scale_factor, -0.1f);
-		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, .05f); // Remove offset of string
+		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, -.1f); // Remove offset of string
 
 		textRenderer.draw(text, 0, 0, color, true, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 	}
@@ -301,6 +302,11 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 	@Override
 	public boolean rendersOutsideBoundingBox(ScreenBlockEntity blockEntity) {
+		return true;
+	}
+
+	@Override
+	public boolean isInRenderDistance(ScreenBlockEntity blockEntity, Vec3d pos) {
 		return true;
 	}
 }
