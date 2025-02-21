@@ -24,6 +24,7 @@
 	"item.glowcase.hyperlink_block": "Hyperlink Block",
 	"item.glowcase.lock": "Lock",
 	"item.glowcase.tablet": "Screen Tablet",
+	"item.glowcase.note": "Note",
 	"gui.glowcase.locked_block": "%s is now locked \uD83D\uDD12",
 	"gui.glowcase.unlocked_block": "%s is now unlocked \uD83D\uDD13",
 	"gui.glowcase.title": "Title",

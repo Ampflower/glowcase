@@ -8,6 +8,7 @@ import dev.hephaestus.glowcase.block.*;
 import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.compat.PolydexCompatibility;
 import dev.hephaestus.glowcase.item.LockItem;
+import dev.hephaestus.glowcase.item.NoteItem;
 import dev.hephaestus.glowcase.item.TabletItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -108,6 +109,8 @@ public class Glowcase implements ModInitializer {
 			.build();
 	});
 
+	public static final Supplier<Item> NOTE_ITEM = registerItem("note", () -> new NoteItem(new Item.Settings().maxCount(1)));
+
 	public static final Supplier<ItemGroup> ITEM_GROUP = registerItemGroup("items", () -> FabricItemGroup.builder()
 		.displayName(Text.translatable("itemGroup.glowcase.items"))
 		.icon(() -> new ItemStack(Items.GLOWSTONE))
@@ -124,6 +127,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(SCREEN_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
 			entries.add(TABLET_ITEM.get());
+			entries.add(NOTE_ITEM.get());
 		})
 		.build()
 	);
