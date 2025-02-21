@@ -31,7 +31,7 @@ public abstract class ItemHandRenderer {
 
 	private static final Map<Item, ItemHandRenderer> RENDERER = Maps.newHashMap();
 
-	public static <T extends BlockEntity> void register(Item item, ItemHandRenderer factory) {
+	public static void register(Item item, ItemHandRenderer factory) {
 		RENDERER.put(item, factory);
 	}
 
