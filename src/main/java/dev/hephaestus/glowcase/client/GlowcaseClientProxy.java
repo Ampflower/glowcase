@@ -18,6 +18,7 @@ import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
 public class GlowcaseClientProxy extends GlowcaseCommonProxy {
@@ -67,6 +68,14 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 	}
 
 	@Override
+	public void openScreenBlockEditScreen(BlockPos pos) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null && client.world.getBlockEntity(pos) instanceof ScreenBlockEntity be) {
+			MinecraftClient.getInstance().setScreen(new ScreenBlockEditScreen(be));
+		}
+	}
+
+	@Override
 	public void openSpriteBlockEditScreen(BlockPos pos) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof SpriteBlockEntity be) {
@@ -103,6 +112,14 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity be) {
 			MinecraftClient.getInstance().setScreen(new ItemAcceptorBlockEditScreen(be));
+		}
+	}
+
+	@Override
+	public void openTabletEditScreen(ItemStack stack) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null) {
+			MinecraftClient.getInstance().setScreen(new TabletEditScreen(stack));
 		}
 	}
 }
