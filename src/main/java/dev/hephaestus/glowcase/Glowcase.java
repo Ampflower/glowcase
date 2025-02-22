@@ -32,7 +32,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
@@ -87,7 +86,7 @@ public class Glowcase implements ModInitializer {
 
 	public static final Supplier<ItemGroup> ITEM_GROUP = registerItemGroup("items", () -> FabricItemGroup.builder()
 		.displayName(Text.translatable("itemGroup.glowcase.items"))
-		.icon(() -> new ItemStack(Items.GLOWSTONE))
+		.icon(() -> new ItemStack(SPRITE_BLOCK_ITEM.get()))
 		.entries((displayContext, entries) -> {
 			entries.add(TEXT_BLOCK_ITEM.get());
 			entries.add(SPRITE_BLOCK_ITEM.get());
