@@ -1,10 +1,10 @@
 package dev.hephaestus.glowcase.client.render.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.ItemProviderBlockEntity;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer.TextLayerType;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -25,11 +25,11 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec2f;
 
-public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ItemDisplayBlockEntity> {
-	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/item_display_block.png");
+public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ItemProviderBlockEntity> {
 
+	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/item_provider_block.png");
 	@Override
-	public void render(ItemDisplayBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+	public void render(ItemProviderBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
 
 		if (camera == null) return;
@@ -42,7 +42,7 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 
 		switch (entity.rotationType) {
 			case TRACKING -> {
-				Vec2f pitchAndYaw = ItemDisplayBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);
+				Vec2f pitchAndYaw = ItemProviderBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);
 				pitch = pitchAndYaw.x;
 				yaw = pitchAndYaw.y;
 				matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
@@ -68,8 +68,6 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 			case BACK -> matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
 		}
 
-		matrices.translate(entity.xOffset,entity.yOffset,entity.zOffset);
-
 		ItemStack stack = entity.getDisplayedStack();
 		Text name;
 		if (stack.getItem() instanceof SpawnEggItem) {
@@ -82,7 +80,6 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 				}
 
 				float scale = renderEntity.getHeight() > renderEntity.getWidth() ? 1F / renderEntity.getHeight() : 0.5F;
-				scale = scale * entity.scale;
 				matrices.scale(scale, scale, scale);
 
 				renderEntity.setPitch(-pitch * 57.2957763671875F);
@@ -100,8 +97,7 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 		} else {
 			name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
 			matrices.translate(0, 0.5, 0);
-			float scale = 0.5F * entity.scale;
-			matrices.scale(scale, scale, scale);
+			matrices.scale(0.5F, 0.5F, 0.5F);
 			matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
 			context.getItemRenderer().renderItem(entity.getDisplayedStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 		}
@@ -117,7 +113,7 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 
 				int color = name.getStyle().getColor() == null ? 0xFFFFFF : name.getStyle().getColor().getRgb();
 				matrices.translate(-context.getTextRenderer().getWidth(name) / 2F, -4, 0);
-				context.getTextRenderer().draw(name, 0, 0, color, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+				context.getTextRenderer().draw(name, 0, 0, color, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
 			}
 		}
 

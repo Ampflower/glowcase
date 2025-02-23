@@ -16,6 +16,10 @@ public class GlowcaseCommonProxy {
 		//No-op
 	}
 
+	public void openItemProviderBlockEditScreen(BlockPos pos){
+		//No-op
+	}
+
 	public void openTextBlockEditScreen(BlockPos pos) {
 		//No-op
 	}

@@ -24,6 +24,7 @@ public class GlowcaseClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(Glowcase.PARTICLE_DISPLAY_BLOCK_ENTITY.get(), ParticleDisplayBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(Glowcase.SOUND_BLOCK_ENTITY.get(), SoundPlayerBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(Glowcase.ITEM_ACCEPTOR_BLOCK_ENTITY.get(), ItemAcceptorBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(Glowcase.ITEM_PROVIDER_BLOCK_ENTITY.get(), ItemProviderBlockEntityRenderer::new);
 
 		WorldRenderEvents.AFTER_TRANSLUCENT.register(BakedBlockEntityRenderer.Manager::render);
 		InvalidateRenderStateCallback.EVENT.register(BakedBlockEntityRenderer.Manager::reset);

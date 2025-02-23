@@ -56,6 +56,10 @@ public class Glowcase implements ModInitializer {
 	public static final Supplier<BlockItem> ITEM_DISPLAY_BLOCK_ITEM = registerItem("item_display_block", () -> new BlockItem(ITEM_DISPLAY_BLOCK.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<ItemDisplayBlockEntity>> ITEM_DISPLAY_BLOCK_ENTITY = registerBlockEntity("item_display_block", () -> BlockEntityType.Builder.create(ItemDisplayBlockEntity::new, ITEM_DISPLAY_BLOCK.get()).build(null));
 
+	public static final Supplier<ItemProviderBlock> ITEM_PROVIDER_BLOCK = registerBlock("item_provider_block", ItemProviderBlock::new);
+	public static final Supplier<BlockItem> ITEM_PROVIDER_BLOCK_ITEM = registerItem("item_provider_block", () -> new BlockItem(ITEM_PROVIDER_BLOCK.get(), new Item.Settings()));
+	public static final Supplier<BlockEntityType<ItemProviderBlockEntity>> ITEM_PROVIDER_BLOCK_ENTITY = registerBlockEntity("item_provider_block", () -> BlockEntityType.Builder.create(ItemProviderBlockEntity::new, ITEM_PROVIDER_BLOCK.get()).build(null));
+
 	public static final Supplier<ParticleDisplayBlock> PARTICLE_DISPLAY = registerBlock("particle_display", ParticleDisplayBlock::new);
 	public static final Supplier<BlockItem> PARTICLE_DISPLAY_ITEM = registerItem("particle_display", () -> new BlockItem(PARTICLE_DISPLAY.get(), new Item.Settings()));
 	public static final Supplier<BlockEntityType<ParticleDisplayBlockEntity>> PARTICLE_DISPLAY_BLOCK_ENTITY = registerBlockEntity("particle_display", () -> BlockEntityType.Builder.create(ParticleDisplayBlockEntity::new, PARTICLE_DISPLAY.get()).build(null));
@@ -124,6 +128,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(SCREEN_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
 			entries.add(TABLET_ITEM.get());
+			entries.add(ITEM_PROVIDER_BLOCK_ITEM.get());
 		})
 		.build()
 	);
