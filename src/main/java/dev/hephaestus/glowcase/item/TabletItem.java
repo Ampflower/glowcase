@@ -117,7 +117,9 @@ public class TabletItem extends Item {
 				}
 			}
 
-			Glowcase.proxy.openTabletEditScreen(stack);
+			if (player.getWorld().isClient())
+				Glowcase.proxy.openTabletEditScreen(stack);
+
 			return true;
 		}
 		return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
