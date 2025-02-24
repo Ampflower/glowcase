@@ -24,6 +24,12 @@ public class NoteItem extends Item {
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack stackInHand = user.getStackInHand(hand);
 
+		NoteComponent noteComponent = stackInHand.get(Glowcase.NOTE_COMPONENT.get());
+
+		// Only edit when not signed
+		if (noteComponent != null && noteComponent.title().isPresent())
+			return TypedActionResult.pass(stackInHand);
+
 		if (world.isClient())
 			Glowcase.proxy.openNoteEditScreen(stackInHand);
 
@@ -43,19 +49,23 @@ public class NoteItem extends Item {
 
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
+		boolean signed = false;
+
 		if (itemStack.contains(Glowcase.NOTE_COMPONENT.get())) {
 			NoteComponent noteComponent = itemStack.get(Glowcase.NOTE_COMPONENT.get());
 			assert noteComponent != null;
 
 			if (noteComponent.title().isPresent()) {
+				signed = true;
 				Text author = (noteComponent.author().isPresent())
 					? Text.literal(noteComponent.author().get())
-					: Text.translatable("gui.glowcase.note.anonymous");
+					: Text.translatable("gui.glowcase.note.anonymous").formatted(Formatting.WHITE);
 
 				tooltip.add(Text.translatable("item.glowcase.note.tooltip.0", author).formatted(Formatting.YELLOW));
 			}
 		}
 
-		tooltip.add(Text.translatable("item.glowcase.note.tooltip.1").formatted(Formatting.GRAY));
+		if (!signed)
+			tooltip.add(Text.translatable("item.glowcase.note.tooltip.1").formatted(Formatting.GRAY));
 	}
 }

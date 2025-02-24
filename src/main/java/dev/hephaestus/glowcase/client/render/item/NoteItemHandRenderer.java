@@ -29,6 +29,8 @@ public class NoteItemHandRenderer extends ItemHandRenderer {
 	private static final int BG_WIDTH = 244 ;
 	private static final int BG_HEIGHT = 117;
 
+	private static final int TXT_X_PADDING = 15 * 2;
+
 	@Override
 	public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, ItemStack stack) {
 		matrices.push();
@@ -79,13 +81,21 @@ public class NoteItemHandRenderer extends ItemHandRenderer {
 		matrices.translate(off_x, off_y, -.01f);
 		matrices.scale(0.67f, 0.67f, 1f);
 
+		float width = BG_WIDTH - TXT_X_PADDING;
+
 		List<Text> lines = noteComponent.lines();
 		for (int i=0; i<lines.size(); i++) {
 			StringVisitable text = lines.get(i);
 			if (!NoteEditScreen.isInBounds(textRenderer, text))
 				text = NoteEditScreen.ensureBounds(textRenderer, text);
 
-			textRenderer.draw(Language.getInstance().reorder(text), 0, textRenderer.fontHeight * i, NoteTextColorResource.TXT_COLOR, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+			float x = switch (noteComponent.alignment()) {
+				case LEFT -> 0;
+				case CENTER -> width/2f - textRenderer.getWidth(text)/2f - 1; // We don't ask why the -1 is there
+				case RIGHT ->  BG_WIDTH - TXT_X_PADDING - textRenderer.getWidth(text);
+			};
+
+			textRenderer.draw(Language.getInstance().reorder(text), x, textRenderer.fontHeight * i, NoteTextColorResource.TXT_COLOR, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 		}
 
 		matrices.pop();
