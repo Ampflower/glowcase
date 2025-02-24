@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: multi-character selection at some point? it may be a bit complex but it'd be nice
 public class NoteEditScreen extends TextEditorScreen {
 	private static final Identifier TEXTURE = Glowcase.id("textures/gui/note.png");
 

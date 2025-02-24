@@ -1,6 +1,7 @@
 package dev.hephaestus.glowcase.client.render.item;
 
 import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.client.gui.screen.ingame.NoteEditScreen;
 import dev.hephaestus.glowcase.client.util.NoteTextColorResource;
 import dev.hephaestus.glowcase.item.component.NoteComponent;
 import net.minecraft.client.MinecraftClient;
@@ -10,9 +11,11 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Language;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Matrix4f;
 
@@ -78,8 +81,11 @@ public class NoteItemHandRenderer extends ItemHandRenderer {
 
 		List<Text> lines = noteComponent.lines();
 		for (int i=0; i<lines.size(); i++) {
-			Text text = lines.get(i);
-			textRenderer.draw(text, 0, textRenderer.fontHeight * i, NoteTextColorResource.TXT_COLOR, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+			StringVisitable text = lines.get(i);
+			if (!NoteEditScreen.isInBounds(textRenderer, text))
+				text = NoteEditScreen.ensureBounds(textRenderer, text);
+
+			textRenderer.draw(Language.getInstance().reorder(text), 0, textRenderer.fontHeight * i, NoteTextColorResource.TXT_COLOR, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 		}
 
 		matrices.pop();
