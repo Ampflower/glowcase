@@ -5,10 +5,13 @@ import dev.hephaestus.glowcase.client.render.block.entity.*;
 import dev.hephaestus.glowcase.client.render.item.ItemHandRenderer;
 import dev.hephaestus.glowcase.client.render.item.NoteItemHandRenderer;
 import dev.hephaestus.glowcase.client.render.item.TabletItemHandRenderer;
+import dev.hephaestus.glowcase.client.util.NoteTextColorResource;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
+import net.minecraft.resource.ResourceType;
 
 public class GlowcaseClient implements ClientModInitializer {
 	public static final ScreenImageCache screenImageCache = new ScreenImageCache();
@@ -33,5 +36,7 @@ public class GlowcaseClient implements ClientModInitializer {
 
 		WorldRenderEvents.AFTER_TRANSLUCENT.register(BakedBlockEntityRenderer.Manager::render);
 		InvalidateRenderStateCallback.EVENT.register(BakedBlockEntityRenderer.Manager::reset);
+
+		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NoteTextColorResource());
 	}
 }

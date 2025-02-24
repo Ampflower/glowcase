@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.ColorPickerWidget;
+import dev.hephaestus.glowcase.client.util.NoteTextColorResource;
 import dev.hephaestus.glowcase.item.component.NoteComponent;
 import dev.hephaestus.glowcase.packet.C2SEditNoteItem;
 import eu.pb4.placeholders.api.ParserContext;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.SelectionManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.resource.Resource;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -26,10 +26,6 @@ import net.minecraft.util.Language;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +48,6 @@ public class NoteEditScreen extends TextEditorScreen {
 
 	private static final Text ARROW_LEFT_SYMBOL = Text.literal("«")
 		.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY));
-
-	private int txt_color = 0x000000;
 
 	private final List<Text> lines;
 	private String title = "";
@@ -101,18 +95,6 @@ public class NoteEditScreen extends TextEditorScreen {
 	protected void init() {
 		super.init();
 		if (client == null) return;
-
-		// Get font color from texture
-
-		Optional<Resource> resource = client.getResourceManager().getResource(TEXTURE);
-		if (resource.isPresent()) {
-			try {
-				InputStream inputStream = resource.get().getInputStream();
-				BufferedImage image = ImageIO.read(inputStream);
-
-				txt_color = image.getRGB(image.getWidth()-1, image.getHeight()-1);
-			} catch (IOException ignored) { }
-		}
 
 		selectionManager = new SelectionManager(
 			() -> signing ? (currentRow == 6 ? title : author) : getRawLine(currentRow),
@@ -262,7 +244,7 @@ public class NoteEditScreen extends TextEditorScreen {
 				};
 			}
 
-			context.drawText(textRenderer, Language.getInstance().reorder(text), (int) x, (height/2 - BG_HEIGHT/2 + TXT_OFF_Y) + (textRenderer.fontHeight * i), txt_color, false);
+			context.drawText(textRenderer, Language.getInstance().reorder(text), (int) x, (height/2 - BG_HEIGHT/2 + TXT_OFF_Y) + (textRenderer.fontHeight * i), NoteTextColorResource.TXT_COLOR, false);
 
 			if (overflow) {
 				RenderSystem.enableBlend();
@@ -272,7 +254,7 @@ public class NoteEditScreen extends TextEditorScreen {
 						height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow) + j,
 						0, BG_SIZE - 1, 32, 1
 					);
-				context.drawText(textRenderer, ARROW_LEFT_SYMBOL, width/2 - BG_WIDTH/2 + SCREEN_X1 + 5, height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow), txt_color, false);
+				context.drawText(textRenderer, ARROW_LEFT_SYMBOL, width/2 - BG_WIDTH/2 + SCREEN_X1 + 5, height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow), NoteTextColorResource.TXT_COLOR, false);
 
 				RenderSystem.disableBlend();
 			}
@@ -314,7 +296,7 @@ public class NoteEditScreen extends TextEditorScreen {
 				if (selectionStart < line.length()) {
 					context.fill(startX, startY, startX + 1, startY + caretLength, 0xCC000000);
 				} else {
-					context.drawText(client.textRenderer, "_", startX, startY, txt_color, false);
+					context.drawText(client.textRenderer, "_", startX, startY, NoteTextColorResource.TXT_COLOR, false);
 				}
 			}
 

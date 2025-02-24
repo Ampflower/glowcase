@@ -22,6 +22,8 @@ public record C2SEditNoteItem(NoteComponent noteComponent) implements CustomPayl
 		return ID;
 	}
 
+	// TODO: Client and Server side trimming
+
 	public void receive(ServerPlayNetworking.Context context) {
 		ItemStack stack = context.player().getMainHandStack();
 		if (!(stack.isOf(Glowcase.NOTE_ITEM.get()))) return;
