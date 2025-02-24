@@ -16,6 +16,6 @@ public class NoteItemHandRenderer extends ItemHandRenderer {
 
 	@Override
 	public boolean visible(ItemStack stack) {
-		return false;
+		return (stack.contains(Glowcase.NOTE_COMPONENT.get()));
 	}
 }

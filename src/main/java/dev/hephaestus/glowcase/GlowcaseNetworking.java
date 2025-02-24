@@ -16,7 +16,8 @@ public class GlowcaseNetworking {
 		PayloadTypeRegistry.playC2S().register(C2SEditSoundBlock.ID, C2SEditSoundBlock.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(C2SEditItemAcceptorBlock.ID, C2SEditItemAcceptorBlock.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(C2SEditScreenBlock.ID, C2SEditScreenBlock.PACKET_CODEC);
-		PayloadTypeRegistry.playC2S().register(C2SEditSlideTablet.ID, C2SEditSlideTablet.PACKET_CODEC);
+		PayloadTypeRegistry.playC2S().register(C2SEditTabletItem.ID, C2SEditTabletItem.PACKET_CODEC);
+		PayloadTypeRegistry.playC2S().register(C2SEditNoteItem.ID, C2SEditNoteItem.PACKET_CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditHyperlinkBlock.ID, C2SEditHyperlinkBlock::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditItemDisplayBlock.ID, C2SEditItemDisplayBlock::receive);
@@ -28,6 +29,7 @@ public class GlowcaseNetworking {
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditSoundBlock.ID, C2SEditSoundBlock::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditItemAcceptorBlock.ID, C2SEditItemAcceptorBlock::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditScreenBlock.ID, C2SEditScreenBlock::receive);
-		ServerPlayNetworking.registerGlobalReceiver(C2SEditSlideTablet.ID, C2SEditSlideTablet::receive);
+		ServerPlayNetworking.registerGlobalReceiver(C2SEditTabletItem.ID, C2SEditTabletItem::receive);
+		ServerPlayNetworking.registerGlobalReceiver(C2SEditNoteItem.ID, C2SEditNoteItem::receive);
 	}
 }

@@ -1,7 +1,6 @@
 package dev.hephaestus.glowcase.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.render.item.ItemHandRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -21,7 +20,6 @@ public class MixinHeldItemRenderer {
 	@Inject(method = "renderFirstPersonMap", at = @At("HEAD"), cancellable = true)
 	void glowcase$renderFirstPersonTablet(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, ItemStack stack, CallbackInfo ci) {
 		if (MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
-		if (!stack.isOf(Glowcase.TABLET_ITEM.get())) return;
 
 		@Nullable ItemHandRenderer renderer = ItemHandRenderer.getRenderer(stack);
 		if (renderer == null) return;

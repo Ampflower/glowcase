@@ -10,16 +10,16 @@ import net.minecraft.text.TextCodecs;
 import java.util.List;
 import java.util.Optional;
 
-public record NoteComponent(List<Text> lines, Alignment alignment, Optional<Text> title, Optional<String> author) {
+public record NoteComponent(List<Text> lines, Alignment alignment, Optional<String> title, Optional<String> author) {
 	public static final int LINES_LIMIT = 10;
 	public static final int LINE_LIMIT = 105;
-	public static final int TITLE_LIMIT = 64;
+	public static final int TITLE_LIMIT = 32;
 
 	public static final Codec<NoteComponent> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-			TextCodecs.codec(LINE_LIMIT).sizeLimitedListOf(LINES_LIMIT).fieldOf("lines").forGetter(NoteComponent::lines),
+			TextCodecs.CODEC.sizeLimitedListOf(LINES_LIMIT).fieldOf("lines").forGetter(NoteComponent::lines),
 			Codec.BYTE.fieldOf("alignment").forGetter((note) -> (byte) note.alignment.ordinal()),
-			TextCodecs.codec(TITLE_LIMIT).optionalFieldOf("title").forGetter(NoteComponent::title),
+			Codec.STRING.optionalFieldOf("title").forGetter(NoteComponent::title),
 			Codec.STRING.optionalFieldOf("author").forGetter(NoteComponent::author)
 		).apply(instance, (lines, alignment, title, author)
 			-> new NoteComponent(lines, Alignment.values()[alignment], title, author))

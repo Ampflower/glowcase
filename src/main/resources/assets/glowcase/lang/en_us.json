@@ -76,6 +76,7 @@
 	"gui.glowcase.note.title": "Title*: ",
 	"gui.glowcase.note.author": "Author: ",
 	"gui.glowcase.note.required": "* Required",
+	"gui.glowcase.note.anonymous": "Anonymous",
 	"block.glowcase.generic.tooltip": "Interact with a glowcase item to edit",
 	"block.glowcase.text_block.tooltip.0": "Displays formatted text",
 	"block.glowcase.text_block.tooltip.1": "Supports Placeholder QuickText",
@@ -99,6 +100,8 @@
 	"item.glowcase.tablet.tooltip.0": "Controls what is being presented on a Screen",
 	"item.glowcase.tablet.tooltip.1": "Right click in inventory to edit",
 	"item.glowcase.tablet.tooltip.2": "Shift and right click on Screen to link",
+	"item.glowcase.note.tooltip.0": "Author: %s",
+	"item.glowcase.note.tooltip.1": "Shows text while holding in hand",
 	"item.glowcase.linked_screen": "Linked Screen",
 	"item.glowcase.current_slide": "Current Slide",
 	"item.glowcase.slideshow": "Slideshow"

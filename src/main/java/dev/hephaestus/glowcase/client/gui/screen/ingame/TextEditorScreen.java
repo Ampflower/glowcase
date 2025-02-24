@@ -13,6 +13,7 @@ import java.util.Comparator;
 
 public abstract class TextEditorScreen extends GlowcaseScreen implements ColorPickerIncludedScreen {
 	private ButtonWidget colorText;
+	private ButtonWidget[] widgets = new ButtonWidget[0];
 
 	abstract SelectionManager getSelectionManager();
 
@@ -66,12 +67,21 @@ public abstract class TextEditorScreen extends GlowcaseScreen implements ColorPi
 			toggleColorPicker(!colorPickerWidget.active);
 		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
 
+		widgets = new ButtonWidget[]{
+			boldText, italicizeText, strikeText, underlineText, obfuscateText, colorText
+		};
+
 		this.addDrawableChild(boldText);
 		this.addDrawableChild(italicizeText);
 		this.addDrawableChild(strikeText);
 		this.addDrawableChild(underlineText);
 		this.addDrawableChild(obfuscateText);
 		this.addDrawableChild(colorText);
+	}
+
+	public void toggleWidgets(boolean active) {
+		for (ButtonWidget widget : widgets)
+			widget.active = active;
 	}
 
 	public void insertTag(TextTag tag, boolean findShortest) {
