@@ -484,6 +484,16 @@ public class NoteEditScreen extends TextEditorScreen {
 	@Override
 	public void close() {
 		super.close();
+
+		if (finalizing) {
+			// Remove insertion for optimization as it is not needed anymore
+			for (int i=0; i<lines.size(); i++) {
+				String rawLine = getRawLine(i);
+				Text text = PARSER.parseText(rawLine, ParserContext.of());
+				lines.set(i, text);
+			}
+		}
+
 		new C2SEditNoteItem(new NoteComponent(
 			lines,
 			textAlignment,
