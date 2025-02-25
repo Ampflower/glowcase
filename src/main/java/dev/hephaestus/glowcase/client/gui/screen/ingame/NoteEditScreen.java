@@ -273,11 +273,9 @@ public class NoteEditScreen extends TextEditorScreen {
 		}
 
 		// Cursor / Selection
-		// I literally copied this from TextBlockEditScreen, we might want to abstract this further more down.
+		// I literally copied this from TextBlockEditScreen, we might want to abstract this further more down too
 		int caretStart = selectionManager.getSelectionStart();
 		int caretEnd = selectionManager.getSelectionEnd();
-
-		// TODO: If overflow is true, make sure the cursor moves correctly and that the text moves to the right if the cursor is too far to the left
 
 		if (caretStart >= 0) {
 			String line = signing
