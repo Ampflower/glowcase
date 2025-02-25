@@ -46,9 +46,10 @@ public class NoteEditScreen extends TextEditorScreen {
 
 	private static final int TXT_OFF_Y = 12;
 	private static final int TXT_X_PADDING = 15 * 2;
+	private static final Text ARROW_LEFT_SYMBOL = Text.literal("«");
+	private static final Text ARROW_RIGHT_SYMBOL = Text.literal("»");
 
-	private static final Text ARROW_LEFT_SYMBOL = Text.literal("«")
-		.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY));
+	private int editing_line_offset = 0;
 
 	private final List<Text> lines;
 	private String title = "";
@@ -232,12 +233,12 @@ public class NoteEditScreen extends TextEditorScreen {
 				text = Text.literal(getRawLine(currentRow));
 				line_width = textRenderer.getWidth(text);
 				if (!isInBounds(textRenderer, text)) {
-					x += width / 2f + BG_WIDTH / 2f - TXT_X_PADDING / 2f - line_width;
+					x += width/2f + BG_WIDTH/2f - TXT_X_PADDING/2f - line_width + editing_line_offset;
 					overflow = true;
 				}
 			}
 
-			if (!overflow) {
+			if (!overflow || i != currentRow) {
 				x += switch (alignment) {
 					case LEFT -> width / 2f - BG_WIDTH / 2f + TXT_X_PADDING / 2f;
 					case CENTER -> width / 2f - line_width / 2f;
@@ -247,15 +248,25 @@ public class NoteEditScreen extends TextEditorScreen {
 
 			context.drawText(textRenderer, Language.getInstance().reorder(text), (int) x, (height/2 - BG_HEIGHT/2 + TXT_OFF_Y) + (textRenderer.fontHeight * i), NoteTextColorResource.TXT_COLOR, false);
 
-			if (overflow) {
+			if (overflow && i == currentRow) {
 				RenderSystem.enableBlend();
-				for (int j = 0; j < textRenderer.fontHeight; j++)
+				for (int j = 0; j < textRenderer.fontHeight; j++) {
 					context.drawTexture(TEXTURE,
-						width / 2 - BG_WIDTH / 2 + SCREEN_X1,
-						height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow) + j,
+						width/2 - BG_WIDTH/2 + SCREEN_X1,
+						height/2 - BG_HEIGHT/2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow) + j,
 						0, BG_SIZE - 1, 32, 1
 					);
-				context.drawText(textRenderer, ARROW_LEFT_SYMBOL, width/2 - BG_WIDTH/2 + SCREEN_X1 + 5, height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow), NoteTextColorResource.TXT_COLOR, false);
+					context.drawTexture(TEXTURE,
+						width/2 + BG_WIDTH/2 + SCREEN_X2 - 32,
+						height/2 - BG_HEIGHT/2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow) + j,
+						0, BG_SIZE - 2, 32, 1
+					);
+				}
+
+				if (x < (width/2f - BG_WIDTH/2f + SCREEN_X1))
+					context.drawText(textRenderer, ARROW_LEFT_SYMBOL, width/2 - BG_WIDTH/2 + SCREEN_X1 + 1, height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow), NoteTextColorResource.TXT_COLOR, false);
+				if (editing_line_offset > 0)
+					context.drawText(textRenderer, ARROW_RIGHT_SYMBOL, width/2 + BG_WIDTH/2 + SCREEN_X2 - textRenderer.getWidth(ARROW_RIGHT_SYMBOL) - 1, height / 2 - BG_HEIGHT / 2 + TXT_OFF_Y + (textRenderer.fontHeight * currentRow), NoteTextColorResource.TXT_COLOR, false);
 
 				RenderSystem.disableBlend();
 			}
@@ -280,17 +291,27 @@ public class NoteEditScreen extends TextEditorScreen {
 			int startX = client.textRenderer.getWidth(preSelection);
 			int startY = (height/2 - BG_HEIGHT/2 + TXT_OFF_Y) + (textRenderer.fontHeight * currentRow);
 
-			float push = switch (alignment) {
+			float push = switch (overflow ? NoteComponent.Alignment.RIGHT : alignment) {
 				case LEFT -> width/2f - BG_WIDTH/2f + TXT_X_PADDING/2f;
 				case CENTER -> width/2f - textRenderer.getWidth(line)/2f;
 				case RIGHT ->  width/2f + BG_WIDTH/2f - TXT_X_PADDING/2f - textRenderer.getWidth(line);
 			};
 
 			startX += (int) push;
-			if (overflow)
-				startX = (int) (width/2f + BG_WIDTH/2f - TXT_X_PADDING/2f) + 1;
 			if (signing)
 				startX += textRenderer.getWidth(screen.get(currentRow));
+
+			if (overflow) {
+				int apply = 0;
+
+				while ((startX + editing_line_offset + apply) < (width/2 - BG_WIDTH/2 + SCREEN_X1 + 32))
+					apply++;
+				while ((startX + editing_line_offset+ apply) > (width/2 + BG_WIDTH/2 + SCREEN_X2 - 32))
+					apply--;
+
+				editing_line_offset += apply;
+				startX += editing_line_offset;
+			}
 
 			int caretLength = 9;
 			if (this.ticksSinceOpened / 6 % 2 == 0) {
@@ -345,10 +366,12 @@ public class NoteEditScreen extends TextEditorScreen {
 			setFocused(null);
 			if (keyCode == GLFW.GLFW_KEY_UP) {
 				currentRow = Math.max(currentRow - 1, signing ? 6 : 0);
+				editing_line_offset = 0;
 				selectionManager.putCursorAtEnd();
 				result = true;
 			} else if (keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
 				currentRow = Math.min(currentRow + 1, signing ? 7 : NoteComponent.LINES_LIMIT-1);
+				editing_line_offset = 0;
 				selectionManager.putCursorAtEnd();
 				result = true;
 			} else if (signing && keyCode == GLFW.GLFW_KEY_TAB) {
@@ -410,6 +433,7 @@ public class NoteEditScreen extends TextEditorScreen {
 				currentRow = Math.clamp(currentRow, 6, 7);
 
 			selectionManager.putCursorAtEnd();
+			editing_line_offset = 0;
 
 			return true;
 		} else {
