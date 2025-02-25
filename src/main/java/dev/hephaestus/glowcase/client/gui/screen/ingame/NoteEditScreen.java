@@ -316,12 +316,12 @@ public class NoteEditScreen extends TextEditorScreen {
 				if (selectionStart < line.length()) {
 					context.fill(startX, startY, startX + 1, startY + caretLength, 0xCC000000);
 				} else {
-					context.drawText(client.textRenderer, "_", startX, startY, NoteTextColorResource.TXT_COLOR, false);
+					context.drawText(textRenderer, "_", startX, startY, NoteTextColorResource.TXT_COLOR, false);
 				}
 			}
 
 			if (caretStart != caretEnd) {
-				int endX = startX + this.client.textRenderer.getWidth(line.substring(selectionStart, selectionEnd));
+				int endX = startX + textRenderer.getWidth(line.substring(selectionStart, selectionEnd));
 				Tessellator tessellator = Tessellator.getInstance();
 				BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 				RenderSystem.enableColorLogicOp();
@@ -362,20 +362,71 @@ public class NoteEditScreen extends TextEditorScreen {
 			result = true;
 		} else {
 			setFocused(null);
-			if (keyCode == GLFW.GLFW_KEY_UP) {
+			result = true;
+			if (keyCode == GLFW.GLFW_KEY_UP || (keyCode == GLFW.GLFW_KEY_LEFT && selectionManager.getSelectionStart() <= 0 && currentRow > 0)) {
+				// Move cursor up
 				currentRow = Math.max(currentRow - 1, signing ? 6 : 0);
 				editing_line_offset = 0;
 				selectionManager.putCursorAtEnd();
-				result = true;
-			} else if (keyCode == GLFW.GLFW_KEY_DOWN || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
-				currentRow = Math.min(currentRow + 1, signing ? 7 : NoteComponent.LINES_LIMIT-1);
+			} else if (keyCode == GLFW.GLFW_KEY_DOWN || (keyCode == GLFW.GLFW_KEY_RIGHT && selectionManager.getSelectionStart() >= getRawLine(currentRow).length() && currentRow < NoteComponent.LINES_LIMIT-1)) {
+				// Move cursor down
+				currentRow = Math.min(currentRow + 1, signing ? 7 : NoteComponent.LINES_LIMIT - 1);
 				editing_line_offset = 0;
-				selectionManager.putCursorAtEnd();
-				result = true;
+
+				if (keyCode == GLFW.GLFW_KEY_DOWN)
+					selectionManager.putCursorAtEnd();
+				else
+					selectionManager.moveCursorToStart();
+			} else if (!signing && (currentRow < NoteComponent.LINES_LIMIT-1) && (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)) {
+				// Split lines (enter)
+				if (hasSpaceLeft()) {
+					int cursor = selectionManager.getSelectionStart();
+					if (cursor <= 0) {
+						lines.add(currentRow, Text.of(""));
+						currentRow++;
+						selectionManager.moveCursorToStart();
+					} else if (cursor >= getRawLine(currentRow).length()) {
+						lines.add(currentRow+1, Text.of(""));
+						currentRow++;
+						selectionManager.moveCursorToStart();
+					} else {
+						String curLine = getRawLine(currentRow);
+						String newLine = curLine.substring(cursor);
+						curLine = curLine.substring(0, cursor);
+
+						setRawLine(currentRow, curLine);
+						lines.add(currentRow + 1, Text.of(""));
+						setRawLine(currentRow + 1, newLine);
+
+						currentRow++;
+						selectionManager.moveCursorToStart();
+					}
+				}
+			} else if (!signing && (currentRow > 0 && selectionManager.getSelectionStart() <= 0) && (keyCode == GLFW.GLFW_KEY_BACKSPACE)) {
+				// Delete before cursor (backspace)
+				String curLine = getRawLine(currentRow);
+				String before = getRawLine(currentRow - 1);
+				setRawLine(currentRow - 1, before + curLine);
+
+				lines.remove(currentRow);
+				lines.add(Text.of(""));
+
+				currentRow--;
+				selectionManager.moveCursorToStart();
+				selectionManager.moveCursor(before.length());
+			} else if (!signing && (currentRow <  NoteComponent.LINES_LIMIT-1 && selectionManager.getSelectionStart() >= getRawLine(currentRow).length()) && (keyCode == GLFW.GLFW_KEY_DELETE)) {
+				// Delete after cursor (delete key)
+				String curLine = getRawLine(currentRow);
+				String after = getRawLine(currentRow+1);
+				setRawLine(currentRow, curLine + after);
+
+				lines.remove(currentRow+1);
+				lines.add(Text.of(""));
 			} else if (signing && keyCode == GLFW.GLFW_KEY_TAB) {
+				// Tab
 				currentRow = (currentRow == 6 ? 7 : 6);
-				result = true;
 			} else {
+				// Rest
 				result = selectionManager.handleSpecialKey(keyCode) || super.keyPressed(keyCode, scanCode, modifiers);
 			}
 		}
@@ -437,6 +488,15 @@ public class NoteEditScreen extends TextEditorScreen {
 		} else {
 			return super.mouseClicked(mouseX, mouseY, button);
 		}
+	}
+
+	private boolean hasSpaceLeft() {
+		Text last = lines.getLast();
+		if (last.getString().isEmpty()) {
+			lines.removeLast();
+			return true;
+		}
+		return false;
 	}
 
 	public String getRawLine(int i) {
