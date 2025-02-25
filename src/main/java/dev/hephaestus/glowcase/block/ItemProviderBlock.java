@@ -11,6 +11,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.BlockFace;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -65,15 +66,17 @@ public class ItemProviderBlock extends AbstractItemDisplayBlock{
 
 		if (canEditGlowcase(player, pos)) {
 			boolean holdingGlowcaseItem = stack.isIn(Glowcase.ITEM_TAG);
-			boolean holdingSameAsDisplay = ItemStack.areItemsEqual(be.getDisplayedStack(), stack);
+//			boolean holdingSameAsDisplay = ItemStack.areItemsEqual(be.getDisplayedStack(), stack);
 
 			if (!be.hasItem()) {
 				if (!world.isClient) be.setStack(stack);
 				return ItemActionResult.SUCCESS;
-			} else if (holdingSameAsDisplay) {
-				if (world.isClient) Glowcase.proxy.openItemProviderBlockEditScreen(pos);
-				return ItemActionResult.SUCCESS;
-			} else if (holdingGlowcaseItem) {
+			}
+//			else if (holdingSameAsDisplay) {
+//				if (world.isClient) Glowcase.proxy.openItemProviderBlockEditScreen(pos);
+//				return ItemActionResult.SUCCESS;
+//			}
+			else if (holdingGlowcaseItem) {
 				if (!world.isClient) be.setStack(ItemStack.EMPTY);
 				return ItemActionResult.SUCCESS;
 			}
@@ -91,7 +94,7 @@ public class ItemProviderBlock extends AbstractItemDisplayBlock{
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return checkType(type, Glowcase.ITEM_PROVIDER_BLOCK_ENTITY.get(), AbstractItemDisplayBlockEntity::tick);
+		return checkType(type, Glowcase.ITEM_PROVIDER_BLOCK_ENTITY.get(), ItemProviderBlockEntity::tick);
 	}
 
 	@Override

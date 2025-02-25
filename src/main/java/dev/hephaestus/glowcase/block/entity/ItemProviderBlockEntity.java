@@ -26,6 +26,8 @@ public class ItemProviderBlockEntity extends AbstractItemDisplayBlockEntity{
 	public ItemProviderBlockEntity.GivesItem givesItem = ItemProviderBlockEntity.GivesItem.YES;
 	public Set<UUID> givenTo = new HashSet<>();
 
+	private boolean setOffsetAndRotation = false;
+
 
 	public ItemProviderBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.ITEM_PROVIDER_BLOCK_ENTITY.get(), pos, state);
@@ -70,12 +72,7 @@ public class ItemProviderBlockEntity extends AbstractItemDisplayBlockEntity{
 		this.stack = stack.copy();
 		BlockState blockState = world.getBlockState(pos);
 		BlockFace blockFace = blockState.get(ItemProviderBlock.FACE);
-		if(blockFace == BlockFace.WALL) {
-			offset = Offset.BACK;
-			rotationType = RotationType.HORIZONTAL;
-		}
-		else {
-			offset = Offset.CENTER;
+		if(blockFace != BlockFace.WALL) {
 			rotationType = stack.getItem() instanceof BlockItem ? RotationType.TRACKING : RotationType.BILLBOARD;
 		}
 
@@ -122,6 +119,27 @@ public class ItemProviderBlockEntity extends AbstractItemDisplayBlockEntity{
 		}
 	}
 
+	public static void tick(World world, BlockPos blockPos, BlockState state, ItemProviderBlockEntity blockEntity) {
+		if(!blockEntity.setOffsetAndRotation) {
+			BlockFace blockFace = state.get(ItemProviderBlock.FACE);
+			if(blockFace == BlockFace.WALL) {
+				blockEntity.offset = Offset.BACK;
+				blockEntity.rotationType = RotationType.HORIZONTAL;
+			}
+			else {
+				blockEntity.offset = Offset.CENTER;
+				blockEntity.rotationType = blockEntity.stack.getItem() instanceof BlockItem ? RotationType.TRACKING : RotationType.BILLBOARD;
+			}
+			blockEntity.setOffsetAndRotation = true;
+			blockEntity.markDirty();
+			blockEntity.dispatch();
+		}
+
+		if (blockEntity.getDisplayEntity() != null) {
+			blockEntity.displayEntity.tick();
+			++blockEntity.displayEntity.age;
+		}
+	}
 
 
 

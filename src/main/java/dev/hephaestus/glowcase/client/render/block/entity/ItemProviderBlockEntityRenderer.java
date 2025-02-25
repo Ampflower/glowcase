@@ -40,7 +40,10 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 		float yaw = 0F;
 		float pitch = 0F;
 
-		switch (entity.rotationType) {
+		boolean isBack = false;
+		boolean isBillboard = false;
+
+        switch (entity.rotationType) {
 			case TRACKING -> {
 				Vec2f pitchAndYaw = ItemProviderBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);
 				pitch = pitchAndYaw.x;
@@ -51,7 +54,8 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 				pitch = (float) Math.toRadians(camera.getPitch());
 				yaw = (float) Math.toRadians(-camera.getYaw());
 				matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-			}
+				isBillboard = true;
+            }
 			case HORIZONTAL -> {
 				var rotation = -(entity.getCachedState().get(Properties.ROTATION) * 2 * Math.PI) / 16.0F;
 				matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) rotation));
@@ -65,7 +69,10 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 
 		switch (entity.offset) {
 			case FRONT -> matrices.translate(0D, Math.sin(pitch) * 0.4, -0.4D);
-			case BACK -> matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
+			case BACK -> {
+				matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
+				isBack = true;
+			}
 		}
 
 		ItemStack stack = entity.getDisplayedStack();
@@ -119,6 +126,18 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 
 		matrices.pop();
 
-		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) {
+			if(isBack) {
+				BlockEntityRenderUtil.renderPlaceholderAtBack(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+			}
+			else if(isBillboard) {
+				BlockEntityRenderUtil.renderPlaceholderAsBillboard(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+			}
+			else {
+				BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+			}
+
+		}
+
 	}
 }

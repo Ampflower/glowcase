@@ -38,6 +38,7 @@ public class ItemDisplayBlockEntity extends AbstractItemDisplayBlockEntity {
 
 	public ItemDisplayBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.ITEM_DISPLAY_BLOCK_ENTITY.get(), pos, state);
+		showName = false;
 	}
 
 	@Override
