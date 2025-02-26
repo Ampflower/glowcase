@@ -223,7 +223,7 @@ public class NoteEditScreen extends TextEditorScreen {
 			if (signing && i >= 6 && i <= 7)
 				text = StringVisitable.concat(text, Text.of((i == 6) ? title : author));
 
-			if (!isInBounds(textRenderer, text))
+			if (outOfBounds(textRenderer, text))
 				text = ensureBounds(textRenderer, text);
 
 			int line_width = textRenderer.getWidth(text);
@@ -232,7 +232,7 @@ public class NoteEditScreen extends TextEditorScreen {
 			if (i == currentRow && !signing) {
 				text = Text.literal(getRawLine(currentRow));
 				line_width = textRenderer.getWidth(text);
-				if (!isInBounds(textRenderer, text)) {
+				if (outOfBounds(textRenderer, text)) {
 					x += width/2f + BG_WIDTH/2f - TXT_X_PADDING/2f - line_width + editing_line_offset;
 					overflow = true;
 				}
@@ -439,10 +439,7 @@ public class NoteEditScreen extends TextEditorScreen {
 
 	@Override
 	public boolean charTyped(char chr, int modifiers) {
-		if (signing
-			? ((currentRow == 6 ? title : author).length() < NoteComponent.TITLE_LIMIT)
-			: isInBounds(textRenderer, lines.get(currentRow))) {
-
+		if (!signing || (currentRow == 6 ? title : author).length() < NoteComponent.TITLE_LIMIT) {
 			this.selectionManager.insert(chr);
 			return true;
 		}
@@ -490,7 +487,7 @@ public class NoteEditScreen extends TextEditorScreen {
 
 				int charPos = (int) mouseX;
 
-				if (!isInBounds(textRenderer, text)) {
+				if (outOfBounds(textRenderer, text)) {
 					// Scrolling line
 					charPos -= (int) (width / 2f + BG_WIDTH / 2f - TXT_X_PADDING / 2f - length + editing_line_offset);
 				} else {
@@ -558,9 +555,9 @@ public class NoteEditScreen extends TextEditorScreen {
 		}
 	}
 
-	public static <T extends StringVisitable> boolean isInBounds(TextRenderer textRenderer, T text) {
+	public static <T extends StringVisitable> boolean outOfBounds(TextRenderer textRenderer, T text) {
 		int line_width = textRenderer.getWidth(text);
-		return (line_width <= (BG_WIDTH - TXT_X_PADDING));
+		return (line_width > (BG_WIDTH - TXT_X_PADDING));
 	}
 
 	public static StringVisitable ensureBounds(TextRenderer textRenderer, StringVisitable text) {

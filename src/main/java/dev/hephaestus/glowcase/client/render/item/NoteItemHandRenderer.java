@@ -86,7 +86,7 @@ public class NoteItemHandRenderer extends ItemHandRenderer {
 		List<Text> lines = noteComponent.lines();
 		for (int i=0; i<lines.size(); i++) {
 			StringVisitable text = lines.get(i);
-			if (!NoteEditScreen.isInBounds(textRenderer, text))
+			if (NoteEditScreen.outOfBounds(textRenderer, text))
 				text = NoteEditScreen.ensureBounds(textRenderer, text);
 
 			float x = switch (noteComponent.alignment()) {
