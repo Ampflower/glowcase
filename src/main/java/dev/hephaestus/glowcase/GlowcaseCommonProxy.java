@@ -55,4 +55,8 @@ public class GlowcaseCommonProxy {
 	public void openTabletEditScreen(ItemStack stack) {
 		//No-op
 	}
+
+	public void openNoteEditScreen(ItemStack stack) {
+		//No-op
+	}
 }

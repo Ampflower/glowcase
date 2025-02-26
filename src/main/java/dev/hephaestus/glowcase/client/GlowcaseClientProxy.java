@@ -122,4 +122,12 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 			MinecraftClient.getInstance().setScreen(new TabletEditScreen(stack));
 		}
 	}
+
+	@Override
+	public void openNoteEditScreen(ItemStack stack) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null) {
+			MinecraftClient.getInstance().setScreen(new NoteEditScreen(stack));
+		}
+	}
 }
