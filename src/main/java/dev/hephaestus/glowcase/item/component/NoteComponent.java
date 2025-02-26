@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public record NoteComponent(List<Text> lines, Alignment alignment, Optional<String> title, Optional<String> author) {
 	public static final int LINES_LIMIT = 10;
-	public static final int LINE_LIMIT = 105;
 	public static final int TITLE_LIMIT = 32;
 
 	public static final Codec<NoteComponent> CODEC = RecordCodecBuilder.create(

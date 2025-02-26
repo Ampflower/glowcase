@@ -473,16 +473,60 @@ public class NoteEditScreen extends TextEditorScreen {
 			double linePos = mouseY - (height/2f - BG_HEIGHT/2f + TXT_OFF_Y);
 			double totalHeight = NoteComponent.LINES_LIMIT * textRenderer.fontHeight;
 
-			currentRow = Math.clamp(
+			int clickedLine = Math.clamp(
 				(int) (NoteComponent.LINES_LIMIT / totalHeight * linePos),
 				0,
 				NoteComponent.LINES_LIMIT-1
 			);
 			if (signing)
-				currentRow = Math.clamp(currentRow, 6, 7);
+				clickedLine = Math.clamp(clickedLine, 6, 7);
 
-			selectionManager.putCursorAtEnd();
-			editing_line_offset = 0;
+			if (clickedLine == currentRow) {
+				// Click on current line, get more precise in-row positioning
+				String line = getRawLine(currentRow);
+				int chars = line.length();
+				Text text = Text.of(line);
+				int length = textRenderer.getWidth(text);
+
+				int charPos = (int) mouseX;
+
+				if (!isInBounds(textRenderer, text)) {
+					// Scrolling line
+					charPos -= (int) (width / 2f + BG_WIDTH / 2f - TXT_X_PADDING / 2f - length + editing_line_offset);
+				} else {
+					// Non-scrolling line
+					float offset = switch (textAlignment) {
+						case LEFT -> width/2f-BG_WIDTH/2f+TXT_X_PADDING/2f;
+						case CENTER -> width/2f - textRenderer.getWidth(line)/2f;
+						case RIGHT -> width/2f + BG_WIDTH/2f - TXT_X_PADDING/2f - textRenderer.getWidth(line);
+					};
+					charPos -= (int) offset;
+				}
+
+				// Find spot to move the cursor to
+
+				if (charPos >= length) {
+					selectionManager.putCursorAtEnd();
+				} else if (charPos <= 0) {
+					selectionManager.moveCursorToStart();
+				} else {
+					// Clicking mid-text
+					for (int i=1; i<chars; i++) {
+						String testContents = line.substring(0, i);
+						int sub_width = textRenderer.getWidth(testContents);
+						if (charPos <= sub_width) {
+							selectionManager.moveCursorToStart();
+							selectionManager.moveCursor(i);
+							break;
+						}
+					}
+				}
+			} else {
+				// Apply new line selection
+				currentRow = clickedLine;
+				selectionManager.putCursorAtEnd();
+				editing_line_offset = 0;
+			}
 
 			return true;
 		} else {
@@ -516,8 +560,7 @@ public class NoteEditScreen extends TextEditorScreen {
 
 	public static <T extends StringVisitable> boolean isInBounds(TextRenderer textRenderer, T text) {
 		int line_width = textRenderer.getWidth(text);
-		String str = (text instanceof Text realText) ? extractRaw(realText) : text.getString();
-		return (line_width <= (BG_WIDTH - TXT_X_PADDING)) && (str.length() <= NoteComponent.LINE_LIMIT);
+		return (line_width <= (BG_WIDTH - TXT_X_PADDING));
 	}
 
 	public static StringVisitable ensureBounds(TextRenderer textRenderer, StringVisitable text) {
