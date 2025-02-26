@@ -136,7 +136,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	}
 
 	public static void renderPicture(@NotNull Identifier texture, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
-		RenderLayer renderLayer = RenderLayer.getEntityTranslucent(texture);
+		RenderLayer renderLayer = RenderLayer.getText(texture);
 		VertexConsumer buffer = vertexConsumers.getBuffer(renderLayer);
 
 		MatrixStack.Entry matrix = matrices.peek();
