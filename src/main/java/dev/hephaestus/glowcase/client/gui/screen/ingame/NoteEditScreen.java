@@ -478,7 +478,7 @@ public class NoteEditScreen extends TextEditorScreen {
 			if (signing)
 				clickedLine = Math.clamp(clickedLine, 6, 7);
 
-			if (clickedLine == currentRow) {
+			if (clickedLine == currentRow && !signing) {
 				// Click on current line, get more precise in-row positioning
 				String line = getRawLine(currentRow);
 				int chars = line.length();
