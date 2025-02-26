@@ -26,7 +26,7 @@ public class BlockEntityRenderUtil {
 		new Vector3f(-0.5F, 0.5F, 0.0F)
 	};
 
-	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, Quaternionf rotation, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
+	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, Quaternionf rotation, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera, float zOffset) {
 		matrices.push();
 		matrices.translate(0.5, 0.5, 0.5);
 		boolean doBillboard = !entity.getCachedState().contains(Properties.ROTATION);
@@ -37,6 +37,7 @@ public class BlockEntityRenderUtil {
 			float blockRotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
 			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(blockRotation));
 		}
+		matrices.translate(0f, 0f, zOffset);
 		matrices.multiply(rotation);
 		matrices.scale(scale, scale, scale);
 		var entry = matrices.peek();
@@ -58,7 +59,11 @@ public class BlockEntityRenderUtil {
 	}
 
 	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
-		renderPlaceholder(entity, texture, scale, RotationAxis.POSITIVE_Y.rotationDegrees(0), matrices, vertexConsumers, camera);
+		renderPlaceholder(entity, texture, scale, matrices, vertexConsumers, camera, 0f);
+	}
+
+	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera, float zOffset) {
+		renderPlaceholder(entity, texture, scale, RotationAxis.POSITIVE_Y.rotationDegrees(0), matrices, vertexConsumers, camera, zOffset);
 	}
 
 	public static boolean shouldRenderPlaceholder(BlockPos pos) {

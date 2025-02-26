@@ -40,7 +40,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	public void render(ScreenBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos()) ||
 			(MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get())))
-			BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers, context.getRenderDispatcher().camera);
+			BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers, context.getRenderDispatcher().camera, (entity.zOffset == ScreenBlockEntity.Offset.NULL ? 0.1f : 0f));
 
 		matrices.push();
 
@@ -63,9 +63,9 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		}
 
 		switch (entity.zOffset) {
-			case POSITIVE -> matrices.translate(0f, 0f, -0.49f);
-			case NEGATIVE -> matrices.translate(0f, 0f, 0.49f);
-			default -> matrices.translate(0f, 0f, 0.01f); // To make it easier to spot the block, even when centered
+			case POSITIVE -> matrices.translate(0f, 0f, -0.45f);
+			case NEGATIVE -> matrices.translate(0f, 0f, 0.45f);
+			default -> matrices.translate(0f, 0f, 0f);
 		}
 
 		// Gather needed variables
@@ -242,8 +242,8 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		float font_scale_factor = Math.min(max_font_width, max_font_height) * .6f;
 
 		// Apply
-		matrices.scale(-font_scale_factor, -font_scale_factor, -0.1f);
-		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, -.1f); // Remove offset of string
+		matrices.scale(-font_scale_factor, -font_scale_factor, -0.5f);
+		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, .1f); // Remove offset of string
 
 		textRenderer.draw(text, 0, 0, color, true, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 	}
@@ -291,13 +291,13 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	}
 
 	private static void renderFilledRectangle(int color, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light) {
-		VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getDebugFilledBox());
+		VertexConsumer buffer = vertexConsumers.getBuffer(RenderLayer.getTextBackground());
 		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
 		buffer.vertex(matrix4f, x1, y1, 0f).color(color).light(light);
 		buffer.vertex(matrix4f, x1, y2, 0f).color(color).light(light);
-		buffer.vertex(matrix4f, x2, y1, 0f).color(color).light(light);
 		buffer.vertex(matrix4f, x2, y2, 0f).color(color).light(light);
+		buffer.vertex(matrix4f, x2, y1, 0f).color(color).light(light);
 	}
 
 	@Override
