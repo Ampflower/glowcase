@@ -82,7 +82,7 @@
 	"block.glowcase.hyperlink_block.tooltip.0": "Opens a URL when interacted",
 	"block.glowcase.item_provider_block.tooltip.0": "Provides an item when interacted",
 	"block.glowcase.item_provider_block.tooltip.1": "Interact with an item stack to set it",
-	"block.glowcase.item_provider_block.tooltip.2": "Interact with the same item to edit",
+	"block.glowcase.item_provider_block.tooltip.2": "Interact with a glowcase item to unset",
 	"block.glowcase.item_display_block.tooltip.0": "Displays an item",
 	"block.glowcase.item_display_block.tooltip.1": "Interact with an item stack to set it",
 	"block.glowcase.item_display_block.tooltip.2": "Interact with the same item to edit",

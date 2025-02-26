@@ -85,26 +85,26 @@ public class ItemDisplayBlockEditScreen extends GlowcaseScreen {
 			}).dimensions(110, 90, 20, 20).build();
 
 			this.decreasePitch = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.pitch -= (float) Math.max(0, 0.125);
-				this.displayBlock.pitch = MathHelper.clamp(this.displayBlock.pitch, -10F,10F);
+				this.displayBlock.pitch -= (float) Math.max(0, 0.0174533F);
+				this.displayBlock.pitch = MathHelper.clamp(this.displayBlock.pitch, -6.28319F,6.28319F);
 				editItemDisplayBlock();
 			}).dimensions(90, 120, 20, 20).build();
 
 			this.increasePitch = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.pitch += 0.125F;
-				this.displayBlock.pitch = MathHelper.clamp(this.displayBlock.pitch, -10F,10F);
+				this.displayBlock.pitch += 0.0174533F;
+				this.displayBlock.pitch = MathHelper.clamp(this.displayBlock.pitch, -6.28319F,6.28319F);
 				editItemDisplayBlock();
 			}).dimensions(110, 120, 20, 20).build();
 
 			this.decreaseYaw = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.yaw -= (float) Math.max(0, 0.125);
-				this.displayBlock.yaw = MathHelper.clamp(this.displayBlock.yaw, -10F,10F);
+				this.displayBlock.yaw -= (float) Math.max(0, 0.0174533);
+				this.displayBlock.yaw = MathHelper.clamp(this.displayBlock.yaw, -6.28319F,6.28319F);
 				editItemDisplayBlock();
 			}).dimensions(90, 150, 20, 20).build();
 
 			this.increaseYaw = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.yaw += 0.125F;
-				this.displayBlock.yaw = MathHelper.clamp(this.displayBlock.yaw, -10F,10F);
+				this.displayBlock.yaw += 0.0174533F;
+				this.displayBlock.yaw = MathHelper.clamp(this.displayBlock.yaw, -6.28319F,6.28319F);
 				editItemDisplayBlock();
 			}).dimensions(110, 150, 20, 20).build();
 
@@ -129,8 +129,8 @@ public class ItemDisplayBlockEditScreen extends GlowcaseScreen {
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.x_offset_value", this.displayBlock.xOffset), 7, 37, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.y_offset_value", this.displayBlock.yOffset), 7, 67, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.z_offset_value", this.displayBlock.zOffset), 7, 97, 0xFFFFFFFF);
-			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.pitch_value", this.displayBlock.pitch), 7, 127, 0xFFFFFFFF);
-			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.yaw_value", this.displayBlock.yaw), 7, 157, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.pitch_value", MathHelper.floor(this.displayBlock.pitch*(180F/Math.PI))), 7, 127, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.yaw_value", MathHelper.floor(this.displayBlock.yaw*(180F/Math.PI))), 7, 157, 0xFFFFFFFF);
 		}
 	}
 

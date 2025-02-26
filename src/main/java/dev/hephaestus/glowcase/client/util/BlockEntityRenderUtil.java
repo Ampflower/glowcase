@@ -61,8 +61,8 @@ public class BlockEntityRenderUtil {
 		matrices.push();
 		matrices.translate(0.5, 0.5, 0.5);
 
-		float blockRotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(blockRotation));
+		float yaw = (float) Math.toRadians(-camera.getYaw());
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
 
 		matrices.multiply(rotation);
 		matrices.scale(scale, scale, scale);

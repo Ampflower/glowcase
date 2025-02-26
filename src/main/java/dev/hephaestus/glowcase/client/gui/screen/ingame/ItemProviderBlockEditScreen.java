@@ -11,10 +11,6 @@ public class ItemProviderBlockEditScreen extends GlowcaseScreen {
 
 	private final ItemProviderBlockEntity providerBlock;
 	private ButtonWidget givesItemButton;
-	private ButtonWidget rotationTypeButton;
-	private ButtonWidget showNameButton;
-	private ButtonWidget offsetButton;
-
 	public ItemProviderBlockEditScreen(ItemProviderBlockEntity providerBlock) {
 		this.providerBlock = providerBlock;
 	}
