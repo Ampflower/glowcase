@@ -3,12 +3,14 @@ package dev.hephaestus.glowcase;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import dev.hephaestus.glowcase.block.*;
 import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.compat.PolydexCompatibility;
 import dev.hephaestus.glowcase.item.LockItem;
+import dev.hephaestus.glowcase.item.NoteItem;
 import dev.hephaestus.glowcase.item.TabletItem;
+import dev.hephaestus.glowcase.item.component.NoteComponent;
+import dev.hephaestus.glowcase.item.component.TabletComponents;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
@@ -28,14 +30,10 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,26 +93,16 @@ public class Glowcase implements ModInitializer {
 	public static final Supplier<Item> LOCK_ITEM = registerItem("lock", () -> new LockItem(new Item.Settings()));
 
 	public static final Supplier<Item> TABLET_ITEM = registerItem("tablet", () -> new TabletItem(new Item.Settings().maxCount(1)));
-	public static final Supplier<ComponentType<Pair<UUID, BlockPos>>> LINKED_SCREEN_COMPONENT = registerComponent("linked_screen", () -> {
-		Codec<UUID> uuidCodec = Codec.INT_STREAM.comapFlatMap(stream -> Util.decodeFixedLengthArray(stream, 4).map(Uuids::toUuid), uuid -> Arrays.stream(Uuids.toIntArray(uuid)));
-		Codec<Pair<UUID, BlockPos>> codec = Codec.mapPair(uuidCodec.fieldOf("uuid"), BlockPos.CODEC.fieldOf("pos")).codec();
-		return ComponentType.<Pair<UUID, BlockPos>>builder()
-			.codec(codec)
-			.packetCodec(PacketCodecs.registryCodec(codec))
-			.build();
-	});
-	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.registryCodec(Codecs.NONNEGATIVE_INT)).build());
-	public static final Supplier<ComponentType<List<Pair<String,String>>>> SLIDESHOW_COMPONENT = registerComponent("slideshow", () -> {
-		Codec<List<Pair<String, String>>> codec = Codec.mapPair(Codec.STRING.fieldOf("url"), Codec.STRING.fieldOf("alt")).codec().listOf();
-		return ComponentType.<List<Pair<String,String>>>builder()
-			.codec(codec)
-			.packetCodec(PacketCodecs.registryCodec(codec))
-			.build();
-	});
+	public static final Supplier<ComponentType<Pair<UUID, BlockPos>>> LINKED_SCREEN_COMPONENT = registerComponent("linked_screen", () -> TabletComponents.LINKED_SCREEN_TYPE);
+	public static final Supplier<ComponentType<Integer>> CURRENT_SLIDE_COMPONENT = registerComponent("current_slide", () -> TabletComponents.CURRENT_SLIDE_TYPE);
+	public static final Supplier<ComponentType<List<Pair<String,String>>>> SLIDESHOW_COMPONENT = registerComponent("slideshow", () -> TabletComponents.SLIDESHOW_COMPONENT_TYPE);
+
+	public static final Supplier<Item> NOTE_ITEM = registerItem("note", () -> new NoteItem(new Item.Settings().maxCount(1)));
+	public static final Supplier<ComponentType<NoteComponent>> NOTE_COMPONENT = registerComponent("note", () -> NoteComponent.TYPE);
 
 	public static final Supplier<ItemGroup> ITEM_GROUP = registerItemGroup("items", () -> FabricItemGroup.builder()
 		.displayName(Text.translatable("itemGroup.glowcase.items"))
-		.icon(() -> new ItemStack(Items.GLOWSTONE))
+		.icon(() -> new ItemStack(SPRITE_BLOCK_ITEM.get()))
 		.entries((displayContext, entries) -> {
 			entries.add(TEXT_BLOCK_ITEM.get());
 			entries.add(SPRITE_BLOCK_ITEM.get());
@@ -129,6 +117,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(LOCK_ITEM.get());
 			entries.add(TABLET_ITEM.get());
 			entries.add(ITEM_PROVIDER_BLOCK_ITEM.get());
+			entries.add(NOTE_ITEM.get());
 		})
 		.build()
 	);

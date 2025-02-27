@@ -6,7 +6,7 @@ import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseClient;
 import dev.hephaestus.glowcase.client.ScreenImageCache.ScreenTexture;
-import dev.hephaestus.glowcase.packet.C2SEditSlideTablet;
+import dev.hephaestus.glowcase.packet.C2SEditTabletItem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -198,7 +198,7 @@ public class TabletEditScreen extends GlowcaseScreen {
 	public void syncSlide() {
 		if (slide_dirty) {
 			slides.set(current, new Pair<>(this.urlEntryWidget.getText(), this.altEntryWidget.getText()));
-			C2SEditSlideTablet.of(current, this.urlEntryWidget.getText(), this.altEntryWidget.getText()).send();
+			C2SEditTabletItem.of(current, this.urlEntryWidget.getText(), this.altEntryWidget.getText()).send();
 		}
 	}
 

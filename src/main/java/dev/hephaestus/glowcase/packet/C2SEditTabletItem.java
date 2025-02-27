@@ -3,7 +3,6 @@ package dev.hephaestus.glowcase.packet;
 import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
-import dev.hephaestus.glowcase.item.TabletItem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
@@ -14,18 +13,18 @@ import net.minecraft.network.packet.CustomPayload;
 
 import java.util.ArrayList;
 
-public record C2SEditSlideTablet(int index, String url, String alt) implements CustomPayload {
-	public static final Id<C2SEditSlideTablet> ID = new Id<>(Glowcase.id("channel.slide_tablet"));
-	public static final PacketCodec<RegistryByteBuf, C2SEditSlideTablet> PACKET_CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, C2SEditSlideTablet::index,
-		PacketCodecs.STRING, C2SEditSlideTablet::url,
-		PacketCodecs.STRING, C2SEditSlideTablet::alt,
-		C2SEditSlideTablet::new
+public record C2SEditTabletItem(int index, String url, String alt) implements CustomPayload {
+	public static final Id<C2SEditTabletItem> ID = new Id<>(Glowcase.id("channel.slide_tablet"));
+	public static final PacketCodec<RegistryByteBuf, C2SEditTabletItem> PACKET_CODEC = PacketCodec.tuple(
+		PacketCodecs.INTEGER, C2SEditTabletItem::index,
+		PacketCodecs.STRING, C2SEditTabletItem::url,
+		PacketCodecs.STRING, C2SEditTabletItem::alt,
+		C2SEditTabletItem::new
 	);
 
-	public static C2SEditSlideTablet of(int index, String url, String alt) {
+	public static C2SEditTabletItem of(int index, String url, String alt) {
 		Pair<String, String> trimmed = ScreenBlockEntity.trimStr(url, alt);
-		return new C2SEditSlideTablet(index, trimmed.getFirst(), trimmed.getSecond());
+		return new C2SEditTabletItem(index, trimmed.getFirst(), trimmed.getSecond());
 	}
 
 	public void receive(ServerPlayNetworking.Context context) {
