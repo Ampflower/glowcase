@@ -66,16 +66,16 @@ public class ItemProviderBlock extends AbstractItemDisplayBlock{
 
 		if (canEditGlowcase(player, pos)) {
 			boolean holdingGlowcaseItem = stack.isIn(Glowcase.ITEM_TAG);
-//			boolean holdingSameAsDisplay = ItemStack.areItemsEqual(be.getDisplayedStack(), stack);
+			boolean holdingSameAsDisplay = ItemStack.areItemsEqual(be.getDisplayedStack(), stack);
 
 			if (!be.hasItem()) {
 				if (!world.isClient) be.setStack(stack);
 				return ItemActionResult.SUCCESS;
 			}
-//			else if (holdingSameAsDisplay) {
-//				if (world.isClient) Glowcase.proxy.openItemProviderBlockEditScreen(pos);
-//				return ItemActionResult.SUCCESS;
-//			}
+			else if (holdingSameAsDisplay) {
+				if (world.isClient) Glowcase.proxy.openItemProviderBlockEditScreen(pos);
+				return ItemActionResult.SUCCESS;
+			}
 			else if (holdingGlowcaseItem) {
 				if (!world.isClient) be.setStack(ItemStack.EMPTY);
 				return ItemActionResult.SUCCESS;
@@ -114,11 +114,9 @@ public class ItemProviderBlock extends AbstractItemDisplayBlock{
 			BlockState blockState;
 			if (direction.getAxis() == Direction.Axis.Y) {
 				blockState = this.getDefaultState()
-					.with(Properties.ROTATION, MathHelper.floor((double) ((ctx.getPlayerYaw()) * 16.0F / 360.0F) + 0.5D) & 15)
 					.with(FACE, direction == Direction.UP ? BlockFace.CEILING : BlockFace.FLOOR);
 			} else {
 				blockState = this.getDefaultState()
-					.with(Properties.ROTATION, MathHelper.floor((double) ((ctx.getPlayerYaw()) * 16.0F / 360.0F) + 0.5D) & 15)
 					.with(FACE, BlockFace.WALL);
 			}
 
