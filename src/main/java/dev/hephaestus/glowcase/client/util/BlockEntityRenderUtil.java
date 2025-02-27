@@ -114,7 +114,7 @@ public class BlockEntityRenderUtil {
 	}
 
 	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera, boolean isBack, boolean isBillboard) {
-		renderPlaceholder(entity, texture, scale, RotationAxis.POSITIVE_Y.rotationDegrees(0), matrices, vertexConsumers, camera);
+		renderPlaceholder(entity, texture, scale, matrices, vertexConsumers, camera);
 	}
 
 	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
