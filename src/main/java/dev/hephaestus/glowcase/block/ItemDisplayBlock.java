@@ -32,38 +32,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ItemDisplayBlock extends GlowcaseBlock implements BlockEntityProvider {
-	private static final VoxelShape OUTLINE = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+public class ItemDisplayBlock extends AbstractItemDisplayBlock {
 
 	public ItemDisplayBlock() {
 		super();
-		this.setDefaultState(this.getDefaultState().with(Properties.ROTATION, 0));
 	}
 
-	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.ROTATION);
-	}
-
-	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(Properties.ROTATION, MathHelper.floor((double) ((ctx.getPlayerYaw()) * 16.0F / 360.0F) + 0.5D) & 15);
-	}
-
-	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return OUTLINE;
-	}
 
 	@Override
 	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof ItemDisplayBlockEntity be)) return ActionResult.CONSUME;
-
-		if (be.canGiveTo(player)) {
-			if (!world.isClient) be.giveTo(player);
-			return ActionResult.SUCCESS;
-		}
+//		if (!(world.getBlockEntity(pos) instanceof ItemDisplayBlockEntity be)) return ActionResult.CONSUME;
+//
+//		if (be.canGiveTo(player)) {
+//			if (!world.isClient) be.giveTo(player);
+//			return ActionResult.SUCCESS;
+//		}
 
 		return ActionResult.CONSUME;
 	}
@@ -77,7 +60,9 @@ public class ItemDisplayBlock extends GlowcaseBlock implements BlockEntityProvid
 			boolean holdingSameAsDisplay = ItemStack.areItemsEqual(be.getDisplayedStack(), stack);
 
 			if (!be.hasItem()) {
-				if (!world.isClient) be.setStack(stack);
+				if (!world.isClient) {
+					be.setStack(stack);
+				}
 				return ItemActionResult.SUCCESS;
 			} else if (holdingSameAsDisplay) {
 				if (world.isClient) Glowcase.proxy.openItemDisplayBlockEditScreen(pos);

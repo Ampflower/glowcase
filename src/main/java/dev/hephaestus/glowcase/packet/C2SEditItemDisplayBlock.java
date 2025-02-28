@@ -12,19 +12,19 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationPropertyHelper;
 
-public record C2SEditItemDisplayBlock(BlockPos pos, ItemDisplayBlockEntity.RotationType rotationType, ItemDisplayBlockEntity.GivesItem givesItem, ItemDisplayBlockEntity.Offset offset, ItemDisplayBlockValues values) implements C2SEditBlockEntity {
+public record C2SEditItemDisplayBlock(BlockPos pos, ItemDisplayBlockEntity.RotationType rotationType, ItemDisplayBlockEntity.Offset offset, ItemDisplayBlockValues values, ItemDisplayBlockOffsetValues offsetValues) implements C2SEditBlockEntity {
 	public static final Id<C2SEditItemDisplayBlock> ID = new Id<>(Glowcase.id("channel.item_display"));
 	public static final PacketCodec<RegistryByteBuf, C2SEditItemDisplayBlock> PACKET_CODEC = PacketCodec.tuple(
 		BlockPos.PACKET_CODEC, C2SEditItemDisplayBlock::pos,
 		PacketCodecs.BYTE.xmap(index -> ItemDisplayBlockEntity.RotationType.values()[index], rotation -> (byte) rotation.ordinal()), C2SEditItemDisplayBlock::rotationType,
-		PacketCodecs.BYTE.xmap(index -> ItemDisplayBlockEntity.GivesItem.values()[index], givesItem -> (byte) givesItem.ordinal()), C2SEditItemDisplayBlock::givesItem,
 		PacketCodecs.BYTE.xmap(index -> ItemDisplayBlockEntity.Offset.values()[index], offset -> (byte) offset.ordinal()), C2SEditItemDisplayBlock::offset,
 		ItemDisplayBlockValues.PACKET_CODEC, C2SEditItemDisplayBlock::values,
+		ItemDisplayBlockOffsetValues.PACKET_CODEC, C2SEditItemDisplayBlock::offsetValues,
 		C2SEditItemDisplayBlock::new
 	);
 
 	public static C2SEditItemDisplayBlock of(ItemDisplayBlockEntity be) {
-		return new C2SEditItemDisplayBlock(be.getPos(), be.rotationType, be.givesItem, be.offset, new ItemDisplayBlockValues(be.getCachedState().get(Properties.ROTATION), be.showName, be.pitch, be.yaw));
+		return new C2SEditItemDisplayBlock(be.getPos(), be.rotationType, be.offset, new ItemDisplayBlockValues(be.getCachedState().get(Properties.ROTATION), be.showName, be.pitch, be.yaw, be.scale), new ItemDisplayBlockOffsetValues(be.xOffset, be.yOffset, be.zOffset));
 	}
 
 	@Override
@@ -37,12 +37,17 @@ public record C2SEditItemDisplayBlock(BlockPos pos, ItemDisplayBlockEntity.Rotat
 		if (!(blockEntity instanceof ItemDisplayBlockEntity be)) return;
 		if (this.values().rotation() < 0 || this.values().rotation() >= RotationPropertyHelper.getMax()) return;
 
-		be.givesItem = this.givesItem();
 		be.rotationType = this.rotationType();
 		be.offset = this.offset();
 		be.pitch = this.values().pitch();
 		be.yaw = this.values().yaw();
 		be.showName = this.values().showName();
+		be.scale = this.values().scale();
+
+
+		be.xOffset = this.offsetValues().xOffset();
+		be.yOffset = this.offsetValues().yOffset();
+		be.zOffset = this.offsetValues().zOffset();
 
 		world.setBlockState(this.pos(), world.getBlockState(this.pos()).with(Properties.ROTATION, this.values().rotation()));
 
@@ -51,13 +56,23 @@ public record C2SEditItemDisplayBlock(BlockPos pos, ItemDisplayBlockEntity.Rotat
 	}
 
 	// separated for tuple call
-	public record ItemDisplayBlockValues(int rotation, boolean showName, float pitch, float yaw) {
+	public record ItemDisplayBlockValues(int rotation, boolean showName, float pitch, float yaw, float scale) {
 		public static final PacketCodec<RegistryByteBuf, ItemDisplayBlockValues> PACKET_CODEC = PacketCodec.tuple(
 			PacketCodecs.INTEGER, ItemDisplayBlockValues::rotation,
 			PacketCodecs.BOOL, ItemDisplayBlockValues::showName,
 			PacketCodecs.FLOAT, ItemDisplayBlockValues::pitch,
 			PacketCodecs.FLOAT, ItemDisplayBlockValues::yaw,
+			PacketCodecs.FLOAT, ItemDisplayBlockValues::scale,
 			ItemDisplayBlockValues::new
+		);
+	}
+
+	public record ItemDisplayBlockOffsetValues(float xOffset, float yOffset, float zOffset){
+		public static final PacketCodec<RegistryByteBuf, ItemDisplayBlockOffsetValues> PACKET_CODEC = PacketCodec.tuple(
+			PacketCodecs.FLOAT, ItemDisplayBlockOffsetValues::xOffset,
+			PacketCodecs.FLOAT, ItemDisplayBlockOffsetValues::yOffset,
+			PacketCodecs.FLOAT, ItemDisplayBlockOffsetValues::zOffset,
+			ItemDisplayBlockOffsetValues::new
 		);
 	}
 }

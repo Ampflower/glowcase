@@ -58,6 +58,65 @@ public class BlockEntityRenderUtil {
 		matrices.pop();
 	}
 
+	public static void renderPlaceholderAsBillboard(BlockEntity entity, Identifier texture, float scale, Quaternionf rotation, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
+		matrices.push();
+		matrices.translate(0.5, 0.5, 0.5);
+
+		float yaw = (float) Math.toRadians(-camera.getYaw());
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
+
+		matrices.multiply(rotation);
+		matrices.scale(scale, scale, scale);
+		var entry = matrices.peek();
+		var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutout(texture));
+		boolean hovered = MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult bhr && bhr.getBlockPos().equals(entity.getPos());
+		int color = hovered ? 0x808080 : 0xFFFFFF;
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[0], 0, 1, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[1], 1, 1, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[2], 1, 0, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[3], 0, 0, color);
+
+		matrices.pop();
+	}
+
+	public static void renderPlaceholderAtBack(BlockEntity entity, Identifier texture, float scale, Quaternionf rotation, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
+		matrices.push();
+		matrices.translate(0.5, 0.5, 0.5);
+		boolean doBillboard = !entity.getCachedState().contains(Properties.ROTATION);
+		if (doBillboard) {
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - camera.getYaw()));
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-camera.getPitch()));
+		} else {
+			float blockRotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(blockRotation));
+		}
+
+		matrices.translate(0D, 0, 0.4D);
+
+		matrices.multiply(rotation);
+		matrices.scale(scale, scale, scale);
+		var entry = matrices.peek();
+		var vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutout(texture));
+		boolean hovered = MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult bhr && bhr.getBlockPos().equals(entity.getPos());
+		int color = hovered ? 0x808080 : 0xFFFFFF;
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[0], 0, 1, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[1], 1, 1, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[2], 1, 0, color);
+		placeholderVertex(entry, vertexConsumer, placeholderVertices[3], 0, 0, color);
+		if (!doBillboard) { // Draw Reverse Face
+			int reverseColor = hovered ? 0x404040 : 0x808080;
+			placeholderVertex(entry, vertexConsumer, placeholderVertices[3], 0, 0, reverseColor);
+			placeholderVertex(entry, vertexConsumer, placeholderVertices[2], 1, 0, reverseColor);
+			placeholderVertex(entry, vertexConsumer, placeholderVertices[1], 1, 1, reverseColor);
+			placeholderVertex(entry, vertexConsumer, placeholderVertices[0], 0, 1, reverseColor);
+		}
+		matrices.pop();
+	}
+
+	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera, boolean isBack, boolean isBillboard) {
+		renderPlaceholder(entity, texture, scale, matrices, vertexConsumers, camera);
+	}
+
 	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Camera camera) {
 		renderPlaceholder(entity, texture, scale, matrices, vertexConsumers, camera, 0f);
 	}
