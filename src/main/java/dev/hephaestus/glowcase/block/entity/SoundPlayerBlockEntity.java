@@ -8,9 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.client.sound.TickableSoundInstance;
+import net.minecraft.client.sound.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -99,7 +97,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		this.repeatDelay = tag.getInt("repeatDelay");
 		this.distance = tag.getFloat("distance");
 		this.relative = tag.getBoolean("relative");
-		this.cancelOthers =  tag.getBoolean("cancelOthers");
+		this.cancelOthers = tag.getBoolean("cancelOthers");
 		if (tag.contains("soundPosition"))
 			Vec3d.CODEC.parse(ops, tag.get("soundPosition"))
 				.resultOrPartial(LOGGER::error)
@@ -156,6 +154,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		private final BlockPos soundBlockPos;
 
 		private final float squaredDistance;
+		private final int attenuation;
 
 		private boolean done;
 
@@ -172,12 +171,9 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
 			this.squaredDistance = distance * distance;
+			this.attenuation = (int) distance;
 			this.done = false;
 		}
-
-//		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, Random random, boolean repeat, int repeatDelay, AttenuationType attenuationType, double x, double y, double z, boolean relative) {
-//			super(id, category, volume, pitch, random, repeat, repeatDelay, attenuationType, x, y, z, relative);
-//		}
 
 		@Override
 		public boolean isDone() {
@@ -191,10 +187,22 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		@Override
 		public void tick() {
 			// stops track-stacking when reloading the block
-			if (!inRange() ||
-				!(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
+			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
 				setDone();
 			}
+		}
+
+		@Override
+		public WeightedSoundSet getSoundSet(SoundManager soundManager) {
+			var soundSet = super.getSoundSet(soundManager);
+			sound = new Sound(sound.getIdentifier(), sound.getVolume(), sound.getPitch(), sound.getWeight(), sound.getRegistrationType(), sound.isStreamed(), sound.isPreloaded(), attenuation);
+
+			return soundSet;
+		}
+
+		@Override
+		public float getVolume() {
+			return super.getVolume();
 		}
 
 		public boolean inRange() {
@@ -209,7 +217,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
 			return !(
 				other != null &&
-				this.id.equals(other.id) &&
+					this.id.equals(other.id) &&
 					this.category.equals(other.category) &&
 					this.volume == other.volume &&
 					this.pitch == other.pitch &&
