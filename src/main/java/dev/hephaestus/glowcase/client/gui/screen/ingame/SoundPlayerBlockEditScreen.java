@@ -6,7 +6,6 @@ import dev.hephaestus.glowcase.math.ParseUtil;
 import dev.hephaestus.glowcase.packet.C2SEditSoundBlock;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
@@ -147,14 +146,15 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 
 	@Override
 	public void close() {
-		setSound();
-
 		soundBlock.volume = (float) ParseUtil.parseOrDefault(this.volume.getText(),soundBlock.volume);
 		soundBlock.pitch = (float) ParseUtil.parseOrDefault(this.pitch.getText(), soundBlock.pitch);
 		soundBlock.repeatDelay = ParseUtil.parseOrDefault(this.repeatDelay.getText(), soundBlock.repeatDelay);
 
 		soundBlock.distance = (float) ParseUtil.parseOrDefault(this.distance.getText(), soundBlock.distance);
 		soundBlock.soundPosition = this.soundPosition.value();
+
+		setSound();
+
 //		soundBlock.soundX = ParseUtil.parseOrDefault(this.soundX.getText(), soundBlock.soundX);
 //		soundBlock.soundY = ParseUtil.parseOrDefault(this.soundY.getText(), soundBlock.soundY);
 //		soundBlock.soundZ = ParseUtil.parseOrDefault(this.soundZ.getText(), soundBlock.soundZ);
@@ -167,17 +167,10 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 
 		String idText = this.soundId.getText();
 		Identifier id = Identifier.tryParse(idText);
-		soundBlock.soundId = id;
-//		if (id == null) return;
-//
-//		RegistryWrapper.WrapperLookup lookup = Objects.requireNonNull(this.client.world).getRegistryManager();
-//		RegistryKey<SoundEvent> key = RegistryKey.of(RegistryKeys.SOUND_EVENT, id);
-//
-//		Optional<RegistryEntry.Reference<SoundEvent>> optionalSound =
-//			lookup.getWrapperOrThrow(RegistryKeys.SOUND_EVENT).getOptional(key);
-//		if (optionalSound.isEmpty()) return;
-//
-//		blockEntity.sound = optionalSound.get().value();
+
+		if(id != null) {
+			soundBlock.soundId = id;
+		}
 
 		C2SEditSoundBlock.of(soundBlock).send();
 	}
