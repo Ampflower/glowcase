@@ -153,8 +153,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		private final PlayerEntity player;
 		private final BlockPos soundBlockPos;
 
-		private final float squaredDistance;
-		private final int attenuation;
+		private final float distance;
 
 		private boolean done;
 
@@ -164,14 +163,13 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 				volume, pitch,
 				SoundInstance.createRandom(),
 				true, repeatDelay,
-				AttenuationType.LINEAR,
+				AttenuationType.NONE,
 				pos.x, pos.y, pos.z,
 				relative
 			);
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
-			this.squaredDistance = distance * distance;
-			this.attenuation = (int) distance;
+			this.distance = distance;
 			this.done = false;
 		}
 
@@ -193,26 +191,20 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		}
 
 		@Override
-		public WeightedSoundSet getSoundSet(SoundManager soundManager) {
-			var soundSet = super.getSoundSet(soundManager);
-			sound = new Sound(sound.getIdentifier(), sound.getVolume(), sound.getPitch(), sound.getWeight(), sound.getRegistrationType(), sound.isStreamed(), sound.isPreloaded(), attenuation);
+		public float getVolume() {
+			var originalVolume = super.getVolume();
 
-			return soundSet;
+			return originalVolume * linearFalloff();
 		}
 
-		@Override
-		public float getVolume() {
-			return super.getVolume();
+		private float linearFalloff() {
+			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.soundBlockPos.toCenterPos());
+			return 1 - (distanceToPlayer / distance);
 		}
 
 		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
+			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.distance * this.distance;
 		}
-
-//		@Override
-//		public boolean canPlay() {
-//			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
-//		}
 
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
 			return !(
@@ -222,7 +214,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 					this.volume == other.volume &&
 					this.pitch == other.pitch &&
 					this.repeatDelay == other.repeatDelay &&
-					this.squaredDistance == other.squaredDistance &&
+					this.distance == other.distance &&
 					this.relative == other.relative &&
 					this.x == other.x &&
 					this.y == other.y &&
