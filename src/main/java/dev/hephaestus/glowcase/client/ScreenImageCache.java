@@ -7,16 +7,21 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.TextureManager;
+import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -41,8 +46,16 @@ public class ScreenImageCache {
 
 	private void createImage(String address, @Nullable BlockPos blockPos) {
 		try {
-			URL url = getURL(address);
-			cache.put(address, new ScreenTexture(url));
+			URI uri = getURI(address);
+
+			if (uri.getScheme() != null && uri.getScheme().toLowerCase(Locale.ROOT).equals(Glowcase.MODID)) {
+				// Local image
+				cache.put(address, new ScreenTexture(Glowcase.id(uri.getSchemeSpecificPart())));
+			} else {
+				// Online image
+				URL url = toURL(uri);
+				cache.put(address, new ScreenTexture(url));
+			}
 		} catch (HTTPException e) {
 			if (blockPos != null && Glowcase.CONFIG.logInvalidScreens.value())
 				Glowcase.LOGGER.warn("Screen at [{}] failed: {} ({}). It's url was: '{}'", blockPos.toShortString(), e.getMessage(), e.getCode(), address);
@@ -52,24 +65,35 @@ public class ScreenImageCache {
 	}
 
 	/**
-	 * Parses a given address and ensures it is valid.
+	 * Parses a given address.
 	 */
-	private URL getURL(String address) throws HTTPException {
-		// Validate Format
+	private URI getURI(String address) throws HTTPException {
 		URI uri;
-		URL url;
 		try {
 			uri = new URI(address);
-			if (uri.getHost() == null)
-				throw new Exception();
-
-			url = uri.toURL();
 		} catch (Exception e) {
 			throw new HTTPException("Malformed URL", 400);
 		}
 
+		return uri;
+	}
+
+	/**
+	 * Converts the given uri to an url and ensures its safety.
+	 */
+	private URL toURL(URI uri) throws HTTPException {
 		validateURI(uri);
 		ensureRules(uri);
+
+		if (uri.getHost() == null)
+			throw new HTTPException("Malformed URL", 400);
+
+		URL url;
+		try {
+			url = uri.toURL();
+		} catch (MalformedURLException e) {
+			throw new HTTPException("Malformed URL", 400);
+		}
 
 		return url;
 	}
@@ -160,10 +184,29 @@ public class ScreenImageCache {
 		}
 
 		/**
-		 * Creates a new empty texture with the given status code;
+		 * Creates a new empty texture with the given status code.
 		 */
 		public ScreenTexture(int code) {
 			loader = CompletableFuture.completedFuture(code);
+		}
+
+		/**
+		 * Creates a reference to a local resource.
+		 */
+		public ScreenTexture(@NotNull Identifier texture) {
+			// Get width/height
+			Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(texture);
+			if (resource.isPresent())
+				try {
+					InputStream inputStream = resource.get().getInputStream();
+					BufferedImage image = ImageIO.read(inputStream);
+
+					width = image.getWidth();
+					height = image.getHeight();
+				} catch (IOException ignored) { }
+
+			this.texture = texture;
+			this.loader = CompletableFuture.completedFuture(200);
 		}
 
 		/**

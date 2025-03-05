@@ -65,7 +65,7 @@
 	"gui.glowcase.screen.blank": "Glowcase",
 	"gui.glowcase.screen.alt": "Alt-Text: \"%s\"",
 	"gui.glowcase.screen.error": "Oopsie woopsie! Failed to load image! (%s).",
-	"gui.glowcase.screen.hint.901": "Only HTTP and HTTPS are allowed.",
+	"gui.glowcase.screen.hint.901": "Only HTTP, HTTPS and 'glowcase' are allowed.",
 	"gui.glowcase.screen.hint.902": "Make sure you have an internet connection.",
 	"gui.glowcase.screen.hint.903": "Image format is not supported.",
 	"gui.glowcase.screen.eink": "Use E-Ink technology",
