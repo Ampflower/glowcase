@@ -5,6 +5,7 @@ import dev.hephaestus.glowcase.block.entity.HyperlinkBlockEntity;
 import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
 import eu.pb4.polydex.api.v1.hover.HoverDisplayBuilder;
 import eu.pb4.polydex.impl.PolydexImpl;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
@@ -37,8 +38,8 @@ public class PolydexCompatibility {
 			return;
 		}
 
-		if (target.blockEntity() instanceof ItemDisplayBlockEntity blockEntity && blockEntity.hasItem()) {
-			var item = blockEntity.getDisplayedStack();
+		if (target.blockEntity() instanceof ItemDisplayBlockEntity blockEntity && !blockEntity.matchesStack(ItemStack.EMPTY)) {
+			var item = blockEntity.getStack();
 			hoverDisplayBuilder.setComponent(HoverDisplayBuilder.NAME, item.getName());
 			// I won't break this I promise
 			hoverDisplayBuilder.setComponent(HoverDisplayBuilder.MOD_SOURCE, PolydexImpl.getMod(Registries.ITEM.getId(item.getItem())));

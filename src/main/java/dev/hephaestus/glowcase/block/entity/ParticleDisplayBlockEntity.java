@@ -2,28 +2,24 @@ package dev.hephaestus.glowcase.block.entity;
 
 import com.mojang.logging.LogUtils;
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.math.DeviatedInteger;
-import dev.hephaestus.glowcase.math.DeviatedVec3d;
+import dev.hephaestus.glowcase.util.DeviatedInteger;
+import dev.hephaestus.glowcase.util.DeviatedVec3d;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class ParticleDisplayBlockEntity extends BlockEntity {
+public class ParticleDisplayBlockEntity extends GlowcaseBlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public ParticleEffect particle = ParticleTypes.FLAME;
@@ -96,23 +92,7 @@ public class ParticleDisplayBlockEntity extends BlockEntity {
 				.ifPresent(result -> this.tickRate = result);
 	}
 
-	// standard blockentity boilerplate
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
-	}
-
+	@Environment(EnvType.CLIENT)
 	public static void clientTick(World world, BlockPos pos, BlockState state, ParticleDisplayBlockEntity entity) {
 		entity.tickCounter--;
 		if (entity.tickCounter > 0) return;

@@ -1,4 +1,4 @@
-package dev.hephaestus.glowcase.math;
+package dev.hephaestus.glowcase.util;
 
 public class ParseUtil {
 	public static boolean canParseInt(String string) {

@@ -56,7 +56,6 @@ public record C2SEditSoundBlock(SoundInfo soundInfo, PositionalInfo positionalIn
 		be.soundPosition = positionalInfo.position;
 
 		be.markDirty();
-		be.dispatch();
 	}
 
 	public record SoundInfo(Identifier id, String category, float volume, float pitch, int repeatDelay, boolean cancelOthers) {

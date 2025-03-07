@@ -5,7 +5,6 @@ import dev.hephaestus.glowcase.Glowcase;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.*;
@@ -13,21 +12,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class SoundPlayerBlockEntity extends BlockEntity {
+public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public Identifier soundId = SoundEvents.ENTITY_CAT_PURREOW.getId();
@@ -48,18 +43,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 	}
 
 	public void cycleCategory() {
-		switch (this.category) {
-			case SoundCategory.MASTER -> this.category = SoundCategory.MUSIC;
-			case SoundCategory.MUSIC -> this.category = SoundCategory.RECORDS;
-			case SoundCategory.RECORDS -> this.category = SoundCategory.WEATHER;
-			case SoundCategory.WEATHER -> this.category = SoundCategory.BLOCKS;
-			case SoundCategory.BLOCKS -> this.category = SoundCategory.HOSTILE;
-			case SoundCategory.HOSTILE -> this.category = SoundCategory.NEUTRAL;
-			case SoundCategory.NEUTRAL -> this.category = SoundCategory.PLAYERS;
-			case SoundCategory.PLAYERS -> this.category = SoundCategory.AMBIENT;
-			case SoundCategory.AMBIENT -> this.category = SoundCategory.VOICE;
-			case SoundCategory.VOICE -> this.category = SoundCategory.MASTER;
-		}
+		this.category = SoundCategory.values()[(this.category.ordinal() + 1) % SoundCategory.values().length];
 	}
 
 	@Override
@@ -102,23 +86,6 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 			Vec3d.CODEC.parse(ops, tag.get("soundPosition"))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(result -> this.soundPosition = result);
-	}
-
-	// standard blockentity boilerplate
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return super.toUpdatePacket();
 	}
 
 	@Environment(EnvType.CLIENT)

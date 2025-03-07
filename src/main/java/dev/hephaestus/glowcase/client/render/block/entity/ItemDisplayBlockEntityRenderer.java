@@ -4,8 +4,6 @@ import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer.TextLayerType;
-import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -14,13 +12,8 @@ import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec2f;
 
 public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ItemDisplayBlockEntity> {
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/item_display_block.png");
@@ -34,45 +27,17 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 		matrices.push();
 		matrices.translate(0.5D, 0D, 0.5D);
 
-		float yaw = 0F;
-		float pitch = 0F;
-
-		pitch = entity.pitch;
-		yaw = entity.yaw;
+		float pitch = entity.getPitch();
+		float yaw = entity.getYaw();
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-
-		switch (entity.offset) {
-			case FRONT -> matrices.translate(0D, Math.sin(pitch) * 0.4, -0.4D);
-			case BACK -> matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
-		}
-
-		matrices.translate(entity.xOffset,entity.yOffset,entity.zOffset);
-
-		ItemStack stack = entity.getDisplayedStack();
-		Text name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
+		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
 		matrices.translate(0, 0.5, 0);
-		float scale = 0.5F * entity.scale;
-		matrices.scale(scale, scale, scale);
+		matrices.scale(entity.getScale().x(), entity.getScale().y(), entity.getScale().z());
 		matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
-		context.getItemRenderer().renderItem(entity.getDisplayedStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
-
-		if (entity.showName) {
-			HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
-			if (hitResult instanceof BlockHitResult && ((BlockHitResult) hitResult).getBlockPos().equals(entity.getPos())) {
-				matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180));
-				matrices.translate(0, 0, -0.4);
-
-				float scale = 0.025F;
-				matrices.scale(scale, scale, scale);
-
-				int color = name.getStyle().getColor() == null ? 0xFFFFFF : name.getStyle().getColor().getRgb();
-				matrices.translate(-context.getTextRenderer().getWidth(name) / 2F, -4, 0);
-				context.getTextRenderer().draw(name, 0, 0, color, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-			}
-		}
+		context.getItemRenderer().renderItem(entity.getStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 
 		matrices.pop();
 
-		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera, 0f);
+		if (!entity.matchesStack(ItemStack.EMPTY) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera, 0f);
 	}
 }

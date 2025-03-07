@@ -8,7 +8,6 @@ import dev.hephaestus.glowcase.block.entity.PopupBlockEntity;
 import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.HyperlinkBlockEditScreen;
-import dev.hephaestus.glowcase.client.gui.screen.ingame.ItemDisplayBlockEditScreen;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.OutlineBlockEditScreen;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.PopupBlockEditScreen;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.PopupBlockViewScreen;
@@ -39,7 +38,7 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 	public void openItemDisplayBlockEditScreen(BlockPos pos) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof ItemDisplayBlockEntity be) {
-			MinecraftClient.getInstance().setScreen(new ItemDisplayBlockEditScreen(be));
+			MinecraftClient.getInstance().setScreen(new ItemDisplayEditScreen(be));
 		}
 	}
 

@@ -3,17 +3,11 @@ package dev.hephaestus.glowcase.block.entity;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
 
-public class SpriteBlockEntity extends BlockEntity {
+public class SpriteBlockEntity extends GlowcaseBlockEntity {
 	public String sprite = "arrow";
 	public int rotation = 0;
 	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.CENTER;
@@ -26,7 +20,6 @@ public class SpriteBlockEntity extends BlockEntity {
 	public void setSprite(String newSprite) {
 		sprite = newSprite;
 		markDirty();
-		dispatch();
 	}
 
 	@Override
@@ -56,22 +49,5 @@ public class SpriteBlockEntity extends BlockEntity {
 			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
 		}
 		super.markRemoved();
-	}
-
-	// standard blockentity boilerplate
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
 	}
 }

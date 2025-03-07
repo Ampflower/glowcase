@@ -49,6 +49,5 @@ public record C2SEditPopupBlock(BlockPos pos, String title, List<Text> lines, Te
 		be.color = this.color();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }

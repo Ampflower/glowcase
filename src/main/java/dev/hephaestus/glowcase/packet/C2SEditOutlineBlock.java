@@ -46,6 +46,5 @@ public record C2SEditOutlineBlock(BlockPos pos, Vec3i offset, Vec3i scale, int c
 		be.color = this.color();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }

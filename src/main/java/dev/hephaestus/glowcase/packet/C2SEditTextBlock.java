@@ -47,7 +47,6 @@ public record C2SEditTextBlock(BlockPos pos, TextBlockEntity.TextAlignment align
 		be.shadowType = this.shadowType();
 
 		be.markDirty();
-		be.dispatch();
 	}
 
 	// separated for tuple call

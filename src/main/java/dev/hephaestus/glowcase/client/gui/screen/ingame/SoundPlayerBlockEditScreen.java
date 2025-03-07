@@ -2,7 +2,7 @@ package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
 import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.Vec3FieldsWidget;
-import dev.hephaestus.glowcase.math.ParseUtil;
+import dev.hephaestus.glowcase.util.ParseUtil;
 import dev.hephaestus.glowcase.packet.C2SEditSoundBlock;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;

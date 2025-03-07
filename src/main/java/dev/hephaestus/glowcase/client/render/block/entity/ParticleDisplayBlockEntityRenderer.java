@@ -3,7 +3,7 @@ package dev.hephaestus.glowcase.client.render.block.entity;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
-import dev.hephaestus.glowcase.math.DeviatedInteger;
+import dev.hephaestus.glowcase.util.DeviatedInteger;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
