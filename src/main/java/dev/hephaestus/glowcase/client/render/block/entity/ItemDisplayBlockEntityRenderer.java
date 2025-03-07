@@ -37,39 +37,22 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 		float yaw = 0F;
 		float pitch = 0F;
 
-		switch (entity.rotationType) {
-			case TRACKING -> {
-				Vec2f pitchAndYaw = ItemDisplayBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);
-				pitch = pitchAndYaw.x;
-				yaw = pitchAndYaw.y;
-				matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-			}
-			case BILLBOARD -> {
-				pitch = (float) Math.toRadians(camera.getPitch());
-				yaw = (float) Math.toRadians(-camera.getYaw());
-				matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-			}
-			case HORIZONTAL -> {
-				var rotation = -(entity.getCachedState().get(Properties.ROTATION) * 2 * Math.PI) / 16.0F;
-				matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) rotation));
-			}
-			case LOCKED -> {
-				pitch = entity.pitch;
-				yaw = entity.yaw;
-				matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-			}
-		}
+		pitch = entity.pitch;
+		yaw = entity.yaw;
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
 
 		switch (entity.offset) {
 			case FRONT -> matrices.translate(0D, Math.sin(pitch) * 0.4, -0.4D);
 			case BACK -> matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
 		}
 
+		matrices.translate(entity.xOffset,entity.yOffset,entity.zOffset);
+
 		ItemStack stack = entity.getDisplayedStack();
-		Text name;
-		name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
+		Text name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
 		matrices.translate(0, 0.5, 0);
-		matrices.scale(0.5F, 0.5F, 0.5F);
+		float scale = 0.5F * entity.scale;
+		matrices.scale(scale, scale, scale);
 		matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
 		context.getItemRenderer().renderItem(entity.getDisplayedStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 
@@ -90,6 +73,6 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 
 		matrices.pop();
 
-		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera, 0f);
 	}
 }

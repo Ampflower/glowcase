@@ -18,6 +18,7 @@ import dev.hephaestus.glowcase.block.entity.*;
 import dev.hephaestus.glowcase.client.gui.screen.ingame.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
 public class GlowcaseClientProxy extends GlowcaseCommonProxy {
@@ -43,6 +44,14 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 	}
 
 	@Override
+	public void openItemProviderBlockEditScreen(BlockPos pos){
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null && client.world.getBlockEntity(pos) instanceof ItemProviderBlockEntity be) {
+			MinecraftClient.getInstance().setScreen(new ItemProviderBlockEditScreen(be));
+		}
+	}
+
+	@Override
 	public void openTextBlockEditScreen(BlockPos pos) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof TextBlockEntity be) {
@@ -63,6 +72,14 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof PopupBlockEntity be) {
 			MinecraftClient.getInstance().setScreen(new PopupBlockViewScreen(be));
+		}
+	}
+
+	@Override
+	public void openScreenBlockEditScreen(BlockPos pos) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null && client.world.getBlockEntity(pos) instanceof ScreenBlockEntity be) {
+			MinecraftClient.getInstance().setScreen(new ScreenBlockEditScreen(be));
 		}
 	}
 
@@ -103,6 +120,22 @@ public class GlowcaseClientProxy extends GlowcaseCommonProxy {
 		MinecraftClient client = MinecraftClient.getInstance();
 		if (client.world != null && client.world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity be) {
 			MinecraftClient.getInstance().setScreen(new ItemAcceptorBlockEditScreen(be));
+		}
+	}
+
+	@Override
+	public void openTabletEditScreen(ItemStack stack) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null) {
+			MinecraftClient.getInstance().setScreen(new TabletEditScreen(stack));
+		}
+	}
+
+	@Override
+	public void openNoteEditScreen(ItemStack stack) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world != null) {
+			MinecraftClient.getInstance().setScreen(new NoteEditScreen(stack));
 		}
 	}
 

@@ -46,7 +46,7 @@ public class GlowcaseBlock extends Block {
 		return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
 	}
 
-	public boolean canEditGlowcase(PlayerEntity player, BlockPos pos) {
+	public static boolean canEditGlowcase(PlayerEntity player, BlockPos pos) {
 		return player.isCreative() && player.canModifyAt(player.getWorld(), pos);
 	}
 }

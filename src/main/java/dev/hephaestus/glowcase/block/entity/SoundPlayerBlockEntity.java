@@ -8,9 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.client.sound.TickableSoundInstance;
+import net.minecraft.client.sound.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -78,6 +76,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		tag.putInt("repeatDelay", this.repeatDelay);
 		tag.putFloat("distance", this.distance);
 		tag.putBoolean("relative", this.relative);
+		tag.putBoolean("cancelOthers", this.cancelOthers);
 		Vec3d.CODEC.encodeStart(ops, this.soundPosition)
 			.resultOrPartial(LOGGER::error)
 			.ifPresent(result -> tag.put("soundPosition", result));
@@ -98,6 +97,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		this.repeatDelay = tag.getInt("repeatDelay");
 		this.distance = tag.getFloat("distance");
 		this.relative = tag.getBoolean("relative");
+		this.cancelOthers = tag.getBoolean("cancelOthers");
 		if (tag.contains("soundPosition"))
 			Vec3d.CODEC.parse(ops, tag.get("soundPosition"))
 				.resultOrPartial(LOGGER::error)
@@ -153,7 +153,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		private final PlayerEntity player;
 		private final BlockPos soundBlockPos;
 
-		private final float squaredDistance;
+		private final float distance;
 
 		private boolean done;
 
@@ -163,19 +163,15 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 				volume, pitch,
 				SoundInstance.createRandom(),
 				true, repeatDelay,
-				AttenuationType.LINEAR,
+				AttenuationType.NONE,
 				pos.x, pos.y, pos.z,
 				relative
 			);
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
-			this.squaredDistance = distance * distance;
+			this.distance = distance;
 			this.done = false;
 		}
-
-//		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, Random random, boolean repeat, int repeatDelay, AttenuationType attenuationType, double x, double y, double z, boolean relative) {
-//			super(id, category, volume, pitch, random, repeat, repeatDelay, attenuationType, x, y, z, relative);
-//		}
 
 		@Override
 		public boolean isDone() {
@@ -189,30 +185,36 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		@Override
 		public void tick() {
 			// stops track-stacking when reloading the block
-			if (!inRange() ||
-				!(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
+			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
 				setDone();
 			}
 		}
 
-		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
+		@Override
+		public float getVolume() {
+			var originalVolume = super.getVolume();
+
+			return originalVolume * linearFalloff();
 		}
 
-//		@Override
-//		public boolean canPlay() {
-//			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
-//		}
+		private float linearFalloff() {
+			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.soundBlockPos.toCenterPos());
+			return 1 - (distanceToPlayer / distance);
+		}
+
+		public boolean inRange() {
+			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.distance * this.distance;
+		}
 
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
 			return !(
 				other != null &&
-				this.id.equals(other.id) &&
+					this.id.equals(other.id) &&
 					this.category.equals(other.category) &&
 					this.volume == other.volume &&
 					this.pitch == other.pitch &&
 					this.repeatDelay == other.repeatDelay &&
-					this.squaredDistance == other.squaredDistance &&
+					this.distance == other.distance &&
 					this.relative == other.relative &&
 					this.x == other.x &&
 					this.y == other.y &&
