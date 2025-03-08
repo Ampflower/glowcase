@@ -23,12 +23,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec2f;
 
 public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ItemProviderBlockEntity> {
-
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/item_provider_block.png");
+
 	@Override
 	public void render(ItemProviderBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
@@ -45,7 +46,13 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 		boolean isBack = false;
 		boolean isBillboard = false;
 
-        switch (blockState.get(ItemProviderBlock.FACING)) {
+		Direction facing = Direction.UP;
+
+		if (blockState.isOf(Glowcase.ITEM_PROVIDER_BLOCK.get())) {
+			facing = blockState.get(ItemProviderBlock.FACING);
+		}
+
+        switch (facing) {
 			case DOWN, UP -> {
 				if (entity.getStack().getItem() instanceof BlockItem) {
 					Vec2f pitchAndYaw = ItemProviderBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);

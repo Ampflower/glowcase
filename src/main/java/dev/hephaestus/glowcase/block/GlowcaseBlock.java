@@ -8,7 +8,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
@@ -16,20 +15,26 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
 
-public class GlowcaseBlock extends Block {
+public abstract class GlowcaseBlock extends Block {
 	public GlowcaseBlock() {
 		super(Settings.create().nonOpaque().strength(-1, Integer.MAX_VALUE));
 	}
 
 	private static final VoxelShape PSEUDO_EMPTY = VoxelShapes.cuboid(0, -1000, 0, 0.1, -999.9, 0.1);
 
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		return canEditGlowcase(player, pos) && player.getMainHandStack().isIn(Glowcase.ITEM_TAG);
+	}
+
+	protected VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return VoxelShapes.fullCube();
+	}
+
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (context != ShapeContext.absent() && context instanceof EntityShapeContext econtext &&
-			econtext.getEntity() instanceof LivingEntity living &&
-			living.getMainHandStack().isIn(Glowcase.ITEM_TAG)
+		if (context != ShapeContext.absent() && context instanceof EntityShapeContext esc && esc.getEntity() instanceof PlayerEntity player && canTarget(player, pos)
 		) {
-			return VoxelShapes.fullCube();
+			return targetedOutlineShape(state, world, pos, context);
 		} else {
 			return PSEUDO_EMPTY;
 		}

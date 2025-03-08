@@ -62,7 +62,7 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 	@Override
 	public void writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(tag, registryLookup);
-
+		if (!this.stack.isEmpty()) tag.put("item", this.stack.encode(registryLookup));
 		tag.putString("gives_item", this.givesItem.name());
 		NbtList given = new NbtList();
 		for (UUID id : givenTo) {
@@ -76,7 +76,7 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 	@Override
 	public void readNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(tag, registryLookup);
-
+		this.stack = tag.contains("item", NbtElement.COMPOUND_TYPE) ? ItemStack.fromNbt(registryLookup, tag.getCompound("item")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 		if (tag.contains("gives_item")) {
 			this.givesItem = GivesItem.valueOf(tag.getString("gives_item"));
 		} else {

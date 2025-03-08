@@ -24,6 +24,7 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 	protected ButtonWidget increaseYaw;
 
 	private final float pitchYawChange = 15F * ((float) Math.PI / 180F);
+	private final float scaleOffsetChange = 0.125F;
 
 	public AbstractDisplayBlockEditScreen(AbstractDisplayBlockEntity displayBlock) {
 		this.displayBlock = displayBlock;
@@ -35,44 +36,44 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 
 		if (this.client != null) {
 			this.decreaseSize = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.getScale().sub(0.125F, 0.125F, 0.125F);
+				this.displayBlock.getScale().sub(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
 				clampValues();
 				editDisplayBlock();
 			}).dimensions(90, 0, 20, 20).build();
 
 			this.increaseSize = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.getScale().add(0.125F, 0.125F, 0.125F);
+				this.displayBlock.getScale().add(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
 				clampValues();
 				editDisplayBlock();
 			}).dimensions(110, 0, 20, 20).build();
 
 			this.decreaseXOffset = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.getOffset().sub(0.125F, 0, 0);
+				this.displayBlock.getOffset().sub(scaleOffsetChange, 0, 0);
 				editDisplayBlock();
 			}).dimensions(90, 30, 20, 20).build();
 
 			this.increaseXOffset = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.getOffset().add(0.125F, 0, 0);
+				this.displayBlock.getOffset().add(scaleOffsetChange, 0, 0);
 				editDisplayBlock();
 			}).dimensions(110, 30, 20, 20).build();
 
 			this.decreaseYOffset = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.getOffset().sub(0, 0, 0.125F);
+				this.displayBlock.getOffset().sub(0, 0, scaleOffsetChange);
 				editDisplayBlock();
 			}).dimensions(90, 60, 20, 20).build();
 
 			this.increaseYOffset = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.getOffset().add(0, 0.125F, 0);
+				this.displayBlock.getOffset().add(0, scaleOffsetChange, 0);
 				editDisplayBlock();
 			}).dimensions(110, 60, 20, 20).build();
 
 			this.decreaseZOffset = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.getOffset().sub(0, 0, 0.125F);
+				this.displayBlock.getOffset().sub(0, 0, scaleOffsetChange);
 				editDisplayBlock();
 			}).dimensions(90, 90, 20, 20).build();
 
 			this.increaseZOffset = ButtonWidget.builder(Text.literal("+"), action -> {
-				this.displayBlock.getOffset().add(0, 0, 0.125F);
+				this.displayBlock.getOffset().add(0, 0, scaleOffsetChange);
 				editDisplayBlock();
 			}).dimensions(110, 90, 20, 20).build();
 
@@ -113,14 +114,14 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 
 	public void clampValues() {
 		this.displayBlock.setScale(new Vector3f(
-			MathHelper.clamp(this.displayBlock.getScale().x(), -10F, 10F),
-			MathHelper.clamp(this.displayBlock.getScale().y(), -10F, 10F),
-			MathHelper.clamp(this.displayBlock.getScale().z(), -10F, 10F)
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().x() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().y() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().z() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F)
 		));
 		this.displayBlock.setOffset(new Vector3f(
-			MathHelper.clamp(this.displayBlock.getOffset().x(), -5F, 5F),
-			MathHelper.clamp(this.displayBlock.getOffset().y(), -5F, 5F),
-			MathHelper.clamp(this.displayBlock.getOffset().z(), -5F, 5F)
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().x() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().y() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().z() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F)
 		));
 		this.displayBlock.setPitch(MathHelper.clamp(this.displayBlock.getPitch(), -6.28319F, 6.28319F));
 		this.displayBlock.setYaw(MathHelper.clamp(this.displayBlock.getYaw(), -6.28319F, 6.28319F));

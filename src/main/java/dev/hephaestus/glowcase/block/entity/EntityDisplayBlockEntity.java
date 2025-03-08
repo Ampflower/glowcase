@@ -28,14 +28,14 @@ public class EntityDisplayBlockEntity extends AbstractDisplayBlockEntity impleme
 
 	@Override
 	public boolean matchesStack(ItemStack stack) {
-		return stack.isEmpty() && displayEntity == null || (stack.getItem() instanceof SpawnEggItem eggItem && eggItem.isOfSameEntityType(stack, entityType));
+		return (stack.isEmpty() && displayEntity == null) || (stack.getItem() instanceof SpawnEggItem eggItem && eggItem.isOfSameEntityType(stack, entityType));
 	}
 
 	@Override
 	public void setFromStack(ItemStack stack) {
 		if (stack.getItem() instanceof SpawnEggItem eggItem) {
 			setDisplayEntity(eggItem.getEntityType(stack).create(world));
-			setScale(new Vector3f(Math.clamp(displayEntity.getHeight() >= displayEntity.getWidth() ? 1F / displayEntity.getHeight() : 1F / displayEntity.getWidth(), 0, 3)));
+			setScale(new Vector3f(Math.clamp(Math.round(8 * displayEntity.getHeight() >= displayEntity.getWidth() ? 1F / displayEntity.getHeight() : 1F / displayEntity.getWidth()) / 8, 0, 3)));
 		}
 	}
 
@@ -66,13 +66,13 @@ public class EntityDisplayBlockEntity extends AbstractDisplayBlockEntity impleme
 	@Override
 	public void writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(tag, registryLookup);
-		tag.putString("type", Registries.ENTITY_TYPE.getId(entityType).toString());
+		if (entityType != null) tag.putString("type", Registries.ENTITY_TYPE.getId(entityType).toString());
 	}
 
 	@Override
 	public void readNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(tag, registryLookup);
-		this.entityType = Registries.ENTITY_TYPE.get(Identifier.tryParse(tag.getString("type")));
+		this.entityType = tag.contains("type") ? Registries.ENTITY_TYPE.get(Identifier.tryParse(tag.getString("type"))) : null;
 		this.displayEntity = null;
 	}
 }

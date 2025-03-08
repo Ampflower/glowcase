@@ -21,9 +21,6 @@ import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,14 +72,8 @@ public class ScreenBlock extends GlowcaseBlock implements BlockEntityProvider {
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (context != ShapeContext.absent() && context instanceof EntityShapeContext econtext &&
-			econtext.getEntity() instanceof LivingEntity living &&
-			living.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get())
-		) {
-			return VoxelShapes.fullCube();
-		} else
-			return super.getOutlineShape(state, world, pos, context);
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		return super.canTarget(player, pos) || player.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get());
 	}
 
 	@Override

@@ -15,10 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class ItemDisplayBlock extends AbstractStackInteractableBlock {
-	public ItemDisplayBlock() {
-		super();
-	}
-
 	@Override
 	protected void openScreen(BlockPos pos) {
 		Glowcase.proxy.openItemDisplayBlockEditScreen(pos);

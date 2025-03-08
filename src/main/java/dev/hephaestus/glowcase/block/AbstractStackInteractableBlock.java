@@ -14,15 +14,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class AbstractStackInteractableBlock extends GlowcaseBlock implements BlockEntityProvider {
-	public AbstractStackInteractableBlock() {
-		super();
-	}
-
 	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		return ActionResult.CONSUME;
 	}
 
 	protected abstract void openScreen(BlockPos pos);
+
+	@Override
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		if (!(player.getWorld().getBlockEntity(pos) instanceof StackInteractable be)) return false;
+		return canEditGlowcase(player, pos) && (be.matchesStack(ItemStack.EMPTY) || be.matchesStack(player.getMainHandStack()) || player.getMainHandStack().isIn(Glowcase.ITEM_TAG));
+	}
 
 	@Override
 	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
@@ -32,7 +34,7 @@ public abstract class AbstractStackInteractableBlock extends GlowcaseBlock imple
 			boolean holdingGlowcaseItem = stack.isIn(Glowcase.ITEM_TAG);
 			boolean holdingSameAsDisplay = be.matchesStack(stack);
 
-			if (!be.matchesStack(ItemStack.EMPTY)) {
+			if (be.matchesStack(ItemStack.EMPTY)) {
 				if (!world.isClient) be.setFromStack(stack);
 				return ItemActionResult.SUCCESS;
 			} else if (holdingSameAsDisplay) {

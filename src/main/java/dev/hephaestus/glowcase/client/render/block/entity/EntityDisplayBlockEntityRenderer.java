@@ -30,7 +30,6 @@ public record EntityDisplayBlockEntityRenderer(BlockEntityRendererFactory.Contex
 		float yaw = entity.getYaw();
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
 		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
-		matrices.translate(0, 0.5, 0);
 		matrices.scale(entity.getScale().x(), entity.getScale().y(), entity.getScale().z());
 		matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
 		Entity renderEntity = entity.getDisplayEntity();

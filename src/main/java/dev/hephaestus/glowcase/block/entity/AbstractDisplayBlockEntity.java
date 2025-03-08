@@ -1,5 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
+import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.util.DisplayBlockSettings;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
@@ -34,13 +35,16 @@ public abstract class AbstractDisplayBlockEntity extends GlowcaseBlockEntity {
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(nbt, registryLookup);
-		DisplayBlockSettings.CODEC.encode(toSettings(), NbtOps.INSTANCE, nbt);
+		DisplayBlockSettings settings = toSettings();
+		if (!settings.isEmpty()) nbt.put("display", DisplayBlockSettings.CODEC.encode(settings, NbtOps.INSTANCE, nbt).getOrThrow());
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(nbt, registryLookup);
-		loadSettings(DisplayBlockSettings.CODEC.decode(NbtOps.INSTANCE, nbt).getOrThrow().getFirst());
+		DisplayBlockSettings.CODEC.decode(NbtOps.INSTANCE, nbt.getCompound("display"))
+			.ifSuccess(p -> loadSettings(p.getFirst()))
+			.ifError(p -> Glowcase.LOGGER.warn("[Glowcase] Failed to load display block entity data at {}", pos.toShortString()));
 	}
 
 	public Vector3f getOffset() {

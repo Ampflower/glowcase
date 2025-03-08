@@ -35,7 +35,7 @@ public class ItemProviderBlock extends AbstractStackInteractableBlock {
 
 	public ItemProviderBlock() {
 		super();
-		this.setDefaultState(this.getDefaultState().with(FACING, Direction.DOWN));
+		this.setDefaultState(this.getDefaultState().with(FACING, Direction.UP));
 	}
 
 	@Override
@@ -80,8 +80,8 @@ public class ItemProviderBlock extends AbstractStackInteractableBlock {
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		Vec3i facingOffset = state.get(FACING).getVector();
-		return OUTLINE.offset(facingOffset.getX() / 4.0F, 0, facingOffset.getZ() / 4.0F);
+		return OUTLINE.offset(-facingOffset.getX() / 2.0F, 0, -facingOffset.getZ() / 2.0F);
 	}
 }

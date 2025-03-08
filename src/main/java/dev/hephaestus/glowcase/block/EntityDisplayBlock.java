@@ -2,13 +2,16 @@ package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.EntityDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.StackInteractable;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -18,11 +21,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityDisplayBlock extends GlowcaseBlock implements BlockEntityProvider {
+public class EntityDisplayBlock extends AbstractStackInteractableBlock implements BlockEntityProvider {
 	@Nullable
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
 		return new EntityDisplayBlockEntity(pos, state);
+	}
+
+	@Override
+	protected void openScreen(BlockPos pos) {
+		Glowcase.proxy.openEntityDisplayBlockEditScreen(pos);
+	}
+
+	@Override
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		if (!(player.getWorld().getBlockEntity(pos) instanceof StackInteractable be)) return false;
+		return canEditGlowcase(player, pos) && ((be.matchesStack(ItemStack.EMPTY) && player.getMainHandStack().getItem() instanceof SpawnEggItem) || be.matchesStack(player.getMainHandStack()) || player.getMainHandStack().isIn(Glowcase.ITEM_TAG));
 	}
 
 	@Nullable
