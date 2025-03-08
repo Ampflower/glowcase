@@ -9,6 +9,7 @@ fapi = "0.100.7+1.21"
 
 placeholder = "2.4.0+1.21"
 polydex = "1.2.2+1.21"
+emi = "1.1.19+1.21.1"
 
 [plugins]
 loom = { id = "fabric-loom", version.ref = "loom" }
@@ -22,3 +23,5 @@ fapi = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "
 
 placeholder = { group = "eu.pb4", name = "placeholder-api", version.ref = "placeholder" }
 polydex = { group = "eu.pb4", name = "polydex", version.ref = "polydex" }
+
+emi = { group = "dev.emi", name = "emi-fabric", version.ref = "emi" }

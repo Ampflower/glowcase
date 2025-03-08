@@ -11,6 +11,10 @@ archivesBaseName = project.slug
 
 repositories {
 	maven { url "https://maven.nucleoid.xyz/" }
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/"
+	}
 }
 
 dependencies {
@@ -25,6 +29,9 @@ dependencies {
 
 	include libs.placeholder
 	modLocalRuntime libs.polydex
+
+	modCompileOnly libs.emi
+	modLocalRuntime libs.emi
 }
 
 processResources {

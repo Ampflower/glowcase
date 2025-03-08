@@ -27,6 +27,10 @@ public class GlowcaseCommonProxy {
 		//No-op
 	}
 
+	public void openRecipeBlockEditScreen(BlockPos pos) {
+		//No-op
+	}
+
 	public void openSpriteBlockEditScreen(BlockPos pos) {
 		//No-op
 	}
