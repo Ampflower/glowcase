@@ -41,6 +41,5 @@ public record C2SEditItemAcceptorBlock(BlockPos pos, Identifier item, int count,
 		be.outputDirection = this.outputDirection();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }

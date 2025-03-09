@@ -31,11 +31,11 @@ public record SpriteBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	};
 
 	public void render(SpriteBlockEntity entity, float f, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		matrices.push();
 		matrices.translate(0.5D, 0.5D, 0.5D);
 
-		float rotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+		matrices.multiply(entity.getCachedState().get(Properties.FACING).getRotationQuaternion().mul(RotationAxis.POSITIVE_X.rotationDegrees(-90.0F)));
 		matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(entity.rotation));
 
 		switch (entity.zOffset) {
@@ -68,7 +68,7 @@ public record SpriteBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		matrices.pop();
 
-		if (entity.sprite.isEmpty() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, context.getRenderDispatcher().camera);
+		if (entity.sprite.isEmpty() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderFacingPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers);
 	}
 
 	private void vertex(

@@ -63,4 +63,8 @@ public class GlowcaseCommonProxy {
 	public void openNoteEditScreen(ItemStack stack) {
 		//No-op
 	}
+
+	public void openEntityDisplayBlockEditScreen(BlockPos pos) {
+		//No-op
+	}
 }

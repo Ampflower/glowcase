@@ -41,6 +41,5 @@ public record C2SEditSpriteBlock(BlockPos pos, String sprite, int rotation, Text
 		be.color = this.color();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }

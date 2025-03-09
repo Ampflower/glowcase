@@ -2,7 +2,7 @@ package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
 import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.Vec3FieldsWidget;
-import dev.hephaestus.glowcase.math.ParseUtil;
+import dev.hephaestus.glowcase.util.ParseUtil;
 import dev.hephaestus.glowcase.packet.C2SEditSoundBlock;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -103,9 +103,6 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 			this.relativeButton.setMessage(Text.stringifiedTranslatable("gui.glowcase.sound_positioning", soundBlock.relative));
 			soundBlock.soundPosition = soundBlock.relative ? Vec3d.ZERO : soundBlock.getPos().toCenterPos();
 			this.soundPosition.setVec(soundBlock.soundPosition);
-//			soundBlock.soundX = soundBlock.relative ? 0 : soundBlock.getPos().getX();
-//			soundBlock.soundY = soundBlock.relative ? 0 : soundBlock.getPos().getY();
-//			soundBlock.soundZ = soundBlock.relative ? 0 : soundBlock.getPos().getZ();
 		}).dimensions(6 * width / 10, 160, 150, 20).build();
 		this.addDrawableChild(this.relativeButton);
 
@@ -116,32 +113,6 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 			soundBlock.soundPosition);
 		this.addDrawableChild(this.soundPosition);
 
-//		this.soundX = new TextFieldWidget(
-//			this.client.textRenderer,
-//			width / 10, 210,
-//			2 * width / 10, 20,
-//			Text.empty());
-//		this.soundX.setMaxLength(16);
-//		this.soundX.setText(String.valueOf(soundBlock.soundX));
-//		this.addDrawableChild(this.soundX);
-//
-//		this.soundY = new TextFieldWidget(
-//			this.client.textRenderer,
-//			4 * width / 10, 210,
-//			2 * width / 10, 20,
-//			Text.empty());
-//		this.soundY.setMaxLength(16);
-//		this.soundY.setText(String.valueOf(soundBlock.soundY));
-//		this.addDrawableChild(this.soundY);
-//
-//		this.soundZ = new TextFieldWidget(
-//			this.client.textRenderer,
-//			7 * width / 10, 210,
-//			2 * width / 10, 20,
-//			Text.empty());
-//		this.soundZ.setMaxLength(16);
-//		this.soundZ.setText(String.valueOf(soundBlock.soundZ));
-//		this.addDrawableChild(this.soundZ);
 	}
 
 	@Override
@@ -155,11 +126,7 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 
 		setSound();
 
-//		soundBlock.soundX = ParseUtil.parseOrDefault(this.soundX.getText(), soundBlock.soundX);
-//		soundBlock.soundY = ParseUtil.parseOrDefault(this.soundY.getText(), soundBlock.soundY);
-//		soundBlock.soundZ = ParseUtil.parseOrDefault(this.soundZ.getText(), soundBlock.soundZ);
-
-        super.close();
+		super.close();
 	}
 
 	private void setSound() {

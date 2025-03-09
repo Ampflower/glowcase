@@ -7,15 +7,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -31,14 +27,9 @@ public class SoundPlayerBlock extends GlowcaseBlock implements BlockEntityProvid
 	}
 
 	@Override
-	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof SoundPlayerBlockEntity)) return ItemActionResult.CONSUME;
-
-		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
-			Glowcase.proxy.openSoundBlockEditScreen(pos);
-		}
-
-		return ItemActionResult.SUCCESS;
+	protected boolean openEditScreen(BlockPos pos) {
+		Glowcase.proxy.openSoundBlockEditScreen(pos);
+		return true;
 	}
 
 	@Nullable

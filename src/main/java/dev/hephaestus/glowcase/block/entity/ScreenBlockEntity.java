@@ -4,19 +4,14 @@ import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.GlowcaseClient;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class ScreenBlockEntity extends BlockEntity {
+public class ScreenBlockEntity extends GlowcaseBlockEntity {
 	public static final int URL_MAX_LENGTH = 1024;
 	public static final int ALT_MAX_LENGTH = 1024;
 
@@ -113,7 +108,6 @@ public class ScreenBlockEntity extends BlockEntity {
 			GlowcaseClient.screenImageCache.getImage(preview, null);
 
 		markDirty();
-		dispatch();
 	}
 
 	public void setImage(String url, String alt, @Nullable String preview) {
@@ -124,7 +118,6 @@ public class ScreenBlockEntity extends BlockEntity {
 			this.preview = preview;
 
 		markDirty();
-		dispatch();
 	}
 
 	public void setupScreen(float width, float height, Offset xOffset, Offset yOffset, Offset zOffset, boolean eink, boolean stretch) {
@@ -135,20 +128,5 @@ public class ScreenBlockEntity extends BlockEntity {
 		this.zOffset = zOffset;
 		this.eink = eink;
 		this.stretch = stretch;
-	}
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
 	}
 }

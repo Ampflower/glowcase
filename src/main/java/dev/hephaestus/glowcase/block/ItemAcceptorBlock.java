@@ -5,9 +5,6 @@ import dev.hephaestus.glowcase.block.entity.ItemAcceptorBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
@@ -54,21 +51,13 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		Direction direction = ctx.getSide().getOpposite();
 		return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
-			//load any ctrl-picked NBT clientside
-			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity be) {
-				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
-			}
-
-			Glowcase.proxy.openItemAcceptorBlockEditScreen(pos);
-		}
+	protected boolean openEditScreen(BlockPos pos) {
+		Glowcase.proxy.openItemAcceptorBlockEditScreen(pos);
+		return true;
 	}
 
 	@Override
@@ -76,7 +65,7 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 		if (!(world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity be)) return ActionResult.CONSUME;
 		if (canEditGlowcase(player, pos)) {
 			if (world.isClient) {
-				Glowcase.proxy.openItemAcceptorBlockEditScreen(be.getPos());
+				openEditScreen(pos);
 			}
 			return ActionResult.SUCCESS;
 		}

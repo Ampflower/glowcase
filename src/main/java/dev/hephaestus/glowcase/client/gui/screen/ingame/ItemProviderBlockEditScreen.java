@@ -2,10 +2,8 @@ package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
 import dev.hephaestus.glowcase.block.entity.ItemProviderBlockEntity;
 import dev.hephaestus.glowcase.packet.C2SEditItemProviderBlock;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
 
 public class ItemProviderBlockEditScreen extends GlowcaseScreen {
 
@@ -25,22 +23,17 @@ public class ItemProviderBlockEditScreen extends GlowcaseScreen {
 			int centerW = width / 2;
 			int centerH = height / 2;
 
-			this.givesItemButton = ButtonWidget.builder(Text.stringifiedTranslatable("gui.glowcase.gives_item", this.providerBlock.givesItem), (action) -> {
+			this.givesItemButton = ButtonWidget.builder(Text.stringifiedTranslatable("gui.glowcase.gives_item", this.providerBlock.getGivesItem()), (action) -> {
 				this.providerBlock.cycleGiveType();
-				this.givesItemButton.setMessage(Text.stringifiedTranslatable("gui.glowcase.gives_item", this.providerBlock.givesItem));
-				editItemDisplayBlock(true);
+				this.givesItemButton.setMessage(Text.stringifiedTranslatable("gui.glowcase.gives_item", this.providerBlock.getGivesItem()));
+				editItemDisplayBlock();
 			}).dimensions(centerW - 75, centerH - 40 - individualPadding, 150, 20).build();
 
 			this.addDrawableChild(this.givesItemButton);
 		}
 	}
 
-	private void editItemDisplayBlock(boolean updatePitchAndYaw) {
-		if (updatePitchAndYaw && MinecraftClient.getInstance().getCameraEntity() != null) {
-			Vec2f pitchAndYaw = ItemProviderBlockEntity.getPitchAndYaw(MinecraftClient.getInstance().getCameraEntity(), providerBlock.getPos(), 0);
-			providerBlock.pitch = pitchAndYaw.x;
-			providerBlock.yaw = pitchAndYaw.y;
-		}
+	private void editItemDisplayBlock() {
 		C2SEditItemProviderBlock.of(providerBlock).send();
 	}
 }

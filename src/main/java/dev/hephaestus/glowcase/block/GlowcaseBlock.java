@@ -1,6 +1,7 @@
 package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.block.entity.GlowcaseBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.EntityShapeContext;
@@ -8,28 +9,68 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class GlowcaseBlock extends Block {
+public abstract class GlowcaseBlock extends Block {
 	public GlowcaseBlock() {
 		super(Settings.create().nonOpaque().strength(-1, Integer.MAX_VALUE));
 	}
 
 	private static final VoxelShape PSEUDO_EMPTY = VoxelShapes.cuboid(0, -1000, 0, 0.1, -999.9, 0.1);
 
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		return canEditGlowcase(player, pos) && player.getMainHandStack().isIn(Glowcase.ITEM_TAG);
+	}
+
+	protected VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return VoxelShapes.fullCube();
+	}
+
+	abstract protected boolean openEditScreen(BlockPos pos);
+
+	@Override
+	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
+			//load any ctrl-picked NBT clientside
+			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be)
+				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
+
+			openEditScreen(pos);
+		}
+	}
+
+	@Override
+	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
+			if (openEditScreen(pos)) {
+				return ItemActionResult.SUCCESS;
+			}
+		}
+
+		return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+	}
+
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (context != ShapeContext.absent() && context instanceof EntityShapeContext econtext &&
-			econtext.getEntity() instanceof LivingEntity living &&
-			living.getMainHandStack().isIn(Glowcase.ITEM_TAG)
+		if (context != ShapeContext.absent() && context instanceof EntityShapeContext esc && esc.getEntity() instanceof PlayerEntity player && canTarget(player, pos)
 		) {
-			return VoxelShapes.fullCube();
+			return targetedOutlineShape(state, world, pos, context);
 		} else {
 			return PSEUDO_EMPTY;
 		}

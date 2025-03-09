@@ -19,8 +19,9 @@ public record PopupBlockEntityRenderer(BlockEntityRendererFactory.Context contex
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/popup_block.png");
 
 	public void render(PopupBlockEntity entity, float f, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		Camera camera = context.getRenderDispatcher().camera;
-		BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 0.5F, matrices, vertexConsumers, camera);
+		BlockEntityRenderUtil.renderBillboardPlaceholder(entity, ITEM_TEXTURE, 0.5F, matrices, vertexConsumers, camera);
 
 		matrices.push();
 		if (MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult bhr && bhr.getBlockPos().equals(entity.getPos())) {
