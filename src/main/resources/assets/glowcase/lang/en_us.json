@@ -107,7 +107,7 @@
 	"block.glowcase.item_acceptor_block.tooltip.1": " Pushes the item stack to an inventory",
 	"block.glowcase.item_acceptor_block.tooltip.2": " Emits a redstone pulse",
 	"block.glowcase.item_acceptor_block.tooltip.3": "Interact in Creative mode to edit",
-	"block.glowcase.entity_display_block.tooltip.0": "Displays an entity from a spawn egg",
+	"block.glowcase.entity_display_block.tooltip.0": "Displays an entity",
 	"block.glowcase.entity_display_block.tooltip.1": "Interact with a spawn egg to set it",
 	"block.glowcase.entity_display_block.tooltip.2": "Interact with the same spawn egg to edit",
 	"item.glowcase.lock.tooltip.0": "Locks and unlocks containers",
