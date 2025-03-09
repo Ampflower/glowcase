@@ -14,13 +14,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -45,10 +45,10 @@ public class TextBlock extends GlowcaseBlock implements BlockEntityProvider {
 		return this.getDefaultState().with(Properties.ROTATION, MathHelper.floor((double) ((180.0F + ctx.getPlayerYaw()) * 16.0F / 360.0F) + 0.5D) & 15);
 	}
 
-	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-		return new TextBlockEntity(pos, state);
+	protected boolean openEditScreen(BlockPos pos) {
+		Glowcase.proxy.openTextBlockEditScreen(pos);
+		return true;
 	}
 
 	@Override
@@ -56,29 +56,38 @@ public class TextBlock extends GlowcaseBlock implements BlockEntityProvider {
 		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
 			//load any ctrl-picked NBT clientside
 			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof TextBlockEntity be) {
-				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
+			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be) blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
+			openEditScreen(pos);
+		}
+		if (world.getBlockEntity(pos) instanceof TextBlockEntity be) { // Wish we had ctx.side right now...
+			if (be.zOffset == TextBlockEntity.ZOffset.CENTER && Math.abs(placer.getPitch()) < 30) {
+				be.zOffset = TextBlockEntity.ZOffset.BACK;
+			} else if (be.zOffset == TextBlockEntity.ZOffset.BACK && Math.abs(placer.getPitch()) > 60) {
+				be.zOffset = TextBlockEntity.ZOffset.CENTER;
 			}
-
-			Glowcase.proxy.openTextBlockEditScreen(pos);
+			be.markDirty();
 		}
 	}
 
+	@Nullable
 	@Override
-	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof TextBlockEntity be)) return ItemActionResult.CONSUME;
-
-		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
-			Glowcase.proxy.openTextBlockEditScreen(pos);
-		}
-
-		return ItemActionResult.SUCCESS;
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new TextBlockEntity(pos, state);
 	}
 
 	@Override
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
+	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.text_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
 		tooltip.add(Text.translatable("block.glowcase.text_block.tooltip.1").formatted(Formatting.DARK_GRAY));
+		NbtComponent component = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+		if (component == null) return;
+		NbtCompound nbt = component.getNbt();
+		if (nbt == null) return;
+		for (NbtElement element : nbt.getList("lines", NbtElement.STRING_TYPE)) {
+			if (element instanceof NbtString line && !line.asString().isBlank()) {
+				tooltip.add(Text.literal((line.asString().length() > 20 ? "%s...\"" : "%s").formatted(line.asString().substring(0, Math.min(line.asString().length(), 20)))).formatted(Formatting.DARK_PURPLE));
+			}
+		}
 	}
 }

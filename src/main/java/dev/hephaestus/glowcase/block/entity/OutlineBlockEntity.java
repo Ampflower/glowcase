@@ -3,20 +3,14 @@ package dev.hephaestus.glowcase.block.entity;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class OutlineBlockEntity extends BlockEntity {
+public class OutlineBlockEntity extends GlowcaseBlockEntity {
 	public Vec3i offset = Vec3i.ZERO;
 	public Vec3i scale = new Vec3i(1, 1, 1);
 	public int color = 0xFFFFFF;
@@ -53,22 +47,5 @@ public class OutlineBlockEntity extends BlockEntity {
 			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
 		}
 		super.markRemoved();
-	}
-
-	// standard blockentity boilerplate
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
 	}
 }

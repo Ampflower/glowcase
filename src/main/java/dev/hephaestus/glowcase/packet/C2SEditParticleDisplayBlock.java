@@ -2,8 +2,8 @@ package dev.hephaestus.glowcase.packet;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
-import dev.hephaestus.glowcase.math.DeviatedInteger;
-import dev.hephaestus.glowcase.math.DeviatedVec3d;
+import dev.hephaestus.glowcase.util.DeviatedInteger;
+import dev.hephaestus.glowcase.util.DeviatedVec3d;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -57,6 +57,5 @@ public record C2SEditParticleDisplayBlock(
 		be.tickRate = this.tickRate();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }

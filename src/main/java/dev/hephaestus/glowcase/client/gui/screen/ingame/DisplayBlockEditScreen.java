@@ -1,0 +1,145 @@
+package dev.hephaestus.glowcase.client.gui.screen.ingame;
+
+import dev.hephaestus.glowcase.block.entity.DisplayBlockEntity;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
+import org.joml.Vector3f;
+
+public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
+	protected final DisplayBlockEntity displayBlock;
+	protected ButtonWidget decreaseSize;
+	protected ButtonWidget increaseSize;
+
+	protected ButtonWidget decreaseXOffset;
+	protected ButtonWidget increaseXOffset;
+	protected ButtonWidget decreaseYOffset;
+	protected ButtonWidget increaseYOffset;
+	protected ButtonWidget decreaseZOffset;
+	protected ButtonWidget increaseZOffset;
+	protected ButtonWidget decreasePitch;
+	protected ButtonWidget increasePitch;
+	protected ButtonWidget decreaseYaw;
+	protected ButtonWidget increaseYaw;
+
+	private final float pitchYawChange = 15F;
+	private final float scaleOffsetChange = 0.125F;
+
+	public DisplayBlockEditScreen(DisplayBlockEntity displayBlock) {
+		this.displayBlock = displayBlock;
+	}
+
+	@Override
+	public void init() {
+		super.init();
+
+		if (this.client != null) {
+			this.decreaseSize = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.getScale().sub(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
+				clampValues();
+				editDisplayBlock();
+			}).dimensions(90, 0, 20, 20).build();
+
+			this.increaseSize = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.getScale().add(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
+				clampValues();
+				editDisplayBlock();
+			}).dimensions(110, 0, 20, 20).build();
+
+			this.decreaseXOffset = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.getOffset().sub(scaleOffsetChange, 0, 0);
+				editDisplayBlock();
+			}).dimensions(90, 30, 20, 20).build();
+
+			this.increaseXOffset = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.getOffset().add(scaleOffsetChange, 0, 0);
+				editDisplayBlock();
+			}).dimensions(110, 30, 20, 20).build();
+
+			this.decreaseYOffset = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.getOffset().sub(0, scaleOffsetChange, 0);
+				editDisplayBlock();
+			}).dimensions(90, 60, 20, 20).build();
+
+			this.increaseYOffset = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.getOffset().add(0, scaleOffsetChange, 0);
+				editDisplayBlock();
+			}).dimensions(110, 60, 20, 20).build();
+
+			this.decreaseZOffset = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.getOffset().sub(0, 0, scaleOffsetChange);
+				editDisplayBlock();
+			}).dimensions(90, 90, 20, 20).build();
+
+			this.increaseZOffset = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.getOffset().add(0, 0, scaleOffsetChange);
+				editDisplayBlock();
+			}).dimensions(110, 90, 20, 20).build();
+
+			this.decreasePitch = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.setPitch(this.displayBlock.getPitch() - pitchYawChange);
+				editDisplayBlock();
+			}).dimensions(90, 120, 20, 20).build();
+
+			this.increasePitch = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.setPitch(this.displayBlock.getPitch() + pitchYawChange);
+				editDisplayBlock();
+			}).dimensions(110, 120, 20, 20).build();
+
+			this.decreaseYaw = ButtonWidget.builder(Text.literal("-"), action -> {
+				this.displayBlock.setYaw(this.displayBlock.getYaw() - pitchYawChange);
+				editDisplayBlock();
+			}).dimensions(90, 150, 20, 20).build();
+
+			this.increaseYaw = ButtonWidget.builder(Text.literal("+"), action -> {
+				this.displayBlock.setYaw(this.displayBlock.getYaw() + pitchYawChange);
+				editDisplayBlock();
+			}).dimensions(110, 150, 20, 20).build();
+
+			this.addDrawableChild(this.decreaseSize);
+			this.addDrawableChild(this.increaseSize);
+			this.addDrawableChild(this.decreaseXOffset);
+			this.addDrawableChild(this.increaseXOffset);
+			this.addDrawableChild(this.decreaseYOffset);
+			this.addDrawableChild(this.increaseYOffset);
+			this.addDrawableChild(this.decreaseZOffset);
+			this.addDrawableChild(this.increaseZOffset);
+			this.addDrawableChild(this.decreasePitch);
+			this.addDrawableChild(this.increasePitch);
+			this.addDrawableChild(this.decreaseYaw);
+			this.addDrawableChild(this.increaseYaw);
+		}
+	}
+
+	public void clampValues() {
+		this.displayBlock.setScale(new Vector3f(
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().x() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().y() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
+			MathHelper.clamp(Math.round(this.displayBlock.getScale().z() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F)
+		));
+		this.displayBlock.setOffset(new Vector3f(
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().x() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().y() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
+			MathHelper.clamp(Math.round(this.displayBlock.getOffset().z() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F)
+		));
+		this.displayBlock.setPitch(Math.round(((this.displayBlock.getPitch() + 360) % 360) / 15) * 15);
+		this.displayBlock.setYaw(Math.round(((this.displayBlock.getYaw() + 360) % 360) / 15) * 15);
+	}
+
+	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+		if (this.client != null) {
+			super.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.scale_value", this.displayBlock.getScale().x()), 7, 7, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.x_offset_value", this.displayBlock.getOffset().x()), 7, 37, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.y_offset_value", this.displayBlock.getOffset().y()), 7, 67, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.z_offset_value", this.displayBlock.getOffset().z()), 7, 97, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.pitch_value", (int) this.displayBlock.getPitch()), 7, 127, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.yaw_value", (int) this.displayBlock.getYaw()), 7, 157, 0xFFFFFFFF);
+		}
+	}
+
+	protected void editDisplayBlock() {
+		clampValues();
+	}
+}

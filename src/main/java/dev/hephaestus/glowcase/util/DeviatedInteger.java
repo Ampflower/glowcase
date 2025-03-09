@@ -1,4 +1,4 @@
-package dev.hephaestus.glowcase.math;
+package dev.hephaestus.glowcase.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

@@ -16,6 +16,7 @@ public record OutlineBlockEntityRenderer(BlockEntityRendererFactory.Context cont
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/outline_block.png");
 
 	public void render(OutlineBlockEntity entity, float f, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		double x = entity.offset.getX();
 		double y = entity.offset.getY();
 		double z = entity.offset.getZ();
@@ -28,6 +29,6 @@ public record OutlineBlockEntityRenderer(BlockEntityRendererFactory.Context cont
 
 		WorldRenderer.drawBox(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), x, y, z, x + width, y + height, z + depth, red, green, blue, 1);
 
-		if (entity.scale.equals(Vec3i.ZERO) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, context.getRenderDispatcher().camera);
+		if (entity.scale.equals(Vec3i.ZERO) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderBillboardPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, context.getRenderDispatcher().camera);
 	}
 }

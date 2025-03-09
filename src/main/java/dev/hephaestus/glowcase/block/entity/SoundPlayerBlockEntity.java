@@ -5,31 +5,24 @@ import dev.hephaestus.glowcase.Glowcase;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.client.sound.TickableSoundInstance;
+import net.minecraft.client.sound.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class SoundPlayerBlockEntity extends BlockEntity {
+public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public Identifier soundId = SoundEvents.ENTITY_CAT_PURREOW.getId();
@@ -50,18 +43,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 	}
 
 	public void cycleCategory() {
-		switch (this.category) {
-			case SoundCategory.MASTER -> this.category = SoundCategory.MUSIC;
-			case SoundCategory.MUSIC -> this.category = SoundCategory.RECORDS;
-			case SoundCategory.RECORDS -> this.category = SoundCategory.WEATHER;
-			case SoundCategory.WEATHER -> this.category = SoundCategory.BLOCKS;
-			case SoundCategory.BLOCKS -> this.category = SoundCategory.HOSTILE;
-			case SoundCategory.HOSTILE -> this.category = SoundCategory.NEUTRAL;
-			case SoundCategory.NEUTRAL -> this.category = SoundCategory.PLAYERS;
-			case SoundCategory.PLAYERS -> this.category = SoundCategory.AMBIENT;
-			case SoundCategory.AMBIENT -> this.category = SoundCategory.VOICE;
-			case SoundCategory.VOICE -> this.category = SoundCategory.MASTER;
-		}
+		this.category = SoundCategory.values()[(this.category.ordinal() + 1) % SoundCategory.values().length];
 	}
 
 	@Override
@@ -99,28 +81,11 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		this.repeatDelay = tag.getInt("repeatDelay");
 		this.distance = tag.getFloat("distance");
 		this.relative = tag.getBoolean("relative");
-		this.cancelOthers =  tag.getBoolean("cancelOthers");
+		this.cancelOthers = tag.getBoolean("cancelOthers");
 		if (tag.contains("soundPosition"))
 			Vec3d.CODEC.parse(ops, tag.get("soundPosition"))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(result -> this.soundPosition = result);
-	}
-
-	// standard blockentity boilerplate
-
-	public void dispatch() {
-		if (world instanceof ServerWorld sworld) sworld.getChunkManager().markForUpdate(pos);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return createNbt(registryLookup);
-	}
-
-	@Nullable
-	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return super.toUpdatePacket();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -155,7 +120,7 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		private final PlayerEntity player;
 		private final BlockPos soundBlockPos;
 
-		private final float squaredDistance;
+		private final float distance;
 
 		private boolean done;
 
@@ -165,19 +130,15 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 				volume, pitch,
 				SoundInstance.createRandom(),
 				true, repeatDelay,
-				AttenuationType.LINEAR,
+				AttenuationType.NONE,
 				pos.x, pos.y, pos.z,
 				relative
 			);
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
-			this.squaredDistance = distance * distance;
+			this.distance = distance;
 			this.done = false;
 		}
-
-//		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, Random random, boolean repeat, int repeatDelay, AttenuationType attenuationType, double x, double y, double z, boolean relative) {
-//			super(id, category, volume, pitch, random, repeat, repeatDelay, attenuationType, x, y, z, relative);
-//		}
 
 		@Override
 		public boolean isDone() {
@@ -191,30 +152,36 @@ public class SoundPlayerBlockEntity extends BlockEntity {
 		@Override
 		public void tick() {
 			// stops track-stacking when reloading the block
-			if (!inRange() ||
-				!(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
+			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
 				setDone();
 			}
 		}
 
-		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
+		@Override
+		public float getVolume() {
+			var originalVolume = super.getVolume();
+
+			return originalVolume * linearFalloff();
 		}
 
-//		@Override
-//		public boolean canPlay() {
-//			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.squaredDistance;
-//		}
+		private float linearFalloff() {
+			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.soundBlockPos.toCenterPos());
+			return 1 - (distanceToPlayer / distance);
+		}
+
+		public boolean inRange() {
+			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.distance * this.distance;
+		}
 
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
 			return !(
 				other != null &&
-				this.id.equals(other.id) &&
+					this.id.equals(other.id) &&
 					this.category.equals(other.category) &&
 					this.volume == other.volume &&
 					this.pitch == other.pitch &&
 					this.repeatDelay == other.repeatDelay &&
-					this.squaredDistance == other.squaredDistance &&
+					this.distance == other.distance &&
 					this.relative == other.relative &&
 					this.x == other.x &&
 					this.y == other.y &&

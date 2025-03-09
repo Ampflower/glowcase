@@ -6,7 +6,6 @@ import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.ColorPickerWidget;
 import dev.hephaestus.glowcase.packet.C2SEditTextBlock;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
-import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,23 +19,19 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.SelectionManager;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Comparator;
 
 //TODO: multi-character selection at some point? it may be a bit complex but it'd be nice
-public class TextBlockEditScreen extends GlowcaseScreen implements ColorPickerIncludedScreen{
+public class TextBlockEditScreen extends TextEditorScreen {
 	private final TextBlockEntity textBlockEntity;
 
 	private SelectionManager selectionManager;
 	private int currentRow;
 	private long ticksSinceOpened = 0;
 	private ColorPickerWidget colorPickerWidget;
-	private ButtonWidget colorText;
 	private ButtonWidget changeAlignment;
 	private TextFieldWidget colorEntryWidget;
 	private Color colorEntryPreColorPicker; //used for color picker cancel button
@@ -69,12 +64,12 @@ public class TextBlockEditScreen extends GlowcaseScreen implements ColorPickerIn
 			(string) -> true);
 
 		ButtonWidget decreaseSize = ButtonWidget.builder(Text.literal("-"), action -> {
-			this.textBlockEntity.scale -= (float) Math.max(0, 0.125);
+			this.textBlockEntity.scale = Math.max(0, this.textBlockEntity.scale - (Screen.hasShiftDown() ? 1F : 0.125F));
 			this.textBlockEntity.renderDirty = true;
 		}).dimensions(80, 0, 20, 20).build();
 
 		ButtonWidget increaseSize = ButtonWidget.builder(Text.literal("+"), action -> {
-			this.textBlockEntity.scale += 0.125F;
+			this.textBlockEntity.scale += Screen.hasShiftDown() ? 1F : 0.125F;
 			this.textBlockEntity.renderDirty = true;
 		}).dimensions(100, 0, 20, 20).build();
 
@@ -137,63 +132,6 @@ public class TextBlockEditScreen extends GlowcaseScreen implements ColorPickerIn
 		this.addDrawableChild(this.colorEntryWidget);
 
 		addFormattingButtons(280, 20, innerPadding, 20, 2);
-	}
-
-	private void addFormattingButtons(int x, int y, int innerPadding, int buttonSize, int buttonPadding) {
-		int buttonX = x + innerPadding * 2; //adding numbers to this variable because I personally find that more readable, that's all
-		int buttonY = y + innerPadding; //reduce the times this is calculated
-		ButtonWidget boldText = ButtonWidget.builder(Text.literal("B").formatted(Formatting.BOLD), action -> {
-			insertTag(TagRegistry.SAFE.getTag("bold"), true);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		buttonX += buttonSize + buttonPadding;
-		ButtonWidget italicizeText = ButtonWidget.builder(Text.literal("I").formatted(Formatting.ITALIC), action -> {
-			insertTag(TagRegistry.SAFE.getTag("italic"), true);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		buttonX += buttonSize + buttonPadding;
-		ButtonWidget strikeText = ButtonWidget.builder(Text.literal("S").formatted(Formatting.STRIKETHROUGH), action -> {
-			insertTag(TagRegistry.SAFE.getTag("strikethrough"), true);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		buttonX += buttonSize + buttonPadding;
-		ButtonWidget underlineText = ButtonWidget.builder(Text.literal("U").formatted(Formatting.UNDERLINE), action -> {
-			insertTag(TagRegistry.SAFE.getTag("underline"), true);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		buttonX += buttonSize + buttonPadding;
-		//not using the actual obfuscated formatting here because the movement can be annoying
-		ButtonWidget obfuscateText = ButtonWidget.builder(Text.literal("@"), action -> {
-			insertTag(TagRegistry.SAFE.getTag("obfuscated"), true);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		buttonX += buttonSize + buttonPadding; // + 4? (only works on padding of 2)
-		this.colorText = ButtonWidget.builder(Text.literal("\uD83D\uDD8C"), action -> {
-			this.colorPickerWidget.setPosition(216, 10);
-			this.colorPickerWidget.setTargetElement(this.colorText);
-			this.colorPickerWidget.setOnAccept(picker -> {
-				picker.insertColor(picker.color);
-				picker.toggle(false);
-			});
-			this.colorPickerWidget.setOnCancel(picker -> picker.toggle(false));
-			this.colorPickerWidget.setPresetListener((color, formatting) -> {
-				if(formatting != null) {
-					insertFormattingTag(formatting);
-				} else {
-					insertHexTag(ColorPickerWidget.getHexCode(color));
-				}
-				this.toggleColorPicker(false);
-			});
-			this.colorPickerWidget.setChangeListener(null);
-			toggleColorPicker(!this.colorPickerWidget.active);
-		}).dimensions(buttonX, buttonY, buttonSize, buttonSize).build();
-
-		this.addDrawableChild(boldText);
-		this.addDrawableChild(italicizeText);
-		this.addDrawableChild(strikeText);
-		this.addDrawableChild(underlineText);
-		this.addDrawableChild(obfuscateText);
-		this.addDrawableChild(colorText);
 	}
 
 	@Override
@@ -272,32 +210,6 @@ public class TextBlockEditScreen extends GlowcaseScreen implements ColorPickerIn
 
 			context.getMatrices().pop();
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.scale_value", this.textBlockEntity.scale), 7, 7, 0xFFFFFFFF);
-		}
-	}
-
-	public void insertTag(TextTag tag, boolean findShortest) {
-		if(tag == null) return;
-		//find the alias with the least amount of characters
-		String name = tag.name();
-		if(findShortest && tag.aliases().length > 1) {
-			String shortest = Arrays.stream(tag.aliases()).min(Comparator.comparing(String::length)).get();
-			name = Arrays.stream(tag.aliases()).min(Comparator.comparing(String::length)).get();
-		}
-
-		int selectedStart = this.selectionManager.getSelectionStart();
-		int selectedEnd = this.selectionManager.getSelectionEnd();
-		if(selectedStart != selectedEnd) {
-			int selectedAmount = Math.abs(selectedEnd - selectedStart);
-			//text is selected/highlighted - selection is determined based on the direction it happens, so an extra check is needed
-			this.selectionManager.moveCursor(selectedStart < selectedEnd ? 0 : -selectedAmount, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.insert("<" + name + ">");
-			this.selectionManager.moveCursor(selectedAmount, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.insert("</" + name + ">");
-			this.selectionManager.moveCursor(-name.length() - 3, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.setSelection(selectedStart + name.length() + 2, selectedEnd + name.length() + 2);
-		} else {
-			this.selectionManager.insert("<" + name + "></" + name + ">");
-			this.selectionManager.moveCursor(-name.length() - 3, false, SelectionManager.SelectionType.CHARACTER);
 		}
 	}
 
@@ -526,26 +438,7 @@ public class TextBlockEditScreen extends GlowcaseScreen implements ColorPickerIn
 	}
 
 	@Override
-	public void insertHexTag(String hex) {
-		int selectedStart = this.selectionManager.getSelectionStart();
-		int selectedEnd = this.selectionManager.getSelectionEnd();
-		if(selectedStart != selectedEnd) {
-			int selectedAmount = Math.abs(selectedEnd - selectedStart);
-			//text is selected/highlighted - selection is determined based on the direction it happens, so an extra check is needed
-			this.selectionManager.moveCursor(selectedStart < selectedEnd ? 0 : -selectedAmount, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.insert("<" + hex + ">");
-			this.selectionManager.moveCursor(selectedAmount, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.insert("</" + hex + ">");
-			this.selectionManager.moveCursor(-hex.length() - 3, false, SelectionManager.SelectionType.CHARACTER);
-			this.selectionManager.setSelection(selectedStart + hex.length() + 2, selectedEnd + hex.length() + 2);
-		} else {
-			this.selectionManager.insert("<" + hex + "></" + hex + ">");
-			this.selectionManager.moveCursor(-hex.length() - 3, false, SelectionManager.SelectionType.CHARACTER);
-		}
-	}
-
-	@Override
-	public void insertFormattingTag(Formatting formatting) {
-		this.insertTag(TagRegistry.SAFE.getTag(formatting.getName()), false);
+	SelectionManager getSelectionManager() {
+		return this.selectionManager;
 	}
 }

@@ -1,6 +1,6 @@
 package dev.hephaestus.glowcase.client.gui.widget.ingame;
 
-import dev.hephaestus.glowcase.math.ParseUtil;
+import dev.hephaestus.glowcase.util.ParseUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;

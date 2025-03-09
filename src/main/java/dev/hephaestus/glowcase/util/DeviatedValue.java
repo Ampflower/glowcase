@@ -1,4 +1,4 @@
-package dev.hephaestus.glowcase.math;
+package dev.hephaestus.glowcase.util;
 
 import java.util.function.Supplier;
 
