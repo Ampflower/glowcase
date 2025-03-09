@@ -64,10 +64,7 @@ public class TextBlockEditScreen extends TextEditorScreen {
 			(string) -> true);
 
 		ButtonWidget decreaseSize = ButtonWidget.builder(Text.literal("-"), action -> {
-			this.textBlockEntity.scale -= Screen.hasShiftDown() ? 1f : 0.125f;
-			if(this.textBlockEntity.scale < 0) {
-				this.textBlockEntity.scale = 0;
-			}
+			this.textBlockEntity.scale = Math.max(0, this.textBlockEntity.scale - (Screen.hasShiftDown() ? 1f : 0.125f));
 			this.textBlockEntity.renderDirty = true;
 		}).dimensions(80, 0, 20, 20).build();
 
