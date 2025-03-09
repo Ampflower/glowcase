@@ -20,24 +20,22 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 
 	@Override
 	public void render(ItemDisplayBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
 
 		if (camera == null) return;
 
 		matrices.push();
 		matrices.translate(0.5D, 0D, 0.5D);
-
-		float pitch = entity.getPitch();
-		float yaw = entity.getYaw();
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F + entity.getYaw()));
 		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
 		matrices.translate(0, 0.5, 0);
 		matrices.scale(entity.getScale().x(), entity.getScale().y(), entity.getScale().z());
-		matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(entity.getPitch()));
 		context.getItemRenderer().renderItem(entity.getStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 
 		matrices.pop();
 
-		if (!entity.matchesStack(ItemStack.EMPTY) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera, 0f);
+		if (entity.matchesStack(ItemStack.EMPTY) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderCenteredPlaceholder(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(entity.getYaw()), matrices, vertexConsumers);
 	}
 }

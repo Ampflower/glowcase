@@ -38,9 +38,10 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 	@Override
 	public void render(ScreenBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos()) ||
 			(MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get())))
-			BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers, context.getRenderDispatcher().camera, (entity.zOffset == ScreenBlockEntity.Offset.NULL ? 0.1f : 0f));
+			BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers);
 
 		matrices.push();
 

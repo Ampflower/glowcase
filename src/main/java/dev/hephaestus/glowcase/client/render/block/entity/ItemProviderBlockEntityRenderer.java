@@ -17,8 +17,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
@@ -32,6 +30,7 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 
 	@Override
 	public void render(ItemProviderBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
 		BlockState blockState = entity.getWorld().getBlockState(entity.getPos());
 
@@ -55,7 +54,7 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
         switch (facing) {
 			case DOWN, UP -> {
 				if (entity.getStack().getItem() instanceof BlockItem) {
-					Vec2f pitchAndYaw = ItemProviderBlockEntity.getPitchAndYaw(camera, entity.getPos(), tickDelta);
+					Vec2f pitchAndYaw = BlockEntityRenderUtil.getTracking(camera, entity.getPos(), tickDelta);
 					pitch = pitchAndYaw.x;
 					yaw = pitchAndYaw.y;
 					matrices.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
@@ -67,28 +66,16 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 				}
 			}
 	        default -> {
-		        var rotation = -(entity.getCachedState().get(Properties.FACING).asRotation() * 2 * Math.PI) / 16.0F;
-		        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) rotation));
+		        matrices.multiply(facing.getRotationQuaternion().mul(RotationAxis.POSITIVE_X.rotationDegrees(-90.0F)));
 		        matrices.translate(0D, Math.sin(pitch) * -0.4, 0.4D);
 		        isBack = true;
 	        }
 		}
 
-		ItemStack stack = entity.getStack();
-		Text name;
-		if (stack.getItem() instanceof SpawnEggItem) {
-			matrices.push();
-			name = Text.empty();
-			matrices.pop();
-			matrices.translate(0, 0.125F, 0);
-			matrices.scale(0.5F, 0.5F, 0.5F);
-		} else {
-			name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
-			matrices.translate(0, 0.5, 0);
-			matrices.scale(0.5F, 0.5F, 0.5F);
-			matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
-			context.getItemRenderer().renderItem(entity.getStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
-		}
+		matrices.translate(0, 0.5, 0);
+		matrices.scale(0.5F, 0.5F, 0.5F);
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
+		context.getItemRenderer().renderItem(entity.getStack(), ModelTransformationMode.FIXED, light, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, entity.getWorld(), 0);
 
 		HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
 		if (hitResult instanceof BlockHitResult && ((BlockHitResult) hitResult).getBlockPos().equals(entity.getPos())) {
@@ -98,6 +85,8 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 			float scale = 0.025F;
 			matrices.scale(scale, scale, scale);
 
+			ItemStack stack = entity.getStack();
+			Text name = stack.isEmpty() ? Text.translatable("gui.glowcase.none") : (Text.literal("")).append(stack.getName()).formatted(stack.getRarity().getFormatting());
 			int color = name.getStyle().getColor() == null ? 0xFFFFFF : name.getStyle().getColor().getRgb();
 			matrices.translate(-context.getTextRenderer().getWidth(name) / 2F, -4, 0);
 			context.getTextRenderer().draw(name, 0, 0, color, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
@@ -107,16 +96,14 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 
 		if (!entity.hasItem() || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) {
 			if(isBack) {
-				BlockEntityRenderUtil.renderPlaceholderAtBack(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+				BlockEntityRenderUtil.renderFacingPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers);
 			}
 			else if(isBillboard) {
-				BlockEntityRenderUtil.renderPlaceholderAsBillboard(entity, ITEM_TEXTURE, 1.0F, RotationAxis.POSITIVE_Y.rotationDegrees(180), matrices, vertexConsumers, context.getRenderDispatcher().camera);
+				BlockEntityRenderUtil.renderBillboardPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, context.getRenderDispatcher().camera);
 			}
 			else {
-				BlockEntityRenderUtil.renderPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, context.getRenderDispatcher().camera);
+				BlockEntityRenderUtil.renderTrackingPlaceholder(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, camera);
 			}
-
 		}
-
 	}
 }

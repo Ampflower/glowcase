@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
-public class ItemDisplayBlockEntity extends AbstractDisplayBlockEntity implements StackInteractable {
+public class ItemDisplayBlockEntity extends DisplayBlockEntity implements StackInteractable {
 	protected ItemStack stack = ItemStack.EMPTY;
 
 	public ItemStack getStack() {

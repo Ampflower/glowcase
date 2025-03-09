@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 public class SpriteBlockEntity extends GlowcaseBlockEntity {
 	public String sprite = "arrow";
 	public int rotation = 0;
-	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.CENTER;
+	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.BACK;
 	public int color = 0xFFFFFF;
 
 	public SpriteBlockEntity(BlockPos pos, BlockState state) {
@@ -49,5 +49,10 @@ public class SpriteBlockEntity extends GlowcaseBlockEntity {
 			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
 		}
 		super.markRemoved();
+	}
+
+	public void setRotation(int rotation) {
+		this.rotation = rotation;
+		markDirty();
 	}
 }

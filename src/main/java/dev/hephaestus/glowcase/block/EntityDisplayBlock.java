@@ -2,12 +2,14 @@ package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.EntityDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
 import dev.hephaestus.glowcase.block.entity.StackInteractable;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -21,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityDisplayBlock extends AbstractStackInteractableBlock implements BlockEntityProvider {
+public class EntityDisplayBlock extends StackInteractableBlock implements BlockEntityProvider {
 	@Nullable
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
@@ -29,8 +31,17 @@ public class EntityDisplayBlock extends AbstractStackInteractableBlock implement
 	}
 
 	@Override
-	protected void openScreen(BlockPos pos) {
+	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+		super.onPlaced(world, pos, state, placer, itemStack);
+		if (placer != null && world.getBlockEntity(pos) instanceof ItemDisplayBlockEntity be) {
+			be.setYaw((Math.round(((540.0F - placer.getHeadYaw())) / 45.0F) * 45) % 360);
+		}
+	}
+
+	@Override
+	protected boolean openEditScreen(BlockPos pos) {
 		Glowcase.proxy.openEntityDisplayBlockEditScreen(pos);
+		return true;
 	}
 
 	@Override

@@ -10,10 +10,10 @@ import org.joml.Vector3f;
 
 public record DisplayBlockSettings(Vector3f offset, Vector3f scale, float pitch, float yaw) {
 	public static final Codec<DisplayBlockSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codecs.VECTOR_3F.optionalFieldOf("offset", new Vector3f()).forGetter(DisplayBlockSettings::offset),
-		Codecs.VECTOR_3F.optionalFieldOf("scale", new Vector3f(1.0F)).forGetter(DisplayBlockSettings::scale),
-		Codec.FLOAT.optionalFieldOf("pitch", 0F).forGetter(DisplayBlockSettings::pitch),
-		Codec.FLOAT.optionalFieldOf("offset", 0F).forGetter(DisplayBlockSettings::yaw)
+		Codecs.VECTOR_3F.lenientOptionalFieldOf("offset", new Vector3f()).forGetter(DisplayBlockSettings::offset),
+		Codecs.VECTOR_3F.lenientOptionalFieldOf("scale", new Vector3f(1.0F)).forGetter(DisplayBlockSettings::scale),
+		Codec.FLOAT.lenientOptionalFieldOf("pitch", 0F).forGetter(DisplayBlockSettings::pitch),
+		Codec.FLOAT.lenientOptionalFieldOf("offset", 0F).forGetter(DisplayBlockSettings::yaw)
 	).apply(instance, DisplayBlockSettings::new));
 
 	public static final PacketCodec<ByteBuf, DisplayBlockSettings> PACKET_CODEC = PacketCodec.tuple(
@@ -23,6 +23,10 @@ public record DisplayBlockSettings(Vector3f offset, Vector3f scale, float pitch,
 		PacketCodecs.FLOAT, DisplayBlockSettings::yaw,
 		DisplayBlockSettings::new
 	);
+
+	public DisplayBlockSettings() {
+		this(new Vector3f(), new Vector3f(1.0F), 0F, 0F);
+	}
 
 	public boolean isEmpty() {
 		return offset.equals(new Vector3f()) && scale.equals(new Vector3f(1.0F)) && pitch == 0F && yaw == 0F;

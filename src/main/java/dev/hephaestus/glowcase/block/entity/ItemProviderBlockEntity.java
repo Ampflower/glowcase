@@ -2,7 +2,6 @@ package dev.hephaestus.glowcase.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -11,8 +10,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -123,18 +120,6 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 			givenTo.add(player.getUuid());
 			markDirty();
 		}
-	}
-
-	public static Vec2f getPitchAndYaw(Entity camera, BlockPos pos, float delta) {
-		double d = pos.getX() - camera.getLerpedPos(delta).x + 0.5;
-		double e = pos.getY() - camera.getEyeY() + 0.5;
-		double f = pos.getZ() - camera.getLerpedPos(delta).z + 0.5;
-		double g = MathHelper.sqrt((float) (d * d + f * f));
-
-		float pitch = (float) ((-MathHelper.atan2(e, g)));
-		float yaw = (float) (-MathHelper.atan2(f, d) + Math.PI / 2);
-
-		return new Vec2f(pitch, yaw);
 	}
 
 	public enum GivesItem {

@@ -1,7 +1,7 @@
 package dev.hephaestus.glowcase.packet;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.block.entity.AbstractDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.DisplayBlockEntity;
 import dev.hephaestus.glowcase.util.DisplayBlockSettings;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.network.RegistryByteBuf;
@@ -18,7 +18,7 @@ public record C2SEditItemDisplayBlock(BlockPos pos, DisplayBlockSettings setting
 		C2SEditItemDisplayBlock::new
 	);
 
-	public static C2SEditEntityDisplayBlock of(AbstractDisplayBlockEntity be) {
+	public static C2SEditEntityDisplayBlock of(DisplayBlockEntity be) {
 		return new C2SEditEntityDisplayBlock(be.getPos(), be.toSettings());
 	}
 

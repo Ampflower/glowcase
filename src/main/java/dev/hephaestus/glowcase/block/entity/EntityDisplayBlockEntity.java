@@ -16,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.joml.Vector3f;
 
-public class EntityDisplayBlockEntity extends AbstractDisplayBlockEntity implements StackInteractable {
+public class EntityDisplayBlockEntity extends DisplayBlockEntity implements StackInteractable {
 	public static final TagKey<EntityType<?>> TICK = TagKey.of(RegistryKeys.ENTITY_TYPE, Glowcase.id("tick_in_display"));
 
 	protected Entity displayEntity = null;

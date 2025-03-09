@@ -1,6 +1,5 @@
 package dev.hephaestus.glowcase.block.entity;
 
-import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.util.DisplayBlockSettings;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
@@ -10,13 +9,13 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
-public abstract class AbstractDisplayBlockEntity extends GlowcaseBlockEntity {
+public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 	private Vector3f offset = new Vector3f(0.0F);
 	private Vector3f scale = new Vector3f(1.0F);
 	private float pitch = 0.0F;
 	private float yaw = 0.0F;
 
-	public AbstractDisplayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+	public DisplayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
 	}
 
@@ -42,9 +41,14 @@ public abstract class AbstractDisplayBlockEntity extends GlowcaseBlockEntity {
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(nbt, registryLookup);
-		DisplayBlockSettings.CODEC.decode(NbtOps.INSTANCE, nbt.getCompound("display"))
-			.ifSuccess(p -> loadSettings(p.getFirst()))
-			.ifError(p -> Glowcase.LOGGER.warn("[Glowcase] Failed to load display block entity data at {}", pos.toShortString()));
+		if (nbt.contains("display")) {
+			var result = DisplayBlockSettings.CODEC.decode(NbtOps.INSTANCE, nbt.getCompound("display"));
+			if (result.isSuccess()) {
+				loadSettings(result.getOrThrow().getFirst());
+				return;
+			}
+		}
+		loadSettings(new DisplayBlockSettings());
 	}
 
 	public Vector3f getOffset() {

@@ -1,10 +1,10 @@
 package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
-import dev.hephaestus.glowcase.block.entity.AbstractDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.DisplayBlockEntity;
 import dev.hephaestus.glowcase.packet.C2SEditItemDisplayBlock;
 
-public class ItemDisplayEditScreen extends AbstractDisplayBlockEditScreen {
-	public ItemDisplayEditScreen(AbstractDisplayBlockEntity displayBlock) {
+public class ItemDisplayEditScreen extends DisplayBlockEditScreen {
+	public ItemDisplayEditScreen(DisplayBlockEntity displayBlock) {
 		super(displayBlock);
 	}
 

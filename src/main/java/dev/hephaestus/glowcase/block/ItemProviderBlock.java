@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ItemProviderBlock extends AbstractStackInteractableBlock {
+public class ItemProviderBlock extends StackInteractableBlock {
 	private static final VoxelShape OUTLINE = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
 	public static final DirectionProperty FACING = Properties.FACING;
 
@@ -57,8 +57,9 @@ public class ItemProviderBlock extends AbstractStackInteractableBlock {
 	}
 
 	@Override
-	protected void openScreen(BlockPos pos) {
+	protected boolean openEditScreen(BlockPos pos) {
 		Glowcase.proxy.openItemProviderBlockEditScreen(pos);
+		return true;
 	}
 
 	@Nullable
@@ -76,7 +77,7 @@ public class ItemProviderBlock extends AbstractStackInteractableBlock {
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite());
+		return this.getDefaultState().with(FACING, ctx.getSide());
 	}
 
 	@Override

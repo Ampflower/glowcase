@@ -1,6 +1,7 @@
 package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.block.entity.GlowcaseBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.EntityShapeContext;
@@ -8,11 +9,19 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class GlowcaseBlock extends Block {
@@ -28,6 +37,33 @@ public abstract class GlowcaseBlock extends Block {
 
 	protected VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		return VoxelShapes.fullCube();
+	}
+
+	abstract protected boolean openEditScreen(BlockPos pos);
+
+	@Override
+	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
+			//load any ctrl-picked NBT clientside
+			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be)
+				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
+
+			openEditScreen(pos);
+		}
+	}
+
+	@Override
+	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) return ItemActionResult.CONSUME;
+
+		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
+			if (openEditScreen(pos)) {
+				return ItemActionResult.SUCCESS;
+			}
+		}
+
+		return ItemActionResult.SUCCESS;
 	}
 
 	@Override

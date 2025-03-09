@@ -513,14 +513,14 @@ public class ColorPickerWidget extends PressableWidget {
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
-		private ColorPickerIncludedScreen screen;
-		private int x;
-		private int y;
+		private final ColorPickerIncludedScreen screen;
+		private final int x;
+		private final int y;
 		private int width = 150;
 		private int height = 200;
 		private boolean includePresets = true;
 		private boolean includeDefaultPresets = true;
-		private List<Color> presets = Lists.newArrayList();
+		private final List<Color> presets = Lists.newArrayList();
 
 		public Builder(ColorPickerIncludedScreen screen, int x, int y) {
 			this.screen = screen;

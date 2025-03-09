@@ -1,14 +1,14 @@
 package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
-import dev.hephaestus.glowcase.block.entity.AbstractDisplayBlockEntity;
+import dev.hephaestus.glowcase.block.entity.DisplayBlockEntity;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3f;
 
-public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
-	protected final AbstractDisplayBlockEntity displayBlock;
+public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
+	protected final DisplayBlockEntity displayBlock;
 	protected ButtonWidget decreaseSize;
 	protected ButtonWidget increaseSize;
 
@@ -23,10 +23,10 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 	protected ButtonWidget decreaseYaw;
 	protected ButtonWidget increaseYaw;
 
-	private final float pitchYawChange = 15F * ((float) Math.PI / 180F);
+	private final float pitchYawChange = 15F;
 	private final float scaleOffsetChange = 0.125F;
 
-	public AbstractDisplayBlockEditScreen(AbstractDisplayBlockEntity displayBlock) {
+	public DisplayBlockEditScreen(DisplayBlockEntity displayBlock) {
 		this.displayBlock = displayBlock;
 	}
 
@@ -78,7 +78,7 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 			}).dimensions(110, 90, 20, 20).build();
 
 			this.decreasePitch = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.setPitch(this.displayBlock.getPitch() - Math.max(0, pitchYawChange));
+				this.displayBlock.setPitch(this.displayBlock.getPitch() - pitchYawChange);
 				editDisplayBlock();
 			}).dimensions(90, 120, 20, 20).build();
 
@@ -88,7 +88,7 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 			}).dimensions(110, 120, 20, 20).build();
 
 			this.decreaseYaw = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.setYaw(this.displayBlock.getYaw() - Math.max(0, pitchYawChange));
+				this.displayBlock.setYaw(this.displayBlock.getYaw() - pitchYawChange);
 				editDisplayBlock();
 			}).dimensions(90, 150, 20, 20).build();
 
@@ -123,23 +123,19 @@ public abstract class AbstractDisplayBlockEditScreen extends GlowcaseScreen {
 			MathHelper.clamp(Math.round(this.displayBlock.getOffset().y() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
 			MathHelper.clamp(Math.round(this.displayBlock.getOffset().z() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F)
 		));
-		this.displayBlock.setPitch(MathHelper.clamp(this.displayBlock.getPitch(), -6.28319F, 6.28319F));
-		this.displayBlock.setYaw(MathHelper.clamp(this.displayBlock.getYaw(), -6.28319F, 6.28319F));
+		this.displayBlock.setPitch(Math.round(((this.displayBlock.getPitch() + 360) % 360) / 15) * 15);
+		this.displayBlock.setYaw(Math.round(((this.displayBlock.getYaw() + 360) % 360) / 15) * 15);
 	}
 
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (this.client != null) {
 			super.render(context, mouseX, mouseY, delta);
-
-			int degreesPitch = (int) (15 * Math.round((this.displayBlock.getPitch() * (180F / Math.PI) / 15)));
-			int degreesYaw = (int) (15 * Math.round((this.displayBlock.getYaw() * (180F / Math.PI) / 15)));
-
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.scale_value", this.displayBlock.getScale().x()), 7, 7, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.x_offset_value", this.displayBlock.getOffset().x()), 7, 37, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.y_offset_value", this.displayBlock.getOffset().y()), 7, 67, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.z_offset_value", this.displayBlock.getOffset().z()), 7, 97, 0xFFFFFFFF);
-			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.pitch_value", degreesPitch), 7, 127, 0xFFFFFFFF);
-			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.yaw_value", degreesYaw), 7, 157, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.pitch_value", (int) this.displayBlock.getPitch()), 7, 127, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.yaw_value", (int) this.displayBlock.getYaw()), 7, 157, 0xFFFFFFFF);
 		}
 	}
 
