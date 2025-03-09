@@ -55,7 +55,7 @@ public abstract class GlowcaseBlock extends Block {
 
 	@Override
 	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) return ItemActionResult.CONSUME;
+		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
 		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
 			if (openEditScreen(pos)) {
@@ -63,7 +63,7 @@ public abstract class GlowcaseBlock extends Block {
 			}
 		}
 
-		return ItemActionResult.SUCCESS;
+		return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 	}
 
 	@Override

@@ -129,19 +129,19 @@ public class Glowcase implements ModInitializer {
 		.icon(() -> new ItemStack(SPRITE_BLOCK_ITEM.get()))
 		.entries((displayContext, entries) -> {
 			entries.add(TEXT_BLOCK_ITEM.get());
-			entries.add(SPRITE_BLOCK_ITEM.get());
-			entries.add(OUTLINE_BLOCK_ITEM.get());
-			entries.add(PARTICLE_DISPLAY_ITEM.get());
 			entries.add(ENTITY_DISPLAY_BLOCK_ITEM.get());
 			entries.add(ITEM_DISPLAY_BLOCK_ITEM.get());
+			entries.add(SPRITE_BLOCK_ITEM.get());
+			entries.add(PARTICLE_DISPLAY_ITEM.get());
 			entries.add(SOUND_BLOCK_ITEM.get());
-			entries.add(ITEM_ACCEPTOR_BLOCK_ITEM.get());
+			entries.add(SCREEN_BLOCK_ITEM.get());
+			entries.add(OUTLINE_BLOCK_ITEM.get());
 			entries.add(HYPERLINK_BLOCK_ITEM.get());
 			entries.add(POPUP_BLOCK_ITEM.get());
-			entries.add(SCREEN_BLOCK_ITEM.get());
+			entries.add(ITEM_PROVIDER_BLOCK_ITEM.get());
+			entries.add(ITEM_ACCEPTOR_BLOCK_ITEM.get());
 			entries.add(LOCK_ITEM.get());
 			entries.add(TABLET_ITEM.get());
-			entries.add(ITEM_PROVIDER_BLOCK_ITEM.get());
 			entries.add(NOTE_ITEM.get());
 		})
 		.build()

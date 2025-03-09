@@ -30,7 +30,6 @@ public class BlockEntityRenderUtil {
 		new Vector3f(0.5F, 0.5F, 0.0F),
 		new Vector3f(-0.5F, 0.5F, 0.0F)
 	};
-	private static final Vector3f[] placeholderBackFaceVertices = IntStream.range(0, 4).mapToObj(i -> placeholderVertices[4 - i - 1]).toArray(Vector3f[]::new);
 
 	public static void renderPlaceholder(BlockEntity entity, Identifier texture, float scale, Quaternionf rotation, MatrixStack matrices, VertexConsumerProvider vertexConsumers, float zOffset) {
 		matrices.push();
@@ -55,12 +54,14 @@ public class BlockEntityRenderUtil {
 		matrices.pop();
 	}
 
-	public static void renderTrackingPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Entity camera) {
+	public static void renderTrackingPlaceholder(BlockEntity entity, Identifier texture, float scale, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Entity camera, float tickDelta) {
 		matrices.push();
 		matrices.translate(0.5, 0.5, 0.5);
-		Vec2f tracking = getTracking(camera, entity.getPos(), 0);
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(tracking.x));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(tracking.y));
+		Vec2f tracking = getTracking(camera, entity.getPos(), tickDelta);
+		float pitch = tracking.x;
+		float yaw = tracking.y;
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float) (Math.PI + yaw)));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotation(-pitch));
 		matrices.scale(scale, scale, scale);
 		VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityCutout(texture));
 		renderPlaceholderFace(matrices.peek(), vertexConsumer, entity.getPos());

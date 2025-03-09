@@ -41,7 +41,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos()) ||
 			(MinecraftClient.getInstance().player != null && MinecraftClient.getInstance().player.getMainHandStack().isOf(Glowcase.TABLET_ITEM.get())))
-			BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers);
+			BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1f, matrices, vertexConsumers, -0.1F);
 
 		matrices.push();
 

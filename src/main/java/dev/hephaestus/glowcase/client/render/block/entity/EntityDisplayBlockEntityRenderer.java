@@ -26,15 +26,14 @@ public record EntityDisplayBlockEntityRenderer(BlockEntityRendererFactory.Contex
 
 		matrices.push();
 		matrices.translate(0.5D, 0D, 0.5D);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F + entity.getYaw()));
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.getYaw()));
 		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
-		matrices.translate(0, 0.5, 0);
 		matrices.scale(entity.getScale().x(), entity.getScale().y(), entity.getScale().z());
 		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(entity.getPitch()));
 		Entity renderEntity = entity.getDisplayEntity();
 		if (renderEntity != null) {
 			EntityRenderer<? super Entity> entityRenderer = context.getEntityRenderDispatcher().getRenderer(renderEntity);
-			entityRenderer.render(renderEntity, 0, tickDelta, matrices, vertexConsumers, light);
+			entityRenderer.render(renderEntity, 0, 0, matrices, vertexConsumers, light);
 		}
 
 		matrices.pop();

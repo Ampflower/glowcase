@@ -35,7 +35,7 @@ public class EntityDisplayBlockEntity extends DisplayBlockEntity implements Stac
 	public void setFromStack(ItemStack stack) {
 		if (stack.getItem() instanceof SpawnEggItem eggItem) {
 			setDisplayEntity(eggItem.getEntityType(stack).create(world));
-			setScale(new Vector3f(Math.clamp(Math.round(8 * displayEntity.getHeight() >= displayEntity.getWidth() ? 1F / displayEntity.getHeight() : 1F / displayEntity.getWidth()) / 8, 0, 3)));
+			setScale(new Vector3f(Math.clamp(Math.round(Math.min(1F / displayEntity.getHeight(), 1F / displayEntity.getWidth()) * 8F) / 8F, 0.125F, 10F)));
 		}
 	}
 

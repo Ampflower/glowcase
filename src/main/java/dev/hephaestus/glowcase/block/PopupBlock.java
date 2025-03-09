@@ -37,6 +37,11 @@ public class PopupBlock extends GlowcaseBlock implements BlockEntityProvider {
 		return true;
 	}
 
+	@Override
+	boolean canTarget(PlayerEntity player, BlockPos pos) {
+		return true;
+	}
+
 	@Nullable
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {

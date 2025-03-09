@@ -44,6 +44,15 @@ public class ItemProviderBlock extends StackInteractableBlock {
 		builder.add(FACING);
 	}
 
+	public boolean canPickup(PlayerEntity player, BlockPos pos) {
+		return ((player.getWorld().getBlockEntity(pos) instanceof ItemProviderBlockEntity be && be.canGiveTo(player) && !player.isCreative() && be.canGiveTo(player) && (player.getMainHandStack().isEmpty() || (be.matchesStack(player.getMainHandStack()) && player.getMainHandStack().getCount() < player.getMainHandStack().getMaxCount()))));
+	}
+
+	@Override
+	public boolean canTarget(PlayerEntity player, BlockPos pos) {
+		return super.canTarget(player, pos) || canPickup(player, pos);
+	}
+
 	@Override
 	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (!(world.getBlockEntity(pos) instanceof ItemProviderBlockEntity be)) return ActionResult.CONSUME;

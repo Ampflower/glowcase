@@ -51,7 +51,7 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getSide());
+		return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	@Override

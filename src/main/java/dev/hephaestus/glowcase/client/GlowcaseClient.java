@@ -16,11 +16,13 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.util.Identifier;
 
 public class GlowcaseClient implements ClientModInitializer {
 	public static final ScreenImageCache screenImageCache = new ScreenImageCache();
+	public static final Identifier PROVIDER_CROSSHAIR_TEXTURE = Glowcase.id("hud/provider_crosshair");
 
-	@Override
+    @Override
 	public void onInitializeClient() {
 		Glowcase.proxy = new GlowcaseClientProxy();
 

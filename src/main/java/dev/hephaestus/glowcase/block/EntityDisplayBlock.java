@@ -1,8 +1,8 @@
 package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
+import dev.hephaestus.glowcase.block.entity.DisplayBlockEntity;
 import dev.hephaestus.glowcase.block.entity.EntityDisplayBlockEntity;
-import dev.hephaestus.glowcase.block.entity.ItemDisplayBlockEntity;
 import dev.hephaestus.glowcase.block.entity.StackInteractable;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -33,7 +33,7 @@ public class EntityDisplayBlock extends StackInteractableBlock implements BlockE
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
 		super.onPlaced(world, pos, state, placer, itemStack);
-		if (placer != null && world.getBlockEntity(pos) instanceof ItemDisplayBlockEntity be) {
+		if (placer != null && world.getBlockEntity(pos) instanceof DisplayBlockEntity be) {
 			be.setYaw((Math.round(((540.0F - placer.getHeadYaw())) / 45.0F) * 45) % 360);
 		}
 	}

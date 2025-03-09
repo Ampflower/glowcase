@@ -58,7 +58,7 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 			}).dimensions(110, 30, 20, 20).build();
 
 			this.decreaseYOffset = ButtonWidget.builder(Text.literal("-"), action -> {
-				this.displayBlock.getOffset().sub(0, 0, scaleOffsetChange);
+				this.displayBlock.getOffset().sub(0, scaleOffsetChange, 0);
 				editDisplayBlock();
 			}).dimensions(90, 60, 20, 20).build();
 
