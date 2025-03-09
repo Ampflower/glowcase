@@ -37,6 +37,5 @@ public record C2SEditRecipeBlock(BlockPos pos, String recipe, TextBlockEntity.ZO
 		be.zOffset = this.offset();
 
 		be.markDirty();
-		be.dispatch();
 	}
 }
