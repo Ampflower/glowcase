@@ -30,7 +30,7 @@ public class CollectionCaseItem extends Item implements ScrollableItem {
 				ItemStack retrievedStack = collection.getSelectedCollectableStack();
 				if (!retrievedStack.isEmpty() && collection.isSelectedCollected()) { // Retrieve Collectable
 					otherStackSetter.accept(retrievedStack);
-					caseStack.set(Glowcase.COLLECTION_COMPONENT.get(), collection.retrieveSelectedStack());
+					caseStack.set(Glowcase.COLLECTION_COMPONENT.get(), collection.retrieveSelectedStack(player.isCreative()));
 					playRetrieveSound(player);
 					return true;
 				} else if (player.isCreative() && tooltipVisible && collection.hasSelection()) { // Remove Collectable
@@ -71,12 +71,12 @@ public class CollectionCaseItem extends Item implements ScrollableItem {
 		if (collection != null) {
 			if (amount > 0) {
 				for (int i = 0; i < amount; i++) {
-					collection = collection.selectPrevious();
+					collection = collection.selectPrevious(!player.isCreative());
 				}
 				caseStack.set(Glowcase.COLLECTION_COMPONENT.get(), collection);
 			} else {
 				for (int i = 0; i < Math.abs(amount); i++) {
-					collection = collection.selectNext();
+					collection = collection.selectNext(!player.isCreative());
 				}
 				caseStack.set(Glowcase.COLLECTION_COMPONENT.get(), collection);
 			}

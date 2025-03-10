@@ -31,7 +31,7 @@ public record CollectionComponent(ImmutableList<CollectableStack> collectables, 
 	}
 
 	private boolean hasSelection(int selected) {
-		if (selected >= collectables.size() || selected < -1 || (!collectables.isEmpty() && selected < 0)) {
+		if (selected >= collectables.size() || selected < -1) {
 			Glowcase.LOGGER.warn("Glowcase collection case has an out of bounds selection and is now stuck! Index was {} for size {}", selected, collectables.size());
 			return false;
 		}
@@ -81,38 +81,38 @@ public record CollectionComponent(ImmutableList<CollectableStack> collectables, 
 		return new CollectionComponent(alteredCollectables(l -> l.set(selected, l.get(selected).asCollected())), selected);
 	}
 
-	private static int getPreviousCollected(ImmutableList<CollectableStack> collectables, int selected) {
+	private static int getPreviousCollected(ImmutableList<CollectableStack> collectables, int selected, boolean slotsAllowed) {
 		if (collectables.isEmpty()) return -1;
-		for (int i = (collectables.size() + selected - 1) % collectables.size(); i != selected; i = (collectables.size() + i - 1) % collectables.size()) { // Wraparound Fori
+		for (int i = (collectables.size() + selected - 1) % collectables.size(); i != selected && selected >= 0; i = (collectables.size() + i - 1) % collectables.size()) { // Wraparound Fori
 			if (collectables.get(i).collected()) {
 				return i;
 			}
 		}
-		return collectables.size() - 1;
+		return selected >= 0 && collectables.get(selected).collected() ? selected : (slotsAllowed ? collectables.size() - 1 : -1);
 	}
 
-	private static int getNextCollected(ImmutableList<CollectableStack> collectables, int selected) {
+	private static int getNextCollected(ImmutableList<CollectableStack> collectables, int selected, boolean slotsAllowed) {
 		if (collectables.isEmpty()) return -1;
-		for (int i = (selected + 1) % collectables.size(); i != selected; i = (i + 1) % collectables.size()) { // Wraparound Fori
+		for (int i = (selected + 1) % collectables.size(); i != selected && selected >= 0; i = (i + 1) % collectables.size()) { // Wraparound Fori
 			if (collectables.get(i).collected()) {
 				return i;
 			}
 		}
-		return 0;
+		return selected >= 0 && collectables.get(selected).collected() ? selected : (slotsAllowed ? 0 : -1);
 	}
 
-	public CollectionComponent retrieveSelectedStack() {
+	public CollectionComponent retrieveSelectedStack(boolean canSelectSlots) {
 		if (!hasSelection()) return this;
 		ImmutableList<CollectableStack> newCollection = alteredCollectables(l -> l.set(selected, l.get(selected).asRetrieved()));
-		return new CollectionComponent(newCollection, getPreviousCollected(newCollection, selected));
+		return new CollectionComponent(newCollection, getPreviousCollected(newCollection, selected, canSelectSlots));
 	}
 
-	public CollectionComponent selectNext() {
-		return new CollectionComponent(collectables, (selected + 1) % collectables.size());
+	public CollectionComponent selectNext(boolean collected) {
+		return new CollectionComponent(collectables, collected ? getNextCollected(collectables, selected, false) : (selected + 1) % collectables.size());
 	}
 
-	public CollectionComponent selectPrevious() {
-		return new CollectionComponent(collectables, (collectables.size() + selected - 1) % collectables.size());
+	public CollectionComponent selectPrevious(boolean collected) {
+		return new CollectionComponent(collectables, collected ? getPreviousCollected(collectables, selected, false) : (collectables.size() + selected - 1) % collectables.size());
 	}
 
 	public int collected() {
