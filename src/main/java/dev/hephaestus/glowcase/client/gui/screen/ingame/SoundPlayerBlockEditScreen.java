@@ -97,6 +97,12 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 		this.distance.setTextPredicate(ParseUtil::canParseDouble);
 		this.addDrawableChild(this.distance);
 
+		this.relativeButton = new ButtonWidget.Builder(Text.stringifiedTranslatable("gui.glowcase.sound_positioning", soundBlock.relative), (action) -> {
+			soundBlock.relative = !soundBlock.relative;
+			this.relativeButton.setMessage(Text.stringifiedTranslatable("gui.glowcase.sound_positioning", soundBlock.relative));
+		}).dimensions(6 * width / 10, 160, 150, 20).build();
+		this.addDrawableChild(this.relativeButton);
+
 		this.offset = new Vec3FieldsWidget(
 			width / 10, 210,
 			8 * width / 10, 20,

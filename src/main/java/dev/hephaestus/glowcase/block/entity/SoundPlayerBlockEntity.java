@@ -31,6 +31,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	public float pitch = 1;
 	public int repeatDelay = 0;
 	public float distance = 16;
+	public boolean relative = false;
 	public Vec3d offset = Vec3d.ZERO;
 	public boolean cancelOthers = false;
 
@@ -57,6 +58,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		tag.putFloat("pitch", this.pitch);
 		tag.putInt("repeatDelay", this.repeatDelay);
 		tag.putFloat("distance", this.distance);
+		tag.putBoolean("relative", this.relative);
 		tag.putBoolean("cancelOthers", this.cancelOthers);
 		Vec3d.CODEC.encodeStart(ops, this.offset)
 			.resultOrPartial(LOGGER::error)
@@ -77,6 +79,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		this.pitch = tag.getFloat("pitch");
 		this.repeatDelay = tag.getInt("repeatDelay");
 		this.distance = tag.getFloat("distance");
+		this.relative = tag.getBoolean("relative");
 		this.cancelOthers = tag.getBoolean("cancelOthers");
 		if (tag.contains("offset"))
 			Vec3d.CODEC.parse(ops, tag.get("offset"))
@@ -92,7 +95,9 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 				entity.soundId, entity.category,
 				entity.volume, entity.pitch, entity.repeatDelay,
 				entity.distance,
-				entity.pos.toCenterPos().add(entity.offset),
+				entity.relative,
+				entity.getSoundPos(),
+				entity.getSourcePos(),
 				player,
 				entity.getPos()
 			);
@@ -110,6 +115,22 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 	}
 
+	private Vec3d getSoundPos() {
+		if(relative) {
+			return offset;
+		}
+
+		return pos.toCenterPos().add(offset);
+	}
+
+	private Vec3d getSourcePos() {
+		if(relative) {
+			return pos.toCenterPos();
+		}
+
+		return pos.toCenterPos().add(offset);
+	}
+
 	// I don't think the repeat is necessary on this at this point
 	public static class PositionedSoundLoop extends PositionedSoundInstance implements TickableSoundInstance {
 		private final PlayerEntity player;
@@ -120,16 +141,17 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 
 		private boolean done;
 
-		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, int repeatDelay, float distance, Vec3d pos, PlayerEntity player, BlockPos soundBlockPos) {
+		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, int repeatDelay, float distance, boolean relative, Vec3d soundPos, Vec3d pos, PlayerEntity player, BlockPos soundBlockPos) {
 			super(
 				id, category,
 				volume, pitch,
 				SoundInstance.createRandom(),
 				true, repeatDelay,
 				AttenuationType.NONE,
-				pos.x, pos.y, pos.z,
-				false
+				soundPos.x, soundPos.y, soundPos.z,
+				relative
 			);
+
 			this.pos = pos;
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
