@@ -25,7 +25,7 @@ public record C2SEditSoundBlock(SoundInfo soundInfo, PositionalInfo positionalIn
 	public static C2SEditSoundBlock of(SoundPlayerBlockEntity be) {
 		return new C2SEditSoundBlock(
 			new SoundInfo(be.soundId, be.category.toString(), be.volume, be.pitch, be.repeatDelay, be.cancelOthers),
-			new PositionalInfo(be.distance, be.relative, be.soundPosition),
+			new PositionalInfo(be.distance, be.offset),
 			be.getPos()
 		);
 	}
@@ -52,8 +52,7 @@ public record C2SEditSoundBlock(SoundInfo soundInfo, PositionalInfo positionalIn
 		be.cancelOthers = soundInfo.cancelOthers;
 
 		be.distance = positionalInfo.distance;
-		be.relative = positionalInfo.relative;
-		be.soundPosition = positionalInfo.position;
+		be.offset = positionalInfo.offset;
 
 		be.markDirty();
 	}
@@ -70,11 +69,10 @@ public record C2SEditSoundBlock(SoundInfo soundInfo, PositionalInfo positionalIn
 		);
 	}
 
-	public record PositionalInfo(float distance, boolean relative, Vec3d position) {
+	public record PositionalInfo(float distance, Vec3d offset) {
 		public static final PacketCodec<RegistryByteBuf, PositionalInfo> PACKET_CODEC = PacketCodec.tuple(
 			PacketCodecs.FLOAT, PositionalInfo::distance,
-			PacketCodecs.BOOL, PositionalInfo::relative,
-			PacketCodecs.codec(Vec3d.CODEC), PositionalInfo::position,
+			PacketCodecs.codec(Vec3d.CODEC), PositionalInfo::offset,
 			PositionalInfo::new
 		);
 	}
