@@ -1,8 +1,27 @@
 package dev.hephaestus.glowcase;
 
-import dev.hephaestus.glowcase.packet.*;
+import dev.hephaestus.glowcase.item.ScrollableItem;
+import dev.hephaestus.glowcase.packet.C2SEditEntityDisplayBlock;
+import dev.hephaestus.glowcase.packet.C2SEditHyperlinkBlock;
+import dev.hephaestus.glowcase.packet.C2SEditItemAcceptorBlock;
+import dev.hephaestus.glowcase.packet.C2SEditItemDisplayBlock;
+import dev.hephaestus.glowcase.packet.C2SEditItemProviderBlock;
+import dev.hephaestus.glowcase.packet.C2SEditNoteItem;
+import dev.hephaestus.glowcase.packet.C2SEditOutlineBlock;
+import dev.hephaestus.glowcase.packet.C2SEditParticleDisplayBlock;
+import dev.hephaestus.glowcase.packet.C2SEditPopupBlock;
+import dev.hephaestus.glowcase.packet.C2SEditScreenBlock;
+import dev.hephaestus.glowcase.packet.C2SEditSoundBlock;
+import dev.hephaestus.glowcase.packet.C2SEditSpriteBlock;
+import dev.hephaestus.glowcase.packet.C2SEditTabletItem;
+import dev.hephaestus.glowcase.packet.C2SEditTextBlock;
+import dev.hephaestus.glowcase.packet.C2SSlotScrolled;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class GlowcaseNetworking {
 	public static void init() {
@@ -20,6 +39,7 @@ public class GlowcaseNetworking {
 		PayloadTypeRegistry.playC2S().register(C2SEditTabletItem.ID, C2SEditTabletItem.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(C2SEditNoteItem.ID, C2SEditNoteItem.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(C2SEditEntityDisplayBlock.ID, C2SEditEntityDisplayBlock.PACKET_CODEC);
+		PayloadTypeRegistry.playC2S().register(C2SSlotScrolled.ID, C2SSlotScrolled.PACKET_CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditHyperlinkBlock.ID, C2SEditHyperlinkBlock::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditItemDisplayBlock.ID, C2SEditItemDisplayBlock::receive);
@@ -35,5 +55,46 @@ public class GlowcaseNetworking {
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditTabletItem.ID, C2SEditTabletItem::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditNoteItem.ID, C2SEditNoteItem::receive);
 		ServerPlayNetworking.registerGlobalReceiver(C2SEditEntityDisplayBlock.ID, C2SEditEntityDisplayBlock::receive);
+		ServerPlayNetworking.registerGlobalReceiver(C2SSlotScrolled.ID, GlowcaseNetworking::slotScrolled);
+	}
+
+	/**
+	 * @author zacharybarbanell
+	 */
+	private static void slotScrolled(C2SSlotScrolled packet, ServerPlayNetworking.Context ctx) {
+		ctx.server().execute(() -> {
+			ServerPlayerEntity player = ctx.player();
+			player.updateLastActionTime();
+			ScreenHandler screenHandler = player.currentScreenHandler;
+
+			if (screenHandler.syncId != packet.syncId()) {
+				return;
+			}
+			if (player.isSpectator()) {
+				screenHandler.syncState();
+				return;
+			}
+			if (!screenHandler.canUse(player)) {
+				Glowcase.LOGGER.debug("Player {} interacted with invalid menu {}", player, screenHandler);
+				return;
+			}
+			if (!screenHandler.isValid(packet.slotIndex())) {
+				Glowcase.LOGGER.debug("Player {} clicked invalid slot index: {}, available slots: {}", player.getName(), packet.slotIndex(), screenHandler.slots.size());
+				return;
+			}
+			boolean flag = packet.revision() == player.currentScreenHandler.getRevision();
+			screenHandler.disableSyncing();
+			Slot slot = screenHandler.getSlot(packet.slotIndex());
+			ItemStack stack = slot.getStack();
+			if (stack.getItem() instanceof ScrollableItem si) {
+				si.scroll(stack, player, packet.amount());
+			}
+			screenHandler.enableSyncing();
+			if (flag) {
+				screenHandler.updateToClient();
+			} else {
+				screenHandler.sendContentUpdates();
+			}
+		});
 	}
 }
