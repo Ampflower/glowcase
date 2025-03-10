@@ -114,6 +114,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	public static class PositionedSoundLoop extends PositionedSoundInstance implements TickableSoundInstance {
 		private final PlayerEntity player;
 		private final BlockPos soundBlockPos;
+		private final Vec3d pos;
 
 		private final float distance;
 
@@ -129,6 +130,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 				pos.x, pos.y, pos.z,
 				false
 			);
+			this.pos = pos;
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
 			this.distance = distance;
@@ -160,12 +162,12 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 
 		private float linearFalloff() {
-			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.soundBlockPos.toCenterPos());
+			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.pos);
 			return 1 - (distanceToPlayer / distance);
 		}
 
 		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.distance * this.distance;
+			return this.player.squaredDistanceTo(this.pos) <= this.distance * this.distance;
 		}
 
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
