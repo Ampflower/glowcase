@@ -59,7 +59,11 @@ public abstract class GlowcaseBlock extends Block {
 			return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
 
-		if (player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos) && openEditScreen(pos)) {
+		if (player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
+			if (world.isClient) {
+				openEditScreen(pos);
+			}
+
 			return ItemActionResult.SUCCESS;
 		}
 
