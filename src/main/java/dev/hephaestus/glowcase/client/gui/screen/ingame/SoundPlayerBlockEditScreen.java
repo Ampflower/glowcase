@@ -8,7 +8,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
 
@@ -25,7 +24,7 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 
 	private TextFieldWidget distance;
 	private ButtonWidget relativeButton;
-	private Vec3FieldsWidget soundPosition;
+	private Vec3FieldsWidget offset;
 
 	public SoundPlayerBlockEditScreen(SoundPlayerBlockEntity soundBlock) {
 		this.soundBlock = soundBlock;
@@ -101,17 +100,15 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 		this.relativeButton = new ButtonWidget.Builder(Text.stringifiedTranslatable("gui.glowcase.sound_positioning", soundBlock.relative), (action) -> {
 			soundBlock.relative = !soundBlock.relative;
 			this.relativeButton.setMessage(Text.stringifiedTranslatable("gui.glowcase.sound_positioning", soundBlock.relative));
-			soundBlock.soundPosition = soundBlock.relative ? Vec3d.ZERO : soundBlock.getPos().toCenterPos();
-			this.soundPosition.setVec(soundBlock.soundPosition);
 		}).dimensions(6 * width / 10, 160, 150, 20).build();
 		this.addDrawableChild(this.relativeButton);
 
-		this.soundPosition = new Vec3FieldsWidget(
+		this.offset = new Vec3FieldsWidget(
 			width / 10, 210,
 			8 * width / 10, 20,
 			this.client,
-			soundBlock.soundPosition);
-		this.addDrawableChild(this.soundPosition);
+			soundBlock.offset);
+		this.addDrawableChild(this.offset);
 
 	}
 
@@ -122,7 +119,7 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 		soundBlock.repeatDelay = ParseUtil.parseOrDefault(this.repeatDelay.getText(), soundBlock.repeatDelay);
 
 		soundBlock.distance = (float) ParseUtil.parseOrDefault(this.distance.getText(), soundBlock.distance);
-		soundBlock.soundPosition = this.soundPosition.value();
+		soundBlock.offset = this.offset.value();
 
 		setSound();
 

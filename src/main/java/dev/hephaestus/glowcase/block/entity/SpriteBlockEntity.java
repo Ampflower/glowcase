@@ -1,7 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -40,15 +39,6 @@ public class SpriteBlockEntity extends GlowcaseBlockEntity {
 		this.rotation = tag.getInt("rotation");
 		this.zOffset = TextBlockEntity.ZOffset.valueOf(tag.getString("z_offset"));
 		this.color = tag.getInt("color");
-	}
-
-	@SuppressWarnings({"MethodCallSideOnly", "VariableUseSideOnly"})
-	@Override
-	public void markRemoved() {
-		if (world != null && world.isClient) {
-			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
-		}
-		super.markRemoved();
 	}
 
 	public void setRotation(int rotation) {

@@ -19,6 +19,8 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class LockItem extends Item {
+	public static final ContainerLock CONTAINER_LOCK = new ContainerLock("glowcase");
+
 	public LockItem(Settings settings) {
 		super(settings);
 	}
@@ -39,7 +41,7 @@ public class LockItem extends Item {
 		SoundEvent soundEvent;
 
 		if (bea.glowcase$getLock().equals(ContainerLock.EMPTY)) {
-			bea.glowcase$setLock(new ContainerLock("glowcase"));
+			bea.glowcase$setLock(CONTAINER_LOCK);
 			message = Text.translatable("gui.glowcase.locked_block", be.getDisplayName());
 			soundEvent = SoundEvents.BLOCK_WOODEN_TRAPDOOR_CLOSE;
 		} else {

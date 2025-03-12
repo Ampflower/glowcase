@@ -11,6 +11,7 @@ import dev.hephaestus.glowcase.block.ItemProviderBlock;
 import dev.hephaestus.glowcase.block.OutlineBlock;
 import dev.hephaestus.glowcase.block.ParticleDisplayBlock;
 import dev.hephaestus.glowcase.block.PopupBlock;
+import dev.hephaestus.glowcase.block.RecipeBlock;
 import dev.hephaestus.glowcase.block.ScreenBlock;
 import dev.hephaestus.glowcase.block.SoundPlayerBlock;
 import dev.hephaestus.glowcase.block.SpriteBlock;
@@ -23,6 +24,7 @@ import dev.hephaestus.glowcase.block.entity.ItemProviderBlockEntity;
 import dev.hephaestus.glowcase.block.entity.OutlineBlockEntity;
 import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
 import dev.hephaestus.glowcase.block.entity.PopupBlockEntity;
+import dev.hephaestus.glowcase.block.entity.RecipeBlockEntity;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
 import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
 import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
@@ -106,6 +108,10 @@ public class Glowcase implements ModInitializer {
 	public static final Supplier<BlockItem> SPRITE_BLOCK_ITEM = registerItem("sprite_block", () -> new BlockItem(SPRITE_BLOCK.get(), new Item.Settings().maxCount(1)));
 	public static final Supplier<BlockEntityType<SpriteBlockEntity>> SPRITE_BLOCK_ENTITY = registerBlockEntity("sprite_block", () -> BlockEntityType.Builder.create(SpriteBlockEntity::new, SPRITE_BLOCK.get()).build(null));
 
+	public static final Supplier<RecipeBlock> RECIPE_BLOCK = registerBlock("recipe_block", RecipeBlock::new);
+	public static final Supplier<BlockItem> RECIPE_BLOCK_ITEM = registerItem("recipe_block", () -> new BlockItem(RECIPE_BLOCK.get(), new Item.Settings()));
+	public static final Supplier<BlockEntityType<RecipeBlockEntity>> RECIPE_BLOCK_ENTITY = registerBlockEntity("recipe_block", () -> BlockEntityType.Builder.create(RecipeBlockEntity::new, RECIPE_BLOCK.get()).build(null));
+
 	public static final Supplier<OutlineBlock> OUTLINE_BLOCK = registerBlock("outline_block", OutlineBlock::new);
 	public static final Supplier<BlockItem> OUTLINE_BLOCK_ITEM = registerItem("outline_block", () -> new BlockItem(OUTLINE_BLOCK.get(), new Item.Settings().maxCount(1)));
 	public static final Supplier<BlockEntityType<OutlineBlockEntity>> OUTLINE_BLOCK_ENTITY = registerBlockEntity("outline_block", () -> BlockEntityType.Builder.create(OutlineBlockEntity::new, OUTLINE_BLOCK.get()).build(null));
@@ -138,6 +144,7 @@ public class Glowcase implements ModInitializer {
 			entries.add(TEXT_BLOCK_ITEM.get());
 			entries.add(ENTITY_DISPLAY_BLOCK_ITEM.get());
 			entries.add(ITEM_DISPLAY_BLOCK_ITEM.get());
+			entries.add(RECIPE_BLOCK_ITEM.get());
 			entries.add(SPRITE_BLOCK_ITEM.get());
 			entries.add(PARTICLE_DISPLAY_ITEM.get());
 			entries.add(SOUND_BLOCK_ITEM.get());

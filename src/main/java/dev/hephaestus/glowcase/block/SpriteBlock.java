@@ -6,10 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -53,12 +50,7 @@ public class SpriteBlock extends GlowcaseBlock implements BlockEntityProvider {
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
-			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be) {
-				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
-			}
-		}
+		loadClientSideNBT(world, pos, placer, stack);
 		if (placer != null && world.getBlockEntity(pos) instanceof SpriteBlockEntity be) {
 			if (state.get(FACING).equals(Direction.UP)) {
 				be.setRotation(Math.round(((540.0F + placer.getHeadYaw()) % 360.0F) / 45.0F) * 45);

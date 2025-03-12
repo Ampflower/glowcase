@@ -41,26 +41,34 @@ public abstract class GlowcaseBlock extends Block {
 
 	abstract protected boolean openEditScreen(BlockPos pos);
 
+	protected void loadClientSideNBT(World world, BlockPos pos, LivingEntity placer, ItemStack stack) {
+		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
+			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be) blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
+			openEditScreen(pos);
+		}
+	}
+
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		loadClientSideNBT(world, pos, placer, stack);
 		if (world.isClient && placer instanceof PlayerEntity player && canEditGlowcase(player, pos)) {
-			//load any ctrl-picked NBT clientside
-			NbtComponent blockEntityTag = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-			if (blockEntityTag != null && world.getBlockEntity(pos) instanceof BlockEntity be)
-				blockEntityTag.applyToBlockEntity(be, world.getRegistryManager());
-
 			openEditScreen(pos);
 		}
 	}
 
 	@Override
 	protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		if (!(world.getBlockEntity(pos) instanceof GlowcaseBlockEntity)) {
+			return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
 
-		if (world.isClient && player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
-			if (openEditScreen(pos)) {
-				return ItemActionResult.SUCCESS;
+		if (player.getStackInHand(hand).isIn(Glowcase.ITEM_TAG) && canEditGlowcase(player, pos)) {
+			if (world.isClient) {
+				openEditScreen(pos);
 			}
+
+			return ItemActionResult.SUCCESS;
 		}
 
 		return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;

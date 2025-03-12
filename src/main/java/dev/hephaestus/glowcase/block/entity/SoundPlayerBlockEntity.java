@@ -32,14 +32,13 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	public int repeatDelay = 0;
 	public float distance = 16;
 	public boolean relative = false;
-	public Vec3d soundPosition;
+	public Vec3d offset = Vec3d.ZERO;
 	public boolean cancelOthers = false;
 
 	public PositionedSoundLoop nowPlaying = null;
 
 	public SoundPlayerBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.SOUND_BLOCK_ENTITY.get(), pos, state);
-		this.soundPosition = pos.toCenterPos();
 	}
 
 	public void cycleCategory() {
@@ -61,9 +60,9 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		tag.putFloat("distance", this.distance);
 		tag.putBoolean("relative", this.relative);
 		tag.putBoolean("cancelOthers", this.cancelOthers);
-		Vec3d.CODEC.encodeStart(ops, this.soundPosition)
+		Vec3d.CODEC.encodeStart(ops, this.offset)
 			.resultOrPartial(LOGGER::error)
-			.ifPresent(result -> tag.put("soundPosition", result));
+			.ifPresent(result -> tag.put("offset", result));
 	}
 
 	@Override
@@ -82,10 +81,10 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		this.distance = tag.getFloat("distance");
 		this.relative = tag.getBoolean("relative");
 		this.cancelOthers = tag.getBoolean("cancelOthers");
-		if (tag.contains("soundPosition"))
-			Vec3d.CODEC.parse(ops, tag.get("soundPosition"))
+		if (tag.contains("offset"))
+			Vec3d.CODEC.parse(ops, tag.get("offset"))
 				.resultOrPartial(LOGGER::error)
-				.ifPresent(result -> this.soundPosition = result);
+				.ifPresent(result -> this.offset = result);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -97,7 +96,8 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 				entity.volume, entity.pitch, entity.repeatDelay,
 				entity.distance,
 				entity.relative,
-				entity.soundPosition,
+				entity.getSoundPos(),
+				entity.getSourcePos(),
 				player,
 				entity.getPos()
 			);
@@ -115,25 +115,44 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 	}
 
+	private Vec3d getSoundPos() {
+		if(relative) {
+			return offset;
+		}
+
+		return pos.toCenterPos().add(offset);
+	}
+
+	private Vec3d getSourcePos() {
+		if(relative) {
+			return pos.toCenterPos();
+		}
+
+		return pos.toCenterPos().add(offset);
+	}
+
 	// I don't think the repeat is necessary on this at this point
 	public static class PositionedSoundLoop extends PositionedSoundInstance implements TickableSoundInstance {
 		private final PlayerEntity player;
 		private final BlockPos soundBlockPos;
+		private final Vec3d pos;
 
 		private final float distance;
 
 		private boolean done;
 
-		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, int repeatDelay, float distance, boolean relative, Vec3d pos, PlayerEntity player, BlockPos soundBlockPos) {
+		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, int repeatDelay, float distance, boolean relative, Vec3d soundPos, Vec3d pos, PlayerEntity player, BlockPos soundBlockPos) {
 			super(
 				id, category,
 				volume, pitch,
 				SoundInstance.createRandom(),
 				true, repeatDelay,
 				AttenuationType.NONE,
-				pos.x, pos.y, pos.z,
+				soundPos.x, soundPos.y, soundPos.z,
 				relative
 			);
+
+			this.pos = pos;
 			this.player = player;
 			this.soundBlockPos = soundBlockPos;
 			this.distance = distance;
@@ -165,12 +184,12 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 
 		private float linearFalloff() {
-			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.soundBlockPos.toCenterPos());
+			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.pos);
 			return 1 - (distanceToPlayer / distance);
 		}
 
 		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.soundBlockPos.toCenterPos()) <= this.distance * this.distance;
+			return this.player.squaredDistanceTo(this.pos) <= this.distance * this.distance;
 		}
 
 		public boolean isDifferentFrom(PositionedSoundLoop other) {
