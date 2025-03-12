@@ -11,31 +11,40 @@ import dev.hephaestus.glowcase.client.render.item.NoteItemHandRenderer;
 import dev.hephaestus.glowcase.client.render.block.entity.RecipeBlockEntityRenderer;
 import dev.hephaestus.glowcase.client.render.item.TabletItemHandRenderer;
 import dev.hephaestus.glowcase.client.util.NoteTextColorResource;
+import dev.hephaestus.glowcase.item.ScrollableItem;
+import dev.hephaestus.glowcase.mixin.HandledScreenInvoker;
+import dev.hephaestus.glowcase.packet.C2SSlotScrolled;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.mixin.object.builder.client.ModelPredicateProviderRegistryAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Identifier;
 
 public class GlowcaseClient implements ClientModInitializer {
 	public static final Boolean EMI_LOADED = FabricLoader.getInstance().isModLoaded("emi");
 	public static final ScreenImageCache screenImageCache = new ScreenImageCache();
 	public static final Identifier PROVIDER_CROSSHAIR_TEXTURE = Glowcase.id("hud/provider_crosshair");
 
-    @Override
+	private double accScroll = 0;
+
+	@Override
 	public void onInitializeClient() {
 		Glowcase.proxy = new GlowcaseClientProxy();
 
@@ -80,6 +89,10 @@ public class GlowcaseClient implements ClientModInitializer {
 			Glowcase.ENTITY_DISPLAY_BLOCK_ITEM.get()
 		);
 
+		ColorProviderRegistry.ITEM.register((stack, index) -> stack.contains(DataComponentTypes.DYED_COLOR) ? 0xFF000000 | stack.get(DataComponentTypes.DYED_COLOR).rgb() : 0xFFFFFFFF,
+			Glowcase.COLLECTION_CASE_ITEM.get()
+		);
+
 		WorldRenderEvents.AFTER_TRANSLUCENT.register(BakedBlockEntityRenderer.Manager::render);
 		InvalidateRenderStateCallback.EVENT.register(BakedBlockEntityRenderer.Manager::reset);
 
@@ -109,5 +122,31 @@ public class GlowcaseClient implements ClientModInitializer {
 			}
 			return 0;
 		});
+
+		ScreenEvents.BEFORE_INIT.register(((client, sc, scaledWidth, scaledHeight) -> {
+			if (sc instanceof HandledScreen<?> hs) {
+				ScreenMouseEvents.allowMouseScroll(hs).register((screen, x, y, h, v) -> allowMouseScroll((HandledScreen<?>) screen, x, y, v));
+			}
+		}));
+	}
+
+	/**
+	 * @author zacharybarbanell
+	 */
+	private boolean allowMouseScroll(HandledScreen<?> screen, double x, double y, double scroll) {
+		Slot slot = ((HandledScreenInvoker) screen).invokeGetSlotAt(x, y);
+		if (slot == null) return true;
+		ItemStack stack = slot.getStack();
+		if (!(stack.getItem() instanceof ScrollableItem si)) return true;
+		if (accScroll * scroll < 0) {
+			accScroll = 0;
+		}
+		accScroll += scroll;
+		int amount = (int) accScroll;
+		if (amount == 0) return true;
+		accScroll -= amount;
+		si.scroll(stack, MinecraftClient.getInstance().player, amount);
+		ClientPlayNetworking.send(new C2SSlotScrolled(screen.getScreenHandler().syncId, screen.getScreenHandler().getRevision(), slot.id, amount));
+		return false;
 	}
 }

@@ -1,22 +1,23 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "dev.hephaestus.glowcase.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "LockableContainerBlockEntityAccessor",
-	"ContainerLockMixin",
-    "PlayerEntityMixin"
-  ],
-  "client": [
-    "client.KeyboardMixin",
-    "client.MixinHeldItemRenderer",
-    "client.MixinInGameHud",
-    "client.RenderSystemAccessor",
-    "client.TextureManagerAccessor"
-  ],
-  "server": [],
-  "injectors": {
-    "defaultRequire": 1
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.hephaestus.glowcase.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"LockableContainerBlockEntityAccessor",
+		"ContainerLockMixin",
+		"PlayerEntityMixin"
+	],
+	"client": [
+		"HandledScreenInvoker",
+		"client.KeyboardMixin",
+		"client.MixinHeldItemRenderer",
+		"client.MixinInGameHud",
+		"client.RenderSystemAccessor",
+		"client.TextureManagerAccessor"
+	],
+	"server": [],
+	"injectors": {
+		"defaultRequire": 1
 	}
 }
