@@ -150,7 +150,7 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 			world.setBlockState(pos, state.with(POWERED, false), Block.NOTIFY_LISTENERS);
 		} else {
 			world.setBlockState(pos, state.with(POWERED, true), Block.NOTIFY_LISTENERS);
-			world.scheduleBlockTick(pos, this, 4);
+			world.scheduleBlockTick(pos, this, world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity be ? be.getPulse() : 4);
 		}
 
 		this.updateNeighbors(world, pos, state);
@@ -166,11 +166,6 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 	@Override
 	protected boolean emitsRedstonePower(BlockState state) {
 		return true;
-	}
-
-	@Override
-	protected int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
-		return 0;
 	}
 
 	@Override

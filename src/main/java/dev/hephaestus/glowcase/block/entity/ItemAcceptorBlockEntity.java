@@ -18,6 +18,7 @@ import java.util.List;
 public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 	private Identifier item = Identifier.ofVanilla("air");
 	public int count = 1;
+	public int pulse = 4;
 	public OutputDirection outputDirection = OutputDirection.BACK;
 	public boolean isItemTag = false;
 	private List<Item> itemTagList = List.of();
@@ -32,6 +33,7 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 
 		tag.putString("item", this.item.toString());
 		tag.putInt("count", this.count);
+		tag.putInt("pulse", this.pulse);
 		tag.putBoolean("is_item_tag", this.isItemTag);
 		tag.putString("output_direction", this.outputDirection.name());
 	}
@@ -42,6 +44,7 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 
 		setItem(Identifier.tryParse(tag.getString("item")));
 		this.count = tag.getInt("count");
+		this.pulse = tag.getInt("pulse");
 		this.isItemTag = tag.getBoolean("is_item_tag");
 		this.outputDirection = OutputDirection.valueOf(tag.getString("output_direction"));
 	}
@@ -75,6 +78,10 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 			: stack.isOf(Registries.ITEM.get(item));
 
 		return isEqual && stack.getCount() >= count;
+	}
+
+	public int getPulse() {
+		return pulse;
 	}
 
 	public enum OutputDirection
