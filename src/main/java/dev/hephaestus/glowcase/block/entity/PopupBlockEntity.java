@@ -1,7 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TagParser;
@@ -101,14 +100,5 @@ public class PopupBlockEntity extends GlowcaseBlockEntity {
 		} else {
 			this.lines.set(i, Text.empty().append(parsed).setStyle(Style.EMPTY.withInsertion(string)));
 		}
-	}
-
-	@SuppressWarnings({"MethodCallSideOnly", "VariableUseSideOnly"})
-	@Override
-	public void markRemoved() {
-		if (world != null && world.isClient) {
-			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
-		}
-		super.markRemoved();
 	}
 }

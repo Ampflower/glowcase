@@ -1,7 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -38,14 +37,5 @@ public class OutlineBlockEntity extends GlowcaseBlockEntity {
 		this.offset = new Vec3i(offset[0], offset[1], offset[2]);
 		this.scale = new Vec3i(scale[0], scale[1], scale[2]);
 		this.color = tag.getInt("color");
-	}
-
-	@SuppressWarnings({"MethodCallSideOnly", "VariableUseSideOnly"})
-	@Override
-	public void markRemoved() {
-		if (world != null && world.isClient) {
-			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
-		}
-		super.markRemoved();
 	}
 }

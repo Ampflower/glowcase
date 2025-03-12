@@ -1,7 +1,6 @@
 package dev.hephaestus.glowcase.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
-import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -76,15 +75,6 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 			: stack.isOf(Registries.ITEM.get(item));
 
 		return isEqual && stack.getCount() >= count;
-	}
-
-	@SuppressWarnings({"MethodCallSideOnly", "VariableUseSideOnly"})
-	@Override
-	public void markRemoved() {
-		if (world != null && world.isClient) {
-			BakedBlockEntityRenderer.Manager.markForRebuild(getPos());
-		}
-		super.markRemoved();
 	}
 
 	public enum OutputDirection

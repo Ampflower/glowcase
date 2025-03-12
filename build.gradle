@@ -11,7 +11,8 @@ archivesBaseName = project.slug
 
 repositories {
 	maven { url "https://maven.nucleoid.xyz/" }
-	maven { url 'https://repo.sleeping.town/' }
+	maven { url "https://repo.sleeping.town/" }
+	maven { url "https://maven.terraformersmc.com/" }
 }
 
 dependencies {
@@ -29,6 +30,9 @@ dependencies {
 
 	implementation libs.kaleidoConfig
 	include libs.kaleidoConfig
+
+	modCompileOnly libs.emi
+	modLocalRuntime libs.emi
 }
 
 processResources {
