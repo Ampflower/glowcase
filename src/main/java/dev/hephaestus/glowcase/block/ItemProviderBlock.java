@@ -50,7 +50,7 @@ public class ItemProviderBlock extends StackInteractableBlock {
 
 	@Override
 	public boolean canTarget(PlayerEntity player, BlockPos pos) {
-		return super.canTarget(player, pos) || canPickup(player, pos);
+		return super.canTarget(player, pos) || canPickup(player, pos) || !player.isCreative();
 	}
 
 	@Override

@@ -63,6 +63,7 @@
 	"gui.glowcase.count": "Count",
 	"gui.glowcase.pulse": "Pulse Ticks",
 	"gui.glowcase.output_direction": "Pulse/Push Side: %s",
+	"gui.glowcase.cooldown": "Cooldown",
 	"gui.glowcase.alt": "Alt-Text",
 	"gui.glowcase.previous": "Previous",
 	"gui.glowcase.next": "Next",

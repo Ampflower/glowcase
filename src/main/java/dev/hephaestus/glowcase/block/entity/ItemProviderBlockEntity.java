@@ -6,19 +6,20 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements InfiniteInventory, StackInteractable {
 	protected ItemStack stack = ItemStack.EMPTY;
 	protected GivesItem givesItem = GivesItem.ALWAYS;
-	protected final Set<UUID> givenTo = new HashSet<>();
+	public long cooldown = 0;
+	protected final Map<UUID, Long> givenTimes = new HashMap<>();
 
 	public ItemProviderBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.ITEM_PROVIDER_BLOCK_ENTITY.get(), pos, state);
@@ -32,7 +33,7 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 	@Override
 	public void setFromStack(ItemStack stack) {
 		this.stack = stack.copy();
-		this.givenTo.clear();
+		this.givenTimes.clear();
 		this.markDirty();
 	}
 
@@ -61,13 +62,10 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 		super.writeNbt(tag, registryLookup);
 		if (!this.stack.isEmpty()) tag.put("item", this.stack.encode(registryLookup));
 		tag.putString("gives_item", this.givesItem.name());
-		NbtList given = new NbtList();
-		for (UUID id : givenTo) {
-			NbtCompound givenTag = new NbtCompound();
-			givenTag.putUuid("id", id);
-			given.add(givenTag);
-		}
-		tag.put("given_to", given);
+		tag.putLong("cooldown", this.cooldown);
+		NbtCompound timesNbt = new NbtCompound();
+		givenTimes.forEach((id, tick) -> timesNbt.putLong(id.toString(), tick));
+		tag.put("given_times", timesNbt);
 	}
 
 	@Override
@@ -79,28 +77,30 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 		} else {
 			this.givesItem = GivesItem.ALWAYS;
 		}
+		this.cooldown = tag.getLong("cooldown");
 
-		givenTo.clear();
-		if (tag.contains("given_to")) {
-			NbtList given = tag.getList("given_to", NbtElement.COMPOUND_TYPE);
-			for (NbtElement elem : given) {
-				NbtCompound comp = ((NbtCompound) elem);
-				givenTo.add(comp.getUuid("id"));
-			}
+		givenTimes.clear();
+		NbtCompound given = tag.getCompound("given_times");
+		for (String key : given.getKeys()) {
+			givenTimes.put(UUID.fromString(key), given.getLong(key));
 		}
 	}
 
 	public void cycleGiveType() {
 		this.givesItem = GivesItem.values()[(this.givesItem.ordinal() + 1) % GivesItem.values().length];
-		givenTo.clear();
+		givenTimes.clear();
 		markDirty();
+	}
+
+	public long getCooldownTicks(PlayerEntity player) {
+		return givenTimes.containsKey(player.getUuid()) ? givenTimes.get(player.getUuid()) + this.cooldown * 20 - world.getTime() : 0;
 	}
 
 	public boolean canGiveTo(PlayerEntity player) {
 		if (!hasItem()) return false;
 		else return switch (this.givesItem) {
 			case ALWAYS -> true;
-			case ONCE -> player.isCreative() || !givenTo.contains(player.getUuid());
+			case TIMED -> player.isCreative() || getCooldownTicks(player) <= 0;
 			case ONE -> player.isCreative() || !player.getInventory().containsAny(Set.of(stack.getItem()));
 		};
 	}
@@ -117,12 +117,12 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 			player.setStackInHand(Hand.MAIN_HAND, itemStack);
 		}
 		if (!player.isCreative()) {
-			givenTo.add(player.getUuid());
+			givenTimes.put(player.getUuid(), world.getTime());
 			markDirty();
 		}
 	}
 
 	public enum GivesItem {
-		ALWAYS, ONCE, ONE
+		ALWAYS, TIMED, ONE
 	}
 }
