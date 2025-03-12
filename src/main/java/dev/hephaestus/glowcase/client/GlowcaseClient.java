@@ -26,7 +26,6 @@ import net.fabricmc.fabric.mixin.object.builder.client.ModelPredicateProviderReg
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.component.DataComponentTypes;
@@ -37,7 +36,6 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Identifier;
 
 public class GlowcaseClient implements ClientModInitializer {
 	public static final Boolean EMI_LOADED = FabricLoader.getInstance().isModLoaded("emi");
