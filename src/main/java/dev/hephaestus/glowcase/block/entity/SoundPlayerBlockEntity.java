@@ -171,7 +171,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		@Override
 		public void tick() {
 			// stops track-stacking when reloading the block
-			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && !this.isDifferentFrom(be.nowPlaying))) {
+			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && this == be.nowPlaying)) {
 				setDone();
 			}
 		}
