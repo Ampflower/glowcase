@@ -121,6 +121,9 @@ public class EmiClientUtils {
 		view.translate(0.0f, 0.0f, 10.0f);
 		RenderSystem.applyModelViewMatrix();
 
+		float originalFogEnd = RenderSystem.getShaderFogEnd();
+		RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
+
 		Matrix4f backupProj = RenderSystem.getProjectionMatrix();
 		RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorter.BY_Z);
 		GlowcaseWidgetHolder holder = new GlowcaseWidgetHolder(recipe.getDisplayWidth(), recipe.getDisplayHeight());
@@ -145,6 +148,7 @@ public class EmiClientUtils {
 		SORRY.getEntityVertexConsumers().draw();
 
 		framebuffer.endWrite();
+		RenderSystem.setShaderFogEnd(originalFogEnd);
 		client.getFramebuffer().beginWrite(true);
 		return framebuffer;
 	}
