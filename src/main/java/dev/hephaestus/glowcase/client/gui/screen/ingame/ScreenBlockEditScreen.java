@@ -40,9 +40,9 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		int leftX = width / 10;
 		int availableWidth = width - (2 * (width / 10));
 		int fieldWidth = (availableWidth - (2 * gap)) / 3;
-		int fieldY = (height / 2) - 100;
+		int fieldY = (height / 2) - 95;
 
-		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40, 2 * leftX, 20, Text.empty());
+		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 45, 2 * leftX, 20, Text.empty());
 		this.widthEntryWidget.setText(""+this.screenBlockEntity.width);
 		this.widthEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.width"));
 		this.widthEntryWidget.setChangedListener(string -> {
@@ -51,9 +51,9 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		});
 
 		MutableText timesLiteral = Text.literal("×");
-		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
+		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 45, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
 
-		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40, 2 * leftX, 20, Text.empty());
+		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 45, 2 * leftX, 20, Text.empty());
 		this.heightEntryWidget.setText(""+this.screenBlockEntity.height);
 		this.heightEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.height"));
 		this.heightEntryWidget.setChangedListener(string -> {
@@ -89,11 +89,11 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 				case NULL -> "gui.glowcase.center";
 				case POSITIVE -> "gui.glowcase.front";
 			}));
-		}).dimensions(7 * width / 10, height / 2 - 60, 2 * width / 10, 20).build();
+		}).dimensions(7 * width / 10, height / 2 - 55, 2 * width / 10, 20).build();
 
 		{ // We create a button for each alignment possibility of the screen on a 2D canvas (top-left to bottom-right)
 			int xoff = 7 * width / 10;
-			int yoff = height / 2 - 60+20+10;
+			int yoff = height / 2 - 55+20+10;
 
 			int sub_width = 2 * width / 10;
 
@@ -145,22 +145,22 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		this.einkCheckWidget = CheckboxWidget.builder(Text.translatable("gui.glowcase.screen.eink"), this.client.textRenderer)
 			.checked(this.screenBlockEntity.eink)
 			.callback((checkbox, checked) -> this.screenBlockEntity.eink = checked)
-			.pos(width / 10, height / 2 - 20)
+			.pos(width / 10, height / 2 - 15)
 			.build();
 
 		this.stretchCheckWidget = CheckboxWidget.builder(Text.translatable("gui.glowcase.screen.stretch"), this.client.textRenderer)
 			.checked(this.screenBlockEntity.stretch)
 			.callback((checkbox, checked) -> this.screenBlockEntity.stretch = checked)
-			.pos(width / 10, height / 2 + 5)
+			.pos(width / 10, height / 2 + 10)
 			.build();
 
-		this.urlEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 40, 7 * width / 10, 20, Text.empty());
+		this.urlEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 50, 7 * width / 10, 20, Text.empty());
 		this.urlEntryWidget.setMaxLength(ScreenBlockEntity.URL_MAX_LENGTH);
 		this.urlEntryWidget.setText(this.screenBlockEntity.url);
 		this.urlEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.url"));
 		// We don't change the url on the fly here as that would cause many fetch requests which we don't want
 
-		this.altEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 60 + 5, 7 * width / 10, 40, Text.empty());
+		this.altEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 70 + 5, 7 * width / 10, 40, Text.empty());
 		this.altEntryWidget.setMaxLength(ScreenBlockEntity.ALT_MAX_LENGTH);
 		this.altEntryWidget.setText(this.screenBlockEntity.alt);
 		this.altEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.alt"));
