@@ -42,7 +42,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		int fieldWidth = (availableWidth - (2 * gap)) / 3;
 		int fieldY = (height / 2) - 95;
 
-		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 45, 2 * leftX, 20, Text.empty());
+		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40, 2 * leftX, 20, Text.empty());
 		this.widthEntryWidget.setText(""+this.screenBlockEntity.width);
 		this.widthEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.width"));
 		this.widthEntryWidget.setChangedListener(string -> {
@@ -51,9 +51,9 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		});
 
 		MutableText timesLiteral = Text.literal("×");
-		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 45, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
+		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
 
-		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 45, 2 * leftX, 20, Text.empty());
+		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40, 2 * leftX, 20, Text.empty());
 		this.heightEntryWidget.setText(""+this.screenBlockEntity.height);
 		this.heightEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.height"));
 		this.heightEntryWidget.setChangedListener(string -> {
