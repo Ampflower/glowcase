@@ -84,7 +84,7 @@ public class ParticleDisplayEditScreen extends GlowcaseScreen {
 			.map(Registries.PARTICLE_TYPE::getId)
 			.collect(Collectors.toList());
 
-		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, particleId.getX(), particleId.getY() + particleId.getHeight(), particleId.getWidth(), 100, 10, 4, 5,
+		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, particleId.getX(), particleId.getY() + particleId.getHeight() + 5, particleId.getWidth(), 100, 10, 4, 5,
 			(suggestion) -> particleId.setText(suggestion.toString()), Identifier::toString);
 
 		particleId.setChangedListener((text) -> {
@@ -259,6 +259,16 @@ public class ParticleDisplayEditScreen extends GlowcaseScreen {
 		}
 
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+	}
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (suggestionWidget.draggingScrollbar) {
+			if (suggestionWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+				return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
 	}
 
 	@Override
