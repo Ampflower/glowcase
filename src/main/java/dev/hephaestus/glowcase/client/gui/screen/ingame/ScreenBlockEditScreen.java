@@ -22,6 +22,10 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 	private TextFieldWidget urlEntryWidget;
 	private TextFieldWidget altEntryWidget;
 
+	private TextFieldWidget offsetXField;
+	private TextFieldWidget offsetYField;
+	private TextFieldWidget offsetZField;
+
 	public ScreenBlockEditScreen(ScreenBlockEntity screenBlockEntity) {
 		this.screenBlockEntity = screenBlockEntity;
 	}
@@ -31,7 +35,14 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		super.init();
 		if (this.client == null) return;
 
-		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 - 80, 2 * width / 10, 20, Text.empty());
+		// dimension constants
+		int gap = 5;
+		int leftX = width / 10;
+		int availableWidth = width - (2 * (width / 10));
+		int fieldWidth = (availableWidth - (2 * gap)) / 3;
+		int fieldY = (height / 2) - 110;
+
+		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40, 2 * leftX, 20, Text.empty());
 		this.widthEntryWidget.setText(""+this.screenBlockEntity.width);
 		this.widthEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.width"));
 		this.widthEntryWidget.setChangedListener(string -> {
@@ -40,15 +51,28 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		});
 
 		MutableText timesLiteral = Text.literal("×");
-		TextWidget timesLabel = new TextWidget(3 * width / 10 + 5, height / 2 - 80, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
+		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
 
-		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * width / 10 + 10 + textRenderer.getWidth(timesLiteral), height / 2 - 80, 2 * width / 10, 20, Text.empty());
+		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40, 2 * leftX, 20, Text.empty());
 		this.heightEntryWidget.setText(""+this.screenBlockEntity.height);
 		this.heightEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.height"));
 		this.heightEntryWidget.setChangedListener(string -> {
 			if (Floats.tryParse(string) instanceof Float parsed)
 				screenBlockEntity.height = parsed;
 		});
+
+		TextWidget offsetXLabel = new TextWidget(leftX, fieldY - 5, fieldWidth, 20, Text.translatable("gui.glowcase.x_offset_label"), this.client.textRenderer);
+		TextWidget offsetYLabel = new TextWidget(leftX + fieldWidth + gap, fieldY - 5, fieldWidth, 20, Text.translatable("gui.glowcase.y_offset_label"), this.client.textRenderer);
+		TextWidget offsetZLabel = new TextWidget(leftX + 2 * (fieldWidth + gap), fieldY - 5, fieldWidth, 20, Text.translatable("gui.glowcase.z_offset_label"), this.client.textRenderer);
+
+		this.offsetXField = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 15, fieldWidth, 20, Text.empty());
+		this.offsetXField.setText("" + this.screenBlockEntity.preciseX);
+
+		this.offsetYField = new TextFieldWidget(this.client.textRenderer, leftX + fieldWidth + gap, fieldY + 15, fieldWidth, 20, Text.empty());
+		this.offsetYField.setText("" + this.screenBlockEntity.preciseY);
+
+		this.offsetZField = new TextFieldWidget(this.client.textRenderer, leftX + 2 * (fieldWidth + gap), fieldY + 15, fieldWidth, 20, Text.empty());
+		this.offsetZField.setText("" + this.screenBlockEntity.preciseZ);
 
 		this.zOffsetToggle = ButtonWidget.builder(Text.translatable(switch (this.screenBlockEntity.zOffset) {
 			case NEGATIVE -> "gui.glowcase.back";
@@ -65,11 +89,11 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 				case NULL -> "gui.glowcase.center";
 				case POSITIVE -> "gui.glowcase.front";
 			}));
-		}).dimensions(7 * width / 10, height / 2 - 80, 2 * width / 10, 20).build();
+		}).dimensions(7 * width / 10, height / 2 - 70, 2 * width / 10, 20).build();
 
 		{ // We create a button for each alignment possibility of the screen on a 2D canvas (top-left to bottom-right)
 			int xoff = 7 * width / 10;
-			int yoff = height / 2 - 80+20+10;
+			int yoff = height / 2 - 65+20+10;
 
 			int sub_width = 2 * width / 10;
 
@@ -121,22 +145,22 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		this.einkCheckWidget = CheckboxWidget.builder(Text.translatable("gui.glowcase.screen.eink"), this.client.textRenderer)
 			.checked(this.screenBlockEntity.eink)
 			.callback((checkbox, checked) -> this.screenBlockEntity.eink = checked)
-			.pos(width / 10, height / 2 - 40)
+			.pos(width / 10, height / 2 - 25)
 			.build();
 
 		this.stretchCheckWidget = CheckboxWidget.builder(Text.translatable("gui.glowcase.screen.stretch"), this.client.textRenderer)
 			.checked(this.screenBlockEntity.stretch)
 			.callback((checkbox, checked) -> this.screenBlockEntity.stretch = checked)
-			.pos(width / 10, height / 2 - 15)
+			.pos(width / 10, height / 2)
 			.build();
 
-		this.urlEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 20, 7 * width / 10, 20, Text.empty());
+		this.urlEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 45, 7 * width / 10, 20, Text.empty());
 		this.urlEntryWidget.setMaxLength(ScreenBlockEntity.URL_MAX_LENGTH);
 		this.urlEntryWidget.setText(this.screenBlockEntity.url);
 		this.urlEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.url"));
 		// We don't change the url on the fly here as that would cause many fetch requests which we don't want
 
-		this.altEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 40 + 5, 7 * width / 10, 40, Text.empty());
+		this.altEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, height / 2 + 65 + 5, 7 * width / 10, 40, Text.empty());
 		this.altEntryWidget.setMaxLength(ScreenBlockEntity.ALT_MAX_LENGTH);
 		this.altEntryWidget.setText(this.screenBlockEntity.alt);
 		this.altEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.alt"));
@@ -154,6 +178,13 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		this.addDrawableChild(timesLabel);
 		this.addDrawableChild(this.heightEntryWidget);
 		this.addDrawableChild(this.zOffsetToggle);
+
+		this.addDrawableChild(offsetXLabel);
+		this.addDrawableChild(offsetYLabel);
+		this.addDrawableChild(offsetZLabel);
+		this.addDrawableChild(offsetXField);
+		this.addDrawableChild(offsetYField);
+		this.addDrawableChild(offsetZField);
 
 		for (ButtonWidget buttonWidget : alignment)
 			this.addDrawableChild(buttonWidget);
@@ -178,6 +209,12 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 			return this.urlEntryWidget.keyPressed(keyCode, scanCode, modifiers);
 		} else if (this.altEntryWidget.isActive()) {
 			return this.altEntryWidget.keyPressed(keyCode, scanCode, modifiers);
+		} else if (this.offsetXField.isActive()) {
+			return this.offsetXField.keyPressed(keyCode, scanCode, modifiers);
+		} else if (this.offsetYField.isActive()) {
+			return this.offsetYField.keyPressed(keyCode, scanCode, modifiers);
+		} else if (this.offsetZField.isActive()) {
+			return this.offsetZField.keyPressed(keyCode, scanCode, modifiers);
 		} else {
 			return false;
 		}
@@ -185,6 +222,14 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 
 	@Override
 	public void close() {
+		Float parsedX = Floats.tryParse(this.offsetXField.getText());
+		Float parsedY = Floats.tryParse(this.offsetYField.getText());
+		Float parsedZ = Floats.tryParse(this.offsetZField.getText());
+
+		screenBlockEntity.preciseX = (parsedX != null) ? parsedX : 0f;
+		screenBlockEntity.preciseY = (parsedY != null) ? parsedY : 0f;
+		screenBlockEntity.preciseZ = (parsedZ != null) ? parsedZ : 0f;
+
 		screenBlockEntity.eink = einkCheckWidget.isChecked();
 		screenBlockEntity.stretch = stretchCheckWidget.isChecked();
 		screenBlockEntity.setImage(

@@ -8,6 +8,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.UUID;
 
@@ -24,9 +25,14 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 
 	public float width = 1f;
 	public float height = 1f;
+
 	public Offset xOffset = Offset.NULL;
 	public Offset yOffset = Offset.NULL;
 	public Offset zOffset = Offset.NULL;
+
+	public float preciseX = 0f;
+	public float preciseY = 0f;
+	public float preciseZ = 0f;
 
 	public boolean stretch = false;
 	public boolean eink = true;
@@ -73,11 +79,17 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 
 		nbt.putFloat("width", width);
 		nbt.putFloat("height", height);
+
 		nbt.putBoolean("stretch", stretch);
 		nbt.putBoolean("eink", eink);
+
 		nbt.putInt("x_offset", this.xOffset.offset);
 		nbt.putInt("y_offset", this.yOffset.offset);
 		nbt.putInt("z_offset", this.zOffset.offset);
+
+		nbt.putFloat("px", this.preciseX);
+		nbt.putFloat("py", this.preciseY);
+		nbt.putFloat("pz", this.preciseZ);
 
 		nbt.putString("url", url);
 		nbt.putString("alt", alt);
@@ -93,11 +105,17 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 
 		width = nbt.getFloat("width");
 		height = nbt.getFloat("height");
+
 		stretch = nbt.getBoolean("stretch");
 		eink = nbt.getBoolean("eink");
+
 		xOffset = Offset.fromOffset(nbt.getInt("x_offset"));
 		yOffset = Offset.fromOffset(nbt.getInt("y_offset"));
 		zOffset = Offset.fromOffset(nbt.getInt("z_offset"));
+
+		preciseX = nbt.getFloat("px");
+		preciseY = nbt.getFloat("py");
+		preciseZ = nbt.getFloat("pz");
 
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");
@@ -128,5 +146,46 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 		this.zOffset = zOffset;
 		this.eink = eink;
 		this.stretch = stretch;
+	}
+
+	// returns a combined offset 
+	public Vector3f getOffset() {
+		float x = 0f;
+		float y = 0f;
+		float z = 0f;
+
+		// moved front/back stuff here
+		if (xOffset == Offset.POSITIVE) {
+			x = width / 2f - 0.5f;
+		} else if (xOffset == Offset.NEGATIVE) {
+			x = -width / 2f + 0.5f;
+		}
+
+		if (yOffset == Offset.POSITIVE) {
+			y = height / 2f - 0.5f;
+		} else if (yOffset == Offset.NEGATIVE) {
+			y = -height / 2f + 0.5f;
+		}
+
+		if (zOffset == Offset.POSITIVE) {
+			z = -0.45f;
+		} else if (zOffset == Offset.NEGATIVE) {
+			z = 0.45f;
+		}
+
+		x += preciseX;
+		y += preciseY;
+		z += preciseZ;
+
+		return new Vector3f(x, y, z);
+	}
+
+	// to set precise offset
+	public void setOffset(Vector3f offset) {
+		this.preciseX = offset.x();
+		this.preciseY = offset.y();
+		this.preciseZ = offset.z();
+
+		markDirty();
 	}
 }

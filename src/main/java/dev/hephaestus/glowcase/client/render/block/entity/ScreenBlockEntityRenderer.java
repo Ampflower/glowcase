@@ -52,22 +52,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		float rotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
-
-		switch (entity.xOffset) {
-			case POSITIVE -> matrices.translate(entity.width/2 - .5f, 0f, 0f);
-			case NEGATIVE -> matrices.translate(-entity.width/2 + .5f, 0f, 0f);
-		}
-
-		switch (entity.yOffset) {
-			case POSITIVE -> matrices.translate(0f, entity.height/2 - .5f, 0f);
-			case NEGATIVE -> matrices.translate(0f, -entity.height/2 + .5f, 0f);
-		}
-
-		switch (entity.zOffset) {
-			case POSITIVE -> matrices.translate(0f, 0f, -0.45f);
-			case NEGATIVE -> matrices.translate(0f, 0f, 0.45f);
-			default -> matrices.translate(0f, 0f, 0f);
-		}
+		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
 
 		// Gather needed variables
 
