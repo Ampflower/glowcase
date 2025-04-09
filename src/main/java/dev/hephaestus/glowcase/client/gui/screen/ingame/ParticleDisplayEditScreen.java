@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
+import dev.hephaestus.glowcase.client.gui.widget.ingame.SuggestionListWidget;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.Vec3FieldsWidget;
 import dev.hephaestus.glowcase.util.DeviatedInteger;
 import dev.hephaestus.glowcase.util.DeviatedVec3d;
@@ -28,6 +29,9 @@ import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ParticleDisplayEditScreen extends GlowcaseScreen {
 	private final ParticleDisplayBlockEntity blockEntity;
@@ -44,6 +48,9 @@ public class ParticleDisplayEditScreen extends GlowcaseScreen {
 
 	private TextFieldWidget tickRateMean;
 	private TextFieldWidget tickRateStdDev;
+
+	private SuggestionListWidget<Identifier> suggestionWidget;
+	private List<Identifier> validParticles = new ArrayList<>();
 
 	public ParticleDisplayEditScreen(ParticleDisplayBlockEntity blockEntity) {
 		this.blockEntity = blockEntity;
@@ -72,6 +79,17 @@ public class ParticleDisplayEditScreen extends GlowcaseScreen {
 		particleId.setText(Registries.PARTICLE_TYPE.getId(blockEntity.particle.getType()) + optionsString);
 
 		this.addDrawableChild(particleId);
+
+		validParticles = Registries.PARTICLE_TYPE.stream()
+			.map(Registries.PARTICLE_TYPE::getId)
+			.collect(Collectors.toList());
+
+		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, particleId.getX(), particleId.getY() + particleId.getHeight(), particleId.getWidth(), 100, 10, 4, 5,
+			(suggestion) -> particleId.setText(suggestion.toString()), Identifier::toString);
+
+		particleId.setChangedListener((text) -> {
+			suggestionWidget.updateSuggestions(validParticles, text);
+		});
 		// endregion
 
 		// region Position
@@ -228,6 +246,30 @@ public class ParticleDisplayEditScreen extends GlowcaseScreen {
 			width / 10 + (4 * width / 10) + 6, 240,
 			0xFFFFFFFF
 		);
+
+		// render the list over everything
+		suggestionWidget.renderWidget(context, mouseX, mouseY, delta);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		if (suggestionWidget.isMouseOver(mouseX, mouseY) && particleId.isFocused()) {
+			suggestionWidget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+			return true;
+		}
+
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+	}
+
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (suggestionWidget.isMouseOver(mouseX, mouseY) && particleId.isFocused()) {
+			return suggestionWidget.mouseClicked(mouseX, mouseY, button);
+		} else {
+            suggestionWidget.updateSuggestions(new ArrayList<>(), "");
+        }
+
+		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override

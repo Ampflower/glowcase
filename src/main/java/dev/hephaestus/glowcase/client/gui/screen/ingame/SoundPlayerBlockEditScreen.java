@@ -1,15 +1,21 @@
 package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
 import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
+import dev.hephaestus.glowcase.client.gui.widget.ingame.SuggestionListWidget;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.Vec3FieldsWidget;
 import dev.hephaestus.glowcase.util.ParseUtil;
 import dev.hephaestus.glowcase.packet.C2SEditSoundBlock;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 	private final SoundPlayerBlockEntity soundBlock;
@@ -25,6 +31,9 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 	private TextFieldWidget distance;
 	private ButtonWidget relativeButton;
 	private Vec3FieldsWidget offset;
+
+	private SuggestionListWidget<String> suggestionWidget;
+    private List<String> validSounds = new ArrayList<>();
 
 	public SoundPlayerBlockEditScreen(SoundPlayerBlockEntity soundBlock) {
 		this.soundBlock = soundBlock;
@@ -110,7 +119,47 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 			soundBlock.offset);
 		this.addDrawableChild(this.offset);
 
+		validSounds = Registries.SOUND_EVENT.stream()
+			.map(Registries.SOUND_EVENT::getId)
+			.map(Identifier::toString)
+			.collect(Collectors.toList());
+		
+		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, soundId.getX(), soundId.getY() + soundId.getHeight(), soundId.getWidth(), 100, 10, 4, 5,
+			(suggestion) -> soundId.setText(suggestion), s -> s);
+
+		soundId.setChangedListener((text) -> {
+            suggestionWidget.updateSuggestions(validSounds, text);
+        });
 	}
+
+	@Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
+
+		// render the list over everything
+        suggestionWidget.renderWidget(context, mouseX, mouseY, delta);
+    }
+
+	@Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (suggestionWidget.isMouseOver(mouseX, mouseY) && soundId.isFocused()) {
+            return suggestionWidget.mouseClicked(mouseX, mouseY, button);
+        } else {
+            suggestionWidget.updateSuggestions(new ArrayList<>(), "");
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (suggestionWidget.isMouseOver(mouseX, mouseY) && soundId.isFocused()) {
+            suggestionWidget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+            return true;
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
 
 	@Override
 	public void close() {
