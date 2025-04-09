@@ -4,6 +4,7 @@ import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
 import dev.hephaestus.glowcase.client.gui.widget.ingame.SuggestionListWidget;
 import dev.hephaestus.glowcase.packet.C2SEditSpriteBlock;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -98,28 +99,8 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 		this.addDrawableChild(this.colorEntryWidget);
 		this.addDrawableChild(this.scaleEntryWidget);
 
-		List<String> registrySprites = Registries.ITEM.stream()
-            .map(Registries.ITEM::getId)
-            .map(Identifier::toString)
-            .collect(Collectors.toList());
-		
-		List<String> resourceSprites = new ArrayList<>();
 		ResourceManager resourceManager = this.client.getResourceManager();
-		Map<Identifier, ?> spriteResourcesMap = resourceManager.findResources("textures/sprite", id -> id.getPath().endsWith(".png"));
-		
-		for (Identifier resId : spriteResourcesMap.keySet()) {
-			String path = resId.getPath();
-
-			if (path.startsWith("textures/sprite/") && path.endsWith(".png")) {
-				String spriteName = path.substring("textures/sprite/".length(), path.length() - 4);
-				resourceSprites.add(spriteName);
-			}
-		}
-
-		Set<String> combinedSprites = new HashSet<>();
-		combinedSprites.addAll(registrySprites);
-		combinedSprites.addAll(resourceSprites);
-		validSprites = new ArrayList<>(combinedSprites);
+		validSprites = allValidSprites(resourceManager);
 
 		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, spriteWidget.getX(), spriteWidget.getY() + spriteWidget.getHeight() + 5, spriteWidget.getWidth(), 100, 10, 4, 5,
 			(suggestion) -> spriteWidget.setText(suggestion), s -> s);
@@ -127,6 +108,38 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 		spriteWidget.setChangedListener((text) -> {
 			suggestionWidget.updateSuggestions(validSprites, text);
 		});
+	}
+
+	/**
+	 * A list of all valid entries for {@link #spriteWidget}. Used for suggestions.
+	 */
+	public static List<String> allValidSprites(ResourceManager resourceManager) {
+		var validSprites = new ArrayList<String>();
+
+		// Add all sprites inside /textures/sprite, these are explicitly meant for the sprite block
+		// and can be used with just their filename. As these are intended to be used here, we'll list them first
+		resourceManager.findResources("textures/sprite", id -> id.getPath().endsWith(".png")).forEach((sprite, res) -> {
+			validSprites.add(sprite.getPath().substring("textures/sprite/".length(), sprite.getPath().length() - 4));
+		});
+
+		// You can use any texture. Technically I think you can also use ones outside of texture
+		// But findResources requires us to filter
+		resourceManager.findResources("textures", id -> id.getPath().endsWith(".png")).forEach((sprite, res) -> {
+			validSprites.add(sprite.toString());
+		});
+
+		// You can also display any item
+		Registries.ITEM.stream()
+			.map(Registries.ITEM::getId)
+			.map(Identifier::toString)
+			.forEach(validSprites::add);
+
+		// And you can use any modid to display its icon
+		FabricLoader.getInstance().getAllMods().forEach(mod -> {
+			validSprites.add("mod:"+mod.getMetadata().getId());
+		});
+
+		return validSprites;
 	}
 
 	@Override
