@@ -9,16 +9,22 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public class SuggestionListWidget<T> extends ClickableWidget {
     private final TextRenderer textRenderer;
 
     private final List<T> suggestions = new ArrayList<>();
+	private @NotNull String filter = "";
     private int scrollOffset = 0;
 
     private final int baseLineHeight;
     private final int padding;
     private final int maxRows;
+	/**
+	 * The approximate maximum number of characters that'll fit inside the width of this widget
+	 */
+	private int characterWidth;
 
     private final Consumer<T> onSelect;
     private final Function<T, String> toStringFunction;
@@ -32,11 +38,22 @@ public class SuggestionListWidget<T> extends ClickableWidget {
         this.onSelect = onSelect;
         this.toStringFunction = toStringFunction;
         this.textRenderer = textRenderer;
+		this.characterWidth = 1;
+		setWidth(width);
     }
-    
-    // update the suggestion list based on filter
+
+	@Override
+	public void setWidth(int width) {
+		super.setWidth(width);
+		while (textRenderer.getWidth("m".repeat(characterWidth)) < this.width) {
+			characterWidth++;
+		}
+	}
+
+	// update the suggestion list based on filter
     public void updateSuggestions(List<T> newSuggestions, String filter) {
         suggestions.clear();
+		this.filter = filter;
 
         for (T suggestion : newSuggestions) {
             String text = toStringFunction.apply(suggestion);
@@ -85,7 +102,14 @@ public class SuggestionListWidget<T> extends ClickableWidget {
             if (mouseX >= this.getX() && mouseX <= this.getX() + bgWidth && mouseY >= suggestionY && mouseY < suggestionY + adjustedLineHeight) {
                 context.fill(this.getX(), suggestionY, this.getX() + bgWidth, suggestionY + adjustedLineHeight, 0xFFAAAAAA);
             }
-            
+
+			// Detect if the text is too long, and cut it off so more relevant things are visible
+			if (filter.length() > 5) {
+				if (textRenderer.getWidth(suggestionText) > this.width) {
+					suggestionText = "…"+suggestionText.substring(Math.min(filter.length(), suggestionText.length()-characterWidth/2));
+				}
+			}
+
             context.drawTextWithShadow(textRenderer, Text.literal(suggestionText), this.getX() + padding, suggestionY + padding, 0xFFFFFF);
         }
 
