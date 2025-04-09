@@ -109,6 +109,8 @@ public class SuggestionListWidget<T> extends ClickableWidget {
             context.drawTextWithShadow(textRenderer, Text.literal(suggestionText), this.getX() + padding, suggestionY + padding + 1, 0xFFFFFF);
         }
 
+        context.disableScissor();
+
         // scrollbar thingy
         if (scrollable) {
             int scrollbarWidth = 10;
@@ -134,7 +136,6 @@ public class SuggestionListWidget<T> extends ClickableWidget {
             context.fill(handleX, handleY, handleX + handleWidth, handleY + handleHeight, 0xFFFFFFFF);
         }
         
-        context.disableScissor();
         context.getMatrices().pop();
     }
 
