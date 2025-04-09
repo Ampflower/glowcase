@@ -121,7 +121,7 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 		combinedSprites.addAll(resourceSprites);
 		validSprites = new ArrayList<>(combinedSprites);
 
-		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, spriteWidget.getX(), spriteWidget.getY() + spriteWidget.getHeight(), spriteWidget.getWidth(), 100, 10, 4, 5,
+		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, spriteWidget.getX(), spriteWidget.getY() + spriteWidget.getHeight() + 5, spriteWidget.getWidth(), 100, 10, 4, 5,
 			(suggestion) -> spriteWidget.setText(suggestion), s -> s);
 		
 		spriteWidget.setChangedListener((text) -> {
@@ -152,6 +152,16 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (suggestionWidget.draggingScrollbar) {
+			if (suggestionWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+				return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+	}
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {

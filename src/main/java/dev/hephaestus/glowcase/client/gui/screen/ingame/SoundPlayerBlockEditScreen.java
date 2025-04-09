@@ -124,7 +124,7 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 			.map(Identifier::toString)
 			.collect(Collectors.toList());
 		
-		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, soundId.getX(), soundId.getY() + soundId.getHeight(), soundId.getWidth(), 100, 10, 4, 5,
+		suggestionWidget = new SuggestionListWidget<>(this.client.textRenderer, soundId.getX(), soundId.getY() + soundId.getHeight() + 5, soundId.getWidth(), 100, 10, 4, 5,
 			(suggestion) -> soundId.setText(suggestion), s -> s);
 
 		soundId.setChangedListener((text) -> {
@@ -150,6 +150,16 @@ public class SoundPlayerBlockEditScreen extends GlowcaseScreen {
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (suggestionWidget.draggingScrollbar) {
+			if (suggestionWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+				return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+	}
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
