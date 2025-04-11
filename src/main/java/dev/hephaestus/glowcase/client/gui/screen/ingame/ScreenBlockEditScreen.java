@@ -68,12 +68,24 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 
 		this.offsetXField = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 15, fieldWidth, 20, Text.empty());
 		this.offsetXField.setText("" + this.screenBlockEntity.preciseX);
+		this.offsetXField.setChangedListener(string -> {
+			if (Floats.tryParse(string) instanceof Float parsed)
+				screenBlockEntity.preciseX = parsed;
+		});
 
 		this.offsetYField = new TextFieldWidget(this.client.textRenderer, leftX + fieldWidth + gap, fieldY + 15, fieldWidth, 20, Text.empty());
 		this.offsetYField.setText("" + this.screenBlockEntity.preciseY);
+		this.offsetYField.setChangedListener(string -> {
+			if (Floats.tryParse(string) instanceof Float parsed)
+				screenBlockEntity.preciseY = parsed;
+		});
 
 		this.offsetZField = new TextFieldWidget(this.client.textRenderer, leftX + 2 * (fieldWidth + gap), fieldY + 15, fieldWidth, 20, Text.empty());
 		this.offsetZField.setText("" + this.screenBlockEntity.preciseZ);
+		this.offsetZField.setChangedListener(string -> {
+			if (Floats.tryParse(string) instanceof Float parsed)
+				screenBlockEntity.preciseZ = parsed;
+		});
 
 		this.zOffsetToggle = ButtonWidget.builder(Text.translatable(switch (this.screenBlockEntity.zOffset) {
 			case NEGATIVE -> "gui.glowcase.back";
