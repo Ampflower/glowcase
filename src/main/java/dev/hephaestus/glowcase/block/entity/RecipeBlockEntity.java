@@ -16,6 +16,9 @@ public class RecipeBlockEntity extends GlowcaseBlockEntity {
 	public String recipe = "diamond_sword";
 	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.CENTER;
 
+	public float rotationX = 0f;
+	public float rotationY = 0f;
+
 	public RecipeBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.RECIPE_BLOCK_ENTITY.get(), pos, state);
 	}
@@ -39,6 +42,8 @@ public class RecipeBlockEntity extends GlowcaseBlockEntity {
 
 		tag.putString("recipe", this.recipe);
 		tag.putString("z_offset", this.zOffset.name());
+		tag.putFloat("rotationX", this.rotationX);
+		tag.putFloat("rotationY", this.rotationY);
 	}
 
 	@Override
@@ -47,5 +52,7 @@ public class RecipeBlockEntity extends GlowcaseBlockEntity {
 
 		this.recipe = tag.getString("recipe");
 		this.zOffset = TextBlockEntity.ZOffset.valueOf(tag.getString("z_offset"));
+		this.rotationX = tag.contains("rotationX") ? tag.getFloat("rotationX") : 0f;
+		this.rotationY = tag.contains("rotationY") ? tag.getFloat("rotationY") : 0f;
 	}
 }
