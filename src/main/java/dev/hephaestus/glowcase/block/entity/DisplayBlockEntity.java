@@ -14,6 +14,7 @@ public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 	private Vector3f scale = new Vector3f(1.0F);
 	private float pitch = 0.0F;
 	private float yaw = 0.0F;
+	private boolean renderAsBlock = true;
 
 	public DisplayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
@@ -24,7 +25,8 @@ public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 			new Vector3f(offset.x(), offset.y(), offset.z()),
 			new Vector3f(scale.x(), scale.y(), scale.z()),
 			pitch,
-			yaw
+			yaw,
+			renderAsBlock
 		);
 	}
 
@@ -33,6 +35,7 @@ public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 		this.scale.set(settings.scale().x(), settings.scale().y(), settings.scale().z());
 		this.pitch = settings.pitch();
 		this.yaw = settings.yaw();
+		this.renderAsBlock = settings.renderAsBlock();
 		markDirty();
 	}
 
@@ -89,6 +92,15 @@ public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 
 	public void setPitch(float pitch) {
 		this.pitch = pitch;
+		markDirty();
+	}
+
+	public boolean getRenderAsBlock() {
+		return renderAsBlock;
+	}
+
+	public void setRenderAsBlock(boolean renderAsBlock) {
+		this.renderAsBlock = renderAsBlock;
 		markDirty();
 	}
 }
