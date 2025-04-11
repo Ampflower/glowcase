@@ -225,7 +225,7 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (this.client != null) {
 			super.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.scale_value"), 20, 17, 0xFFFFFFFF);
+			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.scale_label"), 20, 17, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.x_offset_label"), 20, 47, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.y_offset_label"), 20, 77, 0xFFFFFFFF);
 			context.drawTextWithShadow(client.textRenderer, Text.translatable("gui.glowcase.z_offset_label"), 20, 107, 0xFFFFFFFF);
