@@ -4,6 +4,7 @@ import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseRenderLayers;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -11,6 +12,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
@@ -30,6 +32,17 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 
 	@Override
 	public void renderUnbaked(TextBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		Entity camera = MinecraftClient.getInstance().getCameraEntity();
+		if (camera != null) {
+			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
+			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
+			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
+
+			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
+				return;
+			}
+		}
+
 		if (entity.renderDirty) {
 			entity.renderDirty = false;
 			Manager.markForRebuild(entity.getPos());
@@ -40,6 +53,17 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 
 	@Override
 	public void renderBaked(TextBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		Entity camera = MinecraftClient.getInstance().getCameraEntity();
+		if (camera != null) {
+			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
+			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
+			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
+			
+			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
+				return;
+			}
+		}
+		
 		matrices.push();
 		matrices.translate(0.5D, 0.5D, 0.5D);
 
