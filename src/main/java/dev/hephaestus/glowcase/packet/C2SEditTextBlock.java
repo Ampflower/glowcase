@@ -27,7 +27,7 @@ public record C2SEditTextBlock(BlockPos pos, TextBlockEntity.TextAlignment align
 	);
 
 	public static C2SEditTextBlock of(TextBlockEntity be) {
-		return new C2SEditTextBlock(be.getPos(), be.textAlignment, be.zOffset, be.shadowType, new TextBlockValues(be.scale, be.color, be.lines));
+		return new C2SEditTextBlock(be.getPos(), be.textAlignment, be.zOffset, be.shadowType, new TextBlockValues(be.scale, be.color, be.lines, be.viewDistance));
 	}
 
 	@Override
@@ -45,16 +45,18 @@ public record C2SEditTextBlock(BlockPos pos, TextBlockEntity.TextAlignment align
 		be.color = this.values().color();
 		be.zOffset = this.offset();
 		be.shadowType = this.shadowType();
+		be.viewDistance = this.values().viewDistance();
 
 		be.markDirty();
 	}
 
 	// separated for tuple call
-	public record TextBlockValues(float scale, int color, List<Text> lines) {
+	public record TextBlockValues(float scale, int color, List<Text> lines, float viewDistance) {
 		public static final PacketCodec<RegistryByteBuf, TextBlockValues> PACKET_CODEC = PacketCodec.tuple(
 			PacketCodecs.FLOAT, TextBlockValues::scale,
 			PacketCodecs.INTEGER, TextBlockValues::color,
 			PacketCodecs.collection(ArrayList::new, TextCodecs.REGISTRY_PACKET_CODEC), TextBlockValues::lines,
+			PacketCodecs.FLOAT, TextBlockValues::viewDistance,
 			TextBlockValues::new
 		);
 	}
