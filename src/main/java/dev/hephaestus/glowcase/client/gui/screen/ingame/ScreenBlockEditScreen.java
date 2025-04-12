@@ -46,7 +46,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		int fieldWidth = (availableWidth - (2 * gap)) / 3;
 		int fieldY = (height / 2) - 110;
 
-		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40, 2 * leftX, 20, Text.empty());
+		this.widthEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40 + 20 + 5, 2 * leftX, 20, Text.empty());
 		this.widthEntryWidget.setText(""+this.screenBlockEntity.width);
 		this.widthEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.width"));
 		this.widthEntryWidget.setChangedListener(string -> {
@@ -57,7 +57,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		MutableText timesLiteral = Text.literal("×");
 		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
 
-		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40, 2 * leftX, 20, Text.empty());
+		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40 + 20 + 5, 2 * leftX, 20, Text.empty());
 		this.heightEntryWidget.setText(""+this.screenBlockEntity.height);
 		this.heightEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.height"));
 		this.heightEntryWidget.setChangedListener(string -> {
@@ -65,7 +65,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 				screenBlockEntity.height = parsed;
 		});
 
-		this.yawEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40 + 20 + 5, (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2 - 5, 20, Text.empty());
+		this.yawEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX, fieldY + 40, (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2 - 5, 20, Text.empty());
         if (this.screenBlockEntity.yaw == 0.0f) {
             this.yawEntryWidget.setText("");
             this.yawEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.yaw"));
@@ -80,7 +80,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 			}
         });
 
-        this.pitchEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX + (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, fieldY + 40 + 20 + 5, (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, 20, Text.empty());
+        this.pitchEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX + (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, fieldY + 40, (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, 20, Text.empty());
         if (this.screenBlockEntity.pitch == 0.0f) {
             this.pitchEntryWidget.setText("");
             this.pitchEntryWidget.setPlaceholder(Text.translatable("gui.glowcase.pitch"));
