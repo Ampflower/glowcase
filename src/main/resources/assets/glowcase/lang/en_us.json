@@ -33,6 +33,7 @@
 	"gui.glowcase.cancel_others": "Cancel other sounds",
 	"gui.glowcase.volume": "Volume",
 	"gui.glowcase.pitch": "Pitch",
+	"gui.glowcase.yaw": "Yaw",
 	"gui.glowcase.repeat_delay": "Repeat Delay",
 	"gui.glowcase.distance": "Distance",
 	"gui.glowcase.sound_category": "%s",
