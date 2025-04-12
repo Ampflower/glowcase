@@ -73,8 +73,11 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
             this.yawEntryWidget.setText(String.valueOf(this.screenBlockEntity.yaw));
         }
         this.yawEntryWidget.setChangedListener(string -> {
-			if (Floats.tryParse(string) instanceof Float parsed)
+			if (string.isEmpty()) {
+				screenBlockEntity.yaw = 0f;
+			} else if (Floats.tryParse(string) instanceof Float parsed) {
 				screenBlockEntity.yaw = parsed;
+			}
         });
 
         this.pitchEntryWidget = new TextFieldWidget(this.client.textRenderer, leftX + (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, fieldY + 40 + 20 + 5, (4 * leftX + 10 + textRenderer.getWidth(timesLiteral)) / 2, 20, Text.empty());
@@ -85,8 +88,11 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
             this.pitchEntryWidget.setText(String.valueOf(this.screenBlockEntity.pitch));
         }
         this.pitchEntryWidget.setChangedListener(string -> {
-			if (Floats.tryParse(string) instanceof Float parsed)
+			if (string.isEmpty()) {
+				screenBlockEntity.pitch = 0f;
+			} else if (Floats.tryParse(string) instanceof Float parsed) {
 				screenBlockEntity.pitch = parsed;
+			}
         });
 
 		TextWidget offsetXLabel = new TextWidget(leftX, fieldY - 5, fieldWidth, 20, Text.translatable("gui.glowcase.x_offset_label"), this.client.textRenderer);
