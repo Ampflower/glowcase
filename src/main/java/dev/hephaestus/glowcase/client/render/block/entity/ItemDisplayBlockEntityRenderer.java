@@ -26,7 +26,7 @@ public record ItemDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context 
 
 		if (camera == null) return;
 
-		boolean renderAsBlock = entity.renderAsBlock;
+		boolean renderAsBlock = entity.getRenderAsBlock();
 		matrices.push();
 		
 		if (renderAsBlock && entity.getStack().getItem() instanceof BlockItem blockItem) {

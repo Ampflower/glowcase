@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 
 public class ItemDisplayBlockEntity extends DisplayBlockEntity implements StackInteractable {
 	protected ItemStack stack = ItemStack.EMPTY;
-	public boolean renderAsBlock = true;
 
 	public ItemStack getStack() {
 		return stack;
@@ -40,14 +39,12 @@ public class ItemDisplayBlockEntity extends DisplayBlockEntity implements StackI
 	@Override
 	public void writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(tag, registryLookup);
-		tag.putBoolean("renderAsBlock", this.renderAsBlock);
 		if (!this.stack.isEmpty()) tag.put("item", this.stack.encode(registryLookup));
 	}
 
 	@Override
 	public void readNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(tag, registryLookup);
-		this.renderAsBlock = tag.getBoolean("renderAsBlock");
 		this.stack = tag.contains("item", NbtElement.COMPOUND_TYPE) ? ItemStack.fromNbt(registryLookup, tag.getCompound("item")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 	}
 }
