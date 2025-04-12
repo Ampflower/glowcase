@@ -55,7 +55,7 @@ public class ScreenBlockEditScreen extends GlowcaseScreen {
 		});
 
 		MutableText timesLiteral = Text.literal("×");
-		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
+		TextWidget timesLabel = new TextWidget(3 * leftX + gap, fieldY + 40 + 20 + 5, textRenderer.getWidth(timesLiteral), 20, timesLiteral, this.client.textRenderer);
 
 		this.heightEntryWidget = new TextFieldWidget(this.client.textRenderer, 3 * leftX + 10 + textRenderer.getWidth(timesLiteral), fieldY + 40 + 20 + 5, 2 * leftX, 20, Text.empty());
 		this.heightEntryWidget.setText(""+this.screenBlockEntity.height);
