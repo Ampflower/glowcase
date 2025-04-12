@@ -55,6 +55,9 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
 		matrices.translate(entity.getOffset().x(), entity.getOffset().y(), entity.getOffset().z());
 
+		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.yaw));
+		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(entity.pitch));
+
 		// Gather needed variables
 
 		TextRenderer textRenderer = this.context.getTextRenderer();
