@@ -1,5 +1,6 @@
 package dev.hephaestus.glowcase.client.gui.screen.ingame;
 
+import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
@@ -9,6 +10,7 @@ import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.BufferBuilder;
@@ -37,6 +39,9 @@ public class TextBlockEditScreen extends TextEditorScreen {
 	private Color colorEntryPreColorPicker; //used for color picker cancel button
 	private ButtonWidget zOffsetToggle;
 	private ButtonWidget shadowToggle;
+
+	private TextFieldWidget viewDistanceField;
+    private ButtonWidget viewDistanceHelpButton;
 
 	public TextBlockEditScreen(TextBlockEntity textBlockEntity) {
 		this.textBlockEntity = textBlockEntity;
@@ -125,6 +130,18 @@ public class TextBlockEditScreen extends TextEditorScreen {
 		this.colorPickerWidget = ColorPickerWidget.builder(this,216, 10).size(182, 104).build();
 		this.colorPickerWidget.toggle(false); //start deactivated
 
+        this.viewDistanceField = new TextFieldWidget(this.client.textRenderer, 7, 20 + innerPadding, 83 + innerPadding, 20, Text.empty());
+        this.viewDistanceField.setText(String.valueOf(this.textBlockEntity.viewDistance));
+        this.viewDistanceField.setChangedListener(s -> {
+			if (Floats.tryParse(s) instanceof Float parsed) {
+				this.textBlockEntity.viewDistance = parsed;
+			}
+        });
+
+        this.viewDistanceHelpButton = ButtonWidget.builder(Text.literal("?"), action -> { })
+			.dimensions(7 + (83 + innerPadding) + 5, 20 + innerPadding, 20, 20).build();
+        this.viewDistanceHelpButton.setTooltip(Tooltip.of(Text.translatable("gui.glowcase.screen.text_edit.view_distance")));
+
 		this.addDrawableChild(colorPickerWidget);
 		this.addDrawableChild(increaseSize);
 		this.addDrawableChild(decreaseSize);
@@ -132,6 +149,9 @@ public class TextBlockEditScreen extends TextEditorScreen {
 		this.addDrawableChild(this.shadowToggle);
 		this.addDrawableChild(this.zOffsetToggle);
 		this.addDrawableChild(this.colorEntryWidget);
+
+		this.addDrawableChild(this.viewDistanceField);
+		this.addDrawableChild(this.viewDistanceHelpButton);
 
 		addFormattingButtons(280, 20, innerPadding, 20, 2);
 	}
@@ -219,6 +239,8 @@ public class TextBlockEditScreen extends TextEditorScreen {
 	public boolean charTyped(char chr, int keyCode) {
 		if (this.colorEntryWidget.isActive()) {
 			return this.colorEntryWidget.charTyped(chr, keyCode);
+		} else if (this.viewDistanceField.isActive()) {
+			return this.viewDistanceField.charTyped(chr, keyCode);
 		} else {
 			this.selectionManager.insert(chr);
 			return true;
@@ -234,8 +256,17 @@ public class TextBlockEditScreen extends TextEditorScreen {
 			} else {
 				return this.colorEntryWidget.keyPressed(keyCode, scanCode, modifiers);
 			}
-		} if(this.colorPickerWidget.active && (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE)) {
-			if(keyCode == GLFW.GLFW_KEY_ENTER) {
+		} else if (this.viewDistanceField.isActive()) {
+			if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+				this.close();
+				return true;
+			} else {
+				return this.viewDistanceField.keyPressed(keyCode, scanCode, modifiers);
+			}
+		}
+		
+		if (this.colorPickerWidget.active && (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE)) {
+			if (keyCode == GLFW.GLFW_KEY_ENTER) {
 				this.colorPickerWidget.confirmColor();
 			} else {
 				this.colorPickerWidget.cancel();
