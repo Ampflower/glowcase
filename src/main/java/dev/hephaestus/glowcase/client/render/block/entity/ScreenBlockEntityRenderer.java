@@ -1,17 +1,15 @@
 package dev.hephaestus.glowcase.client.render.block.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseClient;
+import dev.hephaestus.glowcase.client.GlowcaseRenderLayers;
 import dev.hephaestus.glowcase.client.ScreenImageCache;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
-import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
@@ -19,7 +17,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -27,21 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
-import java.util.function.Function;
 
 public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ScreenBlockEntity> {
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/screen_block.png");
-	
-	// custom render layer for no culling
-	public static final Function<Identifier, RenderLayer> TEXT_NO_CULL = Util.memoize((texture) -> {
-		return RenderLayer.of("glowcase_text_no_cull", VertexFormats.POSITION_COLOR_TEXTURE_LIGHT, DrawMode.QUADS, 786432, false, true, MultiPhaseParameters.builder()
-			.program(RenderPhase.TEXT_PROGRAM)
-			.texture(new RenderPhase.Texture(texture, false, false))
-			.transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
-			.cull(RenderPhase.DISABLE_CULLING)
-			.lightmap(RenderPhase.ENABLE_LIGHTMAP)
-			.build(false));
-	});
 
 	public static final int COLOR_SCR_OFF = 0xFF111111;
 	public static final int COLOR_SCR_ON = 0xFFFFFFFF;
@@ -118,7 +103,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 				// Actual picture
 				renderPicture(texture, x1, x2, y1, y2, vertexConsumers, matrices, brightness, renderBackface);
-			} else if (code/100 == 1) {
+			} else if (code / 100 == 1) {
 				// Loading screen
 				renderFilledRectangle(COLOR_SCR_ON, x1, x2, y1, y2, vertexConsumers, matrices, brightness);
 
@@ -140,7 +125,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	}
 
 	public static void renderPicture(@NotNull Identifier texture, float x1, float x2, float y1, float y2, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, boolean renderBackface) {
-		RenderLayer renderLayer = renderBackface ? TEXT_NO_CULL.apply(texture) : RenderLayer.getText(texture);
+		RenderLayer renderLayer = GlowcaseRenderLayers.getScreen(texture, !renderBackface);
 		VertexConsumer buffer = vertexConsumers.getBuffer(renderLayer);
 
 		MatrixStack.Entry matrix = matrices.peek();
@@ -161,8 +146,8 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	 *
 	 * <p>Note: The code within this method is very messy and someone might want to improve this in the future.</p>
 	 *
-	 * @param code Error code
-	 * @param width Width of the screen
+	 * @param code   Error code
+	 * @param width  Width of the screen
 	 * @param height Height of the screen
 	 */
 	public static void renderErrCode(int code, ScreenBlockEntity entity, float width, float height, VertexConsumerProvider vertexConsumers, MatrixStack matrices, TextRenderer textRenderer, int light) {
@@ -173,7 +158,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		float txt_width = width * 0.95f;
 		float txt_gap = width * 0.05f;
 
-		matrices.translate(txt_width/2f - (txt_gap/2f), height/2f - (lineHeight/2f), -.1f); // Upper-Left corner
+		matrices.translate(txt_width / 2f - (txt_gap / 2f), height / 2f - (lineHeight / 2f), -.1f); // Upper-Left corner
 		matrices.scale(-font_scale, -font_scale, -.1f);
 
 		// Alt-Text
@@ -188,10 +173,10 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 			String line = lines.get(i);
 
 			// No overflows here
-			int limit = (SCR_MAX_LINES/2-1);
+			int limit = (SCR_MAX_LINES / 2 - 1);
 			if (i > limit)
 				break;
-			else if (i == limit && i+1 != lines.size())
+			else if (i == limit && i + 1 != lines.size())
 				line = line + "…";
 
 			moved_lines++;
@@ -207,7 +192,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		matrices.translate(0, textRenderer.fontHeight * 4, 0f);
 
 		MutableText hint = Text.translatableWithFallback("gui.glowcase.screen.hint." + code, "");
-		String error_msg = Text.translatable("gui.glowcase.screen.error", ""+code).append(" ").append(hint).getString();
+		String error_msg = Text.translatable("gui.glowcase.screen.error", "" + code).append(" ").append(hint).getString();
 		lines = wrap(error_msg, font_scale, txt_width, textRenderer);
 
 		moved_lines = 0;
@@ -218,7 +203,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 			int limit = (SCR_MAX_LINES / 2) - 7;
 			if (i > limit)
 				break;
-			else if (i == limit && i+1 != lines.size())
+			else if (i == limit && i + 1 != lines.size())
 				line = line + "…";
 
 			moved_lines++;
@@ -228,13 +213,13 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		// Important face
 
-		matrices.translate(0, -textRenderer.fontHeight  * (moved_lines + 3), 0f); // Undo cursor positioning
+		matrices.translate(0, -textRenderer.fontHeight * (moved_lines + 3), 0f); // Undo cursor positioning
 		matrices.scale(3f, 3f, 1f);
 		textRenderer.draw(":3", 0, 0, COLOR_TXT_CRASH, true, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private void renderTextCentered(MutableText text, int color, float scr_width, float scr_height, MatrixStack matrices, VertexConsumerProvider vertexConsumers, TextRenderer textRenderer,int light) {
+	private void renderTextCentered(MutableText text, int color, float scr_width, float scr_height, MatrixStack matrices, VertexConsumerProvider vertexConsumers, TextRenderer textRenderer, int light) {
 		renderTextCentered(text.getString(), color, scr_width, scr_height, matrices, vertexConsumers, textRenderer, light);
 	}
 
@@ -247,7 +232,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 
 		// Apply
 		matrices.scale(-font_scale_factor, -font_scale_factor, -0.5f);
-		matrices.translate(-textRenderer.getWidth(text)/2f, -textRenderer.fontHeight/2f, .1f); // Remove offset of string
+		matrices.translate(-textRenderer.getWidth(text) / 2f, -textRenderer.fontHeight / 2f, .1f); // Remove offset of string
 
 		textRenderer.draw(text, 0, 0, color, true, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
 	}
@@ -271,8 +256,7 @@ public record ScreenBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 	 * (aka Word wrapping)
 	 *
 	 * @param font_scale Size of the font in relation to the screens sizes.
-	 * @param txt_width Available width of the screen for the text.
-	 *
+	 * @param txt_width  Available width of the screen for the text.
 	 * @return A list of strings where all fit in the expected width.
 	 */
 	private static ArrayList<String> wrap(String text, float font_scale, float txt_width, TextRenderer textRenderer) {
