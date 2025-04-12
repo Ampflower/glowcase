@@ -5,7 +5,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3f;
 
 import com.google.common.primitives.Floats;
@@ -51,21 +50,18 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 			this.scaleField.setChangedListener(string -> {
 				if (Floats.tryParse(string) instanceof Float parsed) {
 					this.displayBlock.setScale(new Vector3f(parsed, parsed, parsed));
-					clampValues();
 					editDisplayBlock();
 				}
 			});
 
 			this.decreaseSize = ButtonWidget.builder(Text.literal("-"), action -> {
 				this.displayBlock.getScale().sub(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
-				clampValues();
 				editDisplayBlock();
 				this.scaleField.setText(String.valueOf(this.displayBlock.getScale().x()));
 			}).dimensions(90 + 60 + 5, 10, 20, 20).build();
 
 			this.increaseSize = ButtonWidget.builder(Text.literal("+"), action -> {
 				this.displayBlock.getScale().add(scaleOffsetChange, scaleOffsetChange, scaleOffsetChange);
-				clampValues();
 				editDisplayBlock();
 				this.scaleField.setText(String.valueOf(this.displayBlock.getScale().x()));
 			}).dimensions(90 + 60 + 5 + 20, 10, 20, 20).build();
@@ -77,7 +73,6 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 					Vector3f offset = this.displayBlock.getOffset();
 					offset.x = parsed;
 					this.displayBlock.setOffset(offset);
-					clampValues();
 					editDisplayBlock();
 				}
 			});
@@ -101,7 +96,6 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 					Vector3f offset = this.displayBlock.getOffset();
 					offset.y = parsed;
 					this.displayBlock.setOffset(offset);
-					clampValues();
 					editDisplayBlock();
 				}
 			});
@@ -125,7 +119,6 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 					Vector3f offset = this.displayBlock.getOffset();
 					offset.z = parsed;
 					this.displayBlock.setOffset(offset);
-					clampValues();
 					editDisplayBlock();
 				}
 			});
@@ -143,11 +136,10 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 			}).dimensions(90 + 60 + 5 + 20, 100, 20, 20).build();
 
 			this.pitchField = new TextFieldWidget(this.client.textRenderer, 90, 130, 60, 20, Text.empty());
-            this.pitchField.setText(String.valueOf((int)this.displayBlock.getPitch()));
+            this.pitchField.setText(String.valueOf(this.displayBlock.getPitch()));
 			this.pitchField.setChangedListener(string -> {
 				if (Floats.tryParse(string) instanceof Float parsed) {
-					this.displayBlock.setPitch(Math.round(parsed));
-					clampValues();
+					this.displayBlock.setPitch(parsed);
 					editDisplayBlock();
 				}
 			});
@@ -155,21 +147,20 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 			this.decreasePitch = ButtonWidget.builder(Text.literal("-"), action -> {
 				this.displayBlock.setPitch(this.displayBlock.getPitch() - pitchYawChange);
 				editDisplayBlock();
-				this.pitchField.setText(String.valueOf((int)this.displayBlock.getPitch()));
+				this.pitchField.setText(String.valueOf(this.displayBlock.getPitch()));
 			}).dimensions(90 + 60 + 5, 130, 20, 20).build();
 
 			this.increasePitch = ButtonWidget.builder(Text.literal("+"), action -> {
 				this.displayBlock.setPitch(this.displayBlock.getPitch() + pitchYawChange);
 				editDisplayBlock();
-				this.pitchField.setText(String.valueOf((int)this.displayBlock.getPitch()));
+				this.pitchField.setText(String.valueOf(this.displayBlock.getPitch()));
 			}).dimensions(90 + 60 + 5 + 20, 130, 20, 20).build();
 
 			this.yawField = new TextFieldWidget(this.client.textRenderer, 90, 160, 60, 20, Text.empty());
-            this.yawField.setText(String.valueOf((int)this.displayBlock.getYaw()));
+            this.yawField.setText(String.valueOf(this.displayBlock.getYaw()));
 			this.yawField.setChangedListener(string -> {
 				if (Floats.tryParse(string) instanceof Float parsed) {
-					this.displayBlock.setYaw(Math.round(parsed));
-					clampValues();
+					this.displayBlock.setYaw(parsed);
 					editDisplayBlock();
 				}
 			});
@@ -177,13 +168,13 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 			this.decreaseYaw = ButtonWidget.builder(Text.literal("-"), action -> {
 				this.displayBlock.setYaw(this.displayBlock.getYaw() - pitchYawChange);
 				editDisplayBlock();
-				this.yawField.setText(String.valueOf((int)this.displayBlock.getYaw()));
+				this.yawField.setText(String.valueOf(this.displayBlock.getYaw()));
 			}).dimensions(90 + 60 + 5, 160, 20, 20).build();
 
 			this.increaseYaw = ButtonWidget.builder(Text.literal("+"), action -> {
 				this.displayBlock.setYaw(this.displayBlock.getYaw() + pitchYawChange);
 				editDisplayBlock();
-				this.yawField.setText(String.valueOf((int)this.displayBlock.getYaw()));
+				this.yawField.setText(String.valueOf(this.displayBlock.getYaw()));
 			}).dimensions(90 + 60 + 5 + 20, 160, 20, 20).build();
 
 			this.addDrawableChild(this.scaleField);
@@ -207,21 +198,6 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 		}
 	}
 
-	public void clampValues() {
-		this.displayBlock.setScale(new Vector3f(
-			MathHelper.clamp(Math.round(this.displayBlock.getScale().x() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
-			MathHelper.clamp(Math.round(this.displayBlock.getScale().y() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F),
-			MathHelper.clamp(Math.round(this.displayBlock.getScale().z() / scaleOffsetChange) * scaleOffsetChange, -10F, 10F)
-		));
-		this.displayBlock.setOffset(new Vector3f(
-			MathHelper.clamp(Math.round(this.displayBlock.getOffset().x() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
-			MathHelper.clamp(Math.round(this.displayBlock.getOffset().y() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F),
-			MathHelper.clamp(Math.round(this.displayBlock.getOffset().z() / scaleOffsetChange) * scaleOffsetChange, -5F, 5F)
-		));
-		this.displayBlock.setPitch(Math.round(((this.displayBlock.getPitch() + 360) % 360) / 15) * 15);
-		this.displayBlock.setYaw(Math.round(((this.displayBlock.getYaw() + 360) % 360) / 15) * 15);
-	}
-
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (this.client != null) {
 			super.render(context, mouseX, mouseY, delta);
@@ -234,7 +210,5 @@ public abstract class DisplayBlockEditScreen extends GlowcaseScreen {
 		}
 	}
 
-	protected void editDisplayBlock() {
-		clampValues();
-	}
+	protected void editDisplayBlock() {}
 }
