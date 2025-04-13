@@ -16,16 +16,10 @@ import java.util.Optional;
 public class SpriteBlockEntity extends GlowcaseBlockEntity {
 	protected String sprite = "arrow";
 	protected @Nullable ItemStack renderItem = null;
+	public int rotation = 0;
 	public TextBlockEntity.ZOffset zOffset = TextBlockEntity.ZOffset.BACK;
-
 	public int color = 0xFFFFFF;
 	public float scale = 1;
-
-	public double offsetX = 0.0;
-	public double offsetY = 0.0;
-	public double offsetZ = 0.0;
-	public float pitch = 0f;
-	public float yaw = 0f;
 
 	public SpriteBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.SPRITE_BLOCK_ENTITY.get(), pos, state);
@@ -55,14 +49,10 @@ public class SpriteBlockEntity extends GlowcaseBlockEntity {
 		super.writeNbt(tag, registryLookup);
 
 		tag.putString("sprite", this.sprite);
+		tag.putInt("rotation", this.rotation);
 		tag.putString("z_offset", this.zOffset.name());
 		tag.putInt("color", this.color);
 		tag.putFloat("scale", this.scale);
-		tag.putDouble("offsetX", this.offsetX);
-		tag.putDouble("offsetY", this.offsetY);
-		tag.putDouble("offsetZ", this.offsetZ);
-		tag.putFloat("pitch", this.pitch);
-		tag.putFloat("yaw", this.yaw);
 	}
 
 	@Override
@@ -70,13 +60,14 @@ public class SpriteBlockEntity extends GlowcaseBlockEntity {
 		super.readNbt(tag, registryLookup);
 
 		setSprite(tag.getString("sprite"));
+		this.rotation = tag.getInt("rotation");
 		this.zOffset = TextBlockEntity.ZOffset.valueOf(tag.getString("z_offset"));
 		this.color = tag.getInt("color");
 		this.scale = tag.getFloat("scale");
-		this.offsetX = tag.contains("offsetX") ? tag.getDouble("offsetX") : 0.0;
-		this.offsetY = tag.contains("offsetY") ? tag.getDouble("offsetY") : 0.0;
-		this.offsetZ = tag.contains("offsetZ") ? tag.getDouble("offsetZ") : 0.0;
-		this.pitch = tag.contains("pitch") ? tag.getFloat("pitch") : 0f;
-		this.yaw = tag.contains("yaw") ? tag.getFloat("yaw") : 0f;
+	}
+
+	public void setRotation(int rotation) {
+		this.rotation = rotation;
+		markDirty();
 	}
 }
