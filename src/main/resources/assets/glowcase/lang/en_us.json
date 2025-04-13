@@ -21,7 +21,7 @@
 	"gui.glowcase.y_offset_label": "Y Offset",
 	"gui.glowcase.z_offset_label": "Z Offset",
 	"gui.glowcase.pitch_value": "Pitch: %d",
-	"gui.glowcase.yaw_value": "Yaw: %d",
+	"gui.glowcase.yaw_value": "Yaw",
 	"gui.glowcase.alignment": "Alignment: %s",
 	"gui.glowcase.gives_item": "Gives Item: %s",
 	"gui.glowcase.shadow_type": "Shadow Type: %s",
