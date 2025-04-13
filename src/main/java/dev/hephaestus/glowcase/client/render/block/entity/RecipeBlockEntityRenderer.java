@@ -22,9 +22,13 @@ public record RecipeBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		if (GlowcaseClient.EMI_LOADED) {
 			matrices.push();
 			matrices.translate(0.5D, 0.5D, 0.5D);
+
 			float rotation = -(entity.getCachedState().get(Properties.ROTATION) * 360) / 16.0F;
+			
 			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
 			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.rotationY));
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(entity.rotationX));
 
 			switch (entity.zOffset) {
 				case FRONT -> matrices.translate(0D, 0D, -0.4D);
