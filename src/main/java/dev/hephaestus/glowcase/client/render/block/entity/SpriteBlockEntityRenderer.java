@@ -46,10 +46,7 @@ public record SpriteBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 		matrices.translate(0.5D, 0.5D, 0.5D);
 
 		matrices.multiply(entity.getCachedState().get(Properties.FACING).getRotationQuaternion().mul(RotationAxis.POSITIVE_X.rotationDegrees(-90.0F)));
-
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(entity.yaw));
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(entity.pitch));
-		matrices.translate(entity.offsetX, entity.offsetY, entity.offsetZ);
+		matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(entity.rotation));
 
 		switch (entity.zOffset) {
 			case FRONT -> matrices.translate(0D, 0D, 0.4D);
