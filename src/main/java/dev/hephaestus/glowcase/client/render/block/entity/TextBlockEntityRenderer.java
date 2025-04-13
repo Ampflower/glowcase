@@ -39,7 +39,16 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
-				entity.renderDirty = true;
+				if (!entity.wasOutOfRange) {
+                    entity.renderDirty = true;
+                    entity.wasOutOfRange = true;
+                }
+			} else {
+				if (entity.wasOutOfRange) {
+					entity.renderDirty = true;
+				}
+
+				entity.wasOutOfRange = false;
 			}
 		}
 
@@ -61,9 +70,19 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 			
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
-				entity.renderDirty = true;
+				if (!entity.wasOutOfRange) {
+                    entity.renderDirty = true;
+                    entity.wasOutOfRange = true;
+                }
+
 				return;
-			}
+			} else {
+                if (entity.wasOutOfRange) {
+					entity.renderDirty = true;
+				}
+
+				entity.wasOutOfRange = false;
+            }
 		}
 		
 		matrices.push();
