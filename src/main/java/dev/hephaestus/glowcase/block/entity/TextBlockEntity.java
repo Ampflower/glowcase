@@ -26,8 +26,7 @@ public class TextBlockEntity extends GlowcaseBlockEntity {
 	public float scale = 1F;
 	public int color = 0xFFFFFF;
 	public boolean renderDirty = true;
-	public float viewDistance = 32.0F;
-	public boolean wasOutOfRange = false;
+	public float viewDistance = -1.0F;
 
 	public TextBlockEntity(BlockPos pos, BlockState state) {
 		super(Glowcase.TEXT_BLOCK_ENTITY.get(), pos, state);
@@ -45,8 +44,6 @@ public class TextBlockEntity extends GlowcaseBlockEntity {
 		tag.putString("z_offset", this.zOffset.name());
 		tag.putString("shadow_type", this.shadowType.name());
 		tag.putFloat("viewDistance", this.viewDistance);
-
-		tag.putBoolean("wasOutOfRange", this.wasOutOfRange);
 
 		NbtList lines = tag.getList("lines", 8);
 		for (var text : this.lines) {
@@ -67,9 +64,7 @@ public class TextBlockEntity extends GlowcaseBlockEntity {
 		this.textAlignment = TextAlignment.valueOf(tag.getString("text_alignment"));
 		this.zOffset = ZOffset.valueOf(tag.getString("z_offset"));
 		this.shadowType = tag.contains("shadow_type") ? ShadowType.valueOf(tag.getString("shadow_type")) : ShadowType.DROP;
-		this.viewDistance = tag.contains("viewDistance") ? tag.getFloat("viewDistance") : 32.0F;
-
-		this.wasOutOfRange = tag.contains("wasOutOfRange") ? tag.getBoolean("wasOutOfRange") : false;
+		this.viewDistance = tag.contains("viewDistance") ? tag.getFloat("viewDistance") : -1.0F;
 
 		NbtList lines = tag.getList("lines", 8);
 
