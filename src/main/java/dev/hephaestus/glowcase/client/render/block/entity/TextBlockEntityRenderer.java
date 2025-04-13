@@ -39,7 +39,7 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
-				return;
+				entity.renderDirty = true;
 			}
 		}
 
@@ -47,6 +47,7 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			entity.renderDirty = false;
 			Manager.markForRebuild(entity.getPos());
 		}
+
 		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		if (entity.lines.stream().allMatch(t -> t.getString().isBlank()) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
 	}
@@ -60,6 +61,7 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 			
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
+				entity.renderDirty = true;
 				return;
 			}
 		}
