@@ -20,6 +20,7 @@ import org.joml.Matrix4f;
 
 public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockEntity> {
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/text_block.png");
+	private boolean wasOutOfRange = false;
 
 	public TextBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
 		super(context);
@@ -33,22 +34,22 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 	@Override
 	public void renderUnbaked(TextBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
-		if (camera != null) {
+		if (camera != null && entity.viewDistance >= 0) {
 			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
 			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
-				if (!entity.wasOutOfRange) {
+				if (!wasOutOfRange) {
                     entity.renderDirty = true;
-                    entity.wasOutOfRange = true;
+                    wasOutOfRange = true;
                 }
 			} else {
-				if (entity.wasOutOfRange) {
+				if (wasOutOfRange) {
 					entity.renderDirty = true;
 				}
 
-				entity.wasOutOfRange = false;
+				wasOutOfRange = false;
 			}
 		}
 
@@ -64,24 +65,24 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 	@Override
 	public void renderBaked(TextBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		Entity camera = MinecraftClient.getInstance().getCameraEntity();
-		if (camera != null) {
+		if (camera != null && entity.viewDistance >= 0) {
 			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
 			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
 			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
 			
 			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
-				if (!entity.wasOutOfRange) {
+				if (!wasOutOfRange) {
                     entity.renderDirty = true;
-                    entity.wasOutOfRange = true;
+                    wasOutOfRange = true;
                 }
 
 				return;
 			} else {
-                if (entity.wasOutOfRange) {
+                if (wasOutOfRange) {
 					entity.renderDirty = true;
 				}
 
-				entity.wasOutOfRange = false;
+				wasOutOfRange = false;
             }
 		}
 		
