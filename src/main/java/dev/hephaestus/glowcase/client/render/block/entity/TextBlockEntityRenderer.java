@@ -4,6 +4,7 @@ import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
 import dev.hephaestus.glowcase.client.GlowcaseRenderLayers;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -11,6 +12,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
@@ -18,6 +20,7 @@ import org.joml.Matrix4f;
 
 public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockEntity> {
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/text_block.png");
+	private boolean wasOutOfRange = false;
 
 	public TextBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
 		super(context);
@@ -30,16 +33,59 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 
 	@Override
 	public void renderUnbaked(TextBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		Entity camera = MinecraftClient.getInstance().getCameraEntity();
+		if (camera != null && entity.viewDistance >= 0) {
+			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
+			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
+			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
+
+			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
+				if (!wasOutOfRange) {
+                    entity.renderDirty = true;
+                    wasOutOfRange = true;
+                }
+			} else {
+				if (wasOutOfRange) {
+					entity.renderDirty = true;
+				}
+
+				wasOutOfRange = false;
+			}
+		}
+
 		if (entity.renderDirty) {
 			entity.renderDirty = false;
 			Manager.markForRebuild(entity.getPos());
 		}
+
 		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
 		if (entity.lines.stream().allMatch(t -> t.getString().isBlank()) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
 	}
 
 	@Override
 	public void renderBaked(TextBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+		Entity camera = MinecraftClient.getInstance().getCameraEntity();
+		if (camera != null && entity.viewDistance >= 0) {
+			double dx = camera.getX() - (entity.getPos().getX() + 0.5);
+			double dy = camera.getY() - (entity.getPos().getY() + 0.5);
+			double dz = camera.getZ() - (entity.getPos().getZ() + 0.5);
+			
+			if ((dx * dx + dy * dy + dz * dz) > (entity.viewDistance * entity.viewDistance)) {
+				if (!wasOutOfRange) {
+                    entity.renderDirty = true;
+                    wasOutOfRange = true;
+                }
+
+				return;
+			} else {
+                if (wasOutOfRange) {
+					entity.renderDirty = true;
+				}
+
+				wasOutOfRange = false;
+            }
+		}
+		
 		matrices.push();
 		matrices.translate(0.5D, 0.5D, 0.5D);
 
