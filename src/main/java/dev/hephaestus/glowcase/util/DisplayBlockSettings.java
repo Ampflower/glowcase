@@ -14,7 +14,7 @@ public record DisplayBlockSettings(Vector3f offset, Vector3f scale, float pitch,
 		Codecs.VECTOR_3F.lenientOptionalFieldOf("scale", new Vector3f(1.0F)).forGetter(DisplayBlockSettings::scale),
 		Codec.FLOAT.lenientOptionalFieldOf("pitch", 0F).forGetter(DisplayBlockSettings::pitch),
 		Codec.FLOAT.lenientOptionalFieldOf("yaw", 0F).forGetter(DisplayBlockSettings::yaw),
-		Codec.BOOL.lenientOptionalFieldOf("renderAsBlock", true).forGetter(DisplayBlockSettings::renderAsBlock)
+		Codec.BOOL.lenientOptionalFieldOf("renderAsBlock", false).forGetter(DisplayBlockSettings::renderAsBlock)
 	).apply(instance, DisplayBlockSettings::new));
 
 	public static final PacketCodec<ByteBuf, DisplayBlockSettings> PACKET_CODEC = PacketCodec.tuple(
@@ -27,7 +27,7 @@ public record DisplayBlockSettings(Vector3f offset, Vector3f scale, float pitch,
 	);
 
 	public DisplayBlockSettings() {
-		this(new Vector3f(), new Vector3f(1.0F), 0F, 0F, true);
+		this(new Vector3f(), new Vector3f(1.0F), 0F, 0F, false);
 	}
 
 	public boolean isEmpty() {

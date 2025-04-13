@@ -14,7 +14,7 @@ public abstract class DisplayBlockEntity extends GlowcaseBlockEntity {
 	private Vector3f scale = new Vector3f(1.0F);
 	private float pitch = 0.0F;
 	private float yaw = 0.0F;
-	private boolean renderAsBlock = true;
+	private boolean renderAsBlock = false;
 
 	public DisplayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
