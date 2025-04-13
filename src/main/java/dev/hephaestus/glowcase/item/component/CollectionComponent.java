@@ -108,10 +108,12 @@ public record CollectionComponent(ImmutableList<CollectableStack> collectables, 
 	}
 
 	public CollectionComponent selectNext(boolean collected) {
+		if (collectables.isEmpty()) return this;
 		return new CollectionComponent(collectables, collected ? getNextCollected(collectables, selected, false) : (selected + 1) % collectables.size());
 	}
 
 	public CollectionComponent selectPrevious(boolean collected) {
+		if (collectables.isEmpty()) return this;
 		return new CollectionComponent(collectables, collected ? getPreviousCollected(collectables, selected, false) : (collectables.size() + selected - 1) % collectables.size());
 	}
 
