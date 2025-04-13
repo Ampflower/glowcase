@@ -34,6 +34,9 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 	public float preciseY = 0f;
 	public float preciseZ = 0f;
 
+	public float pitch = 0f;
+	public float yaw = 0f;
+
 	public boolean renderBackface = false;
 	public boolean stretch = false;
 	public boolean eink = true;
@@ -93,6 +96,9 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 		nbt.putFloat("py", this.preciseY);
 		nbt.putFloat("pz", this.preciseZ);
 
+		nbt.putFloat("pitch", this.pitch);
+		nbt.putFloat("yaw", this.yaw);
+
 		nbt.putString("url", url);
 		nbt.putString("alt", alt);
 
@@ -120,6 +126,9 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 		preciseY = nbt.getFloat("py");
 		preciseZ = nbt.getFloat("pz");
 
+		pitch = nbt.getFloat("pitch");
+		yaw = nbt.getFloat("yaw");
+
 		url = nbt.getString("url");
 		alt = nbt.getString("alt");
 
@@ -141,12 +150,14 @@ public class ScreenBlockEntity extends GlowcaseBlockEntity {
 		markDirty();
 	}
 
-	public void setupScreen(float width, float height, Offset xOffset, Offset yOffset, Offset zOffset, boolean eink, boolean stretch, boolean renderBackface) {
+	public void setupScreen(float width, float height, Offset xOffset, Offset yOffset, Offset zOffset, float pitch, float yaw, boolean eink, boolean stretch, boolean renderBackface) {
 		this.width = Math.clamp(width, 0.05f, Integer.MAX_VALUE);
 		this.height = Math.clamp(height, 0.05f, Integer.MAX_VALUE);
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
 		this.zOffset = zOffset;
+		this.pitch = pitch;
+		this.yaw = yaw;
 		this.eink = eink;
 		this.stretch = stretch;
 		this.renderBackface = renderBackface;

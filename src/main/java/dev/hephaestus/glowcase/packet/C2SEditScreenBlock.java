@@ -10,7 +10,7 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
-public record C2SEditScreenBlock(BlockPos pos, float width, float height, ScreenBlockEntity.Offset xOffset, ScreenBlockEntity.Offset yOffset, ScreenBlockEntity.Offset zOffset, boolean renderBackface, boolean eink, boolean stretch, String url, String alt, float preciseX, float preciseY, float preciseZ) implements C2SEditBlockEntity {
+public record C2SEditScreenBlock(BlockPos pos, float width, float height, ScreenBlockEntity.Offset xOffset, ScreenBlockEntity.Offset yOffset, ScreenBlockEntity.Offset zOffset, float pitch, float yaw, boolean renderBackface, boolean eink, boolean stretch, String url, String alt, float preciseX, float preciseY, float preciseZ) implements C2SEditBlockEntity {
 	public static final Id<C2SEditScreenBlock> ID = new Id<>(Glowcase.id("channel.screen_block"));
 	public static final PacketCodec<RegistryByteBuf, C2SEditScreenBlock> PACKET_CODEC = PacketCodec.of(
 		(packet, buf) -> {
@@ -22,6 +22,8 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 			PacketCodecs.BYTE.encode(buf, (byte) packet.xOffset.ordinal());
 			PacketCodecs.BYTE.encode(buf, (byte) packet.yOffset.ordinal());
 			PacketCodecs.BYTE.encode(buf, (byte) packet.zOffset.ordinal());
+			PacketCodecs.FLOAT.encode(buf, packet.pitch);
+            PacketCodecs.FLOAT.encode(buf, packet.yaw);
 			PacketCodecs.BOOL.encode(buf, packet.renderBackface);
 			PacketCodecs.BOOL.encode(buf, packet.eink);
 			PacketCodecs.BOOL.encode(buf, packet.stretch);
@@ -37,6 +39,8 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
 			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
 			ScreenBlockEntity.Offset.values()[PacketCodecs.BYTE.decode(buf)],
+			PacketCodecs.FLOAT.decode(buf),
+            PacketCodecs.FLOAT.decode(buf),
 			PacketCodecs.BOOL.decode(buf),
 			PacketCodecs.BOOL.decode(buf),
 			PacketCodecs.BOOL.decode(buf),
@@ -48,7 +52,7 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 	);
 
 	public static C2SEditScreenBlock of(ScreenBlockEntity be) {
-		return new C2SEditScreenBlock(be.getPos(), be.width, be.height, be.xOffset, be.yOffset, be.zOffset, be.renderBackface, be.eink, be.stretch, be.url, be.alt, be.preciseX, be.preciseY, be.preciseZ);
+		return new C2SEditScreenBlock(be.getPos(), be.width, be.height, be.xOffset, be.yOffset, be.zOffset, be.pitch, be.yaw, be.renderBackface, be.eink, be.stretch, be.url, be.alt, be.preciseX, be.preciseY, be.preciseZ);
 	}
 
 	@Override
@@ -57,7 +61,7 @@ public record C2SEditScreenBlock(BlockPos pos, float width, float height, Screen
 
 		Pair<String, String> trimmed = ScreenBlockEntity.trimStr(url, alt);
 
-		be.setupScreen(this.width, this.height, this.xOffset, this.yOffset, this.zOffset, this.eink, this.stretch, this.renderBackface);
+		be.setupScreen(this.width, this.height, this.xOffset, this.yOffset, this.zOffset, this.pitch, this.yaw, this.eink, this.stretch, this.renderBackface);
 
 		be.preciseX = this.preciseX;
         be.preciseY = this.preciseY;
