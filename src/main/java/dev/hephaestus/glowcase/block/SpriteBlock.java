@@ -53,12 +53,10 @@ public class SpriteBlock extends GlowcaseBlock implements BlockEntityProvider {
 		loadClientSideNBT(world, pos, placer, stack);
 		if (placer != null && world.getBlockEntity(pos) instanceof SpriteBlockEntity be) {
 			if (state.get(FACING).equals(Direction.UP)) {
-				be.yaw = Math.round(((540.0F + placer.getHeadYaw()) % 360.0F) / 45.0F) * 45;
-				be.pitch = 0f;
+				be.setRotation(Math.round(((540.0F + placer.getHeadYaw()) % 360.0F) / 45.0F) * 45);
 			}
 			if (state.get(FACING).equals(Direction.DOWN)) {
-				be.yaw = Math.round(((540.0F - placer.getHeadYaw()) % 360.0F) / 45.0F) * 45;
-				be.pitch = 180f;
+				be.setRotation(Math.round(((540.0F - placer.getHeadYaw()) % 360.0F) / 45.0F) * 45);
 			}
 		}
 	}
