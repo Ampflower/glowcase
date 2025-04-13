@@ -9,7 +9,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.registry.Registries;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.text.OrderedText;
@@ -18,27 +17,21 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Floats;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SpriteBlockEditScreen extends GlowcaseScreen {
 	private final SpriteBlockEntity spriteBlockEntity;
 
-	private ButtonWidget spriteWidgetHelpButton;
-	private ButtonWidget zOffsetToggle;
-
 	private TextFieldWidget spriteWidget;
+	private ButtonWidget spriteWidgetHelpButton;
+	private ButtonWidget rotationWidget;
+	private ButtonWidget zOffsetToggle;
 	private TextFieldWidget colorEntryWidget;
 	private TextFieldWidget scaleEntryWidget;
-
-	private TextFieldWidget offsetXWidget;
-	private TextFieldWidget offsetYWidget;
-	private TextFieldWidget offsetZWidget;
-	private TextFieldWidget pitchWidget;
-	private TextFieldWidget yawWidget;
-
 
 	private List<OrderedText> spriteHelpTooltipText;
 
@@ -55,77 +48,23 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 
 		if (this.client == null) return;
 
-		int fontHeight = this.client.textRenderer.fontHeight;
-		int containerTop = (height - (3 * fontHeight + 125)) / 2;
-
-		TextWidget offsetXLabel = new TextWidget(width / 10, containerTop, (((width - width / 5) - 10) / 3), 20, Text.translatable("gui.glowcase.x_offset_label"), this.client.textRenderer);
-        TextWidget offsetYLabel = new TextWidget(width / 10 + (((width - width / 5) - 10) / 3) + 5, containerTop, (((width - width / 5) - 10) / 3), 20, Text.translatable("gui.glowcase.y_offset_label"), this.client.textRenderer);
-        TextWidget offsetZLabel = new TextWidget(width / 10 + 2 * ((((width - width / 5) - 10) / 3) + 5), containerTop, (((width - width / 5) - 10) / 3), 20, Text.translatable("gui.glowcase.z_offset_label"), this.client.textRenderer);
-
-		int offsetsFieldY = containerTop + fontHeight + 10;
-
-		this.offsetXWidget = new TextFieldWidget(this.client.textRenderer, width / 10, offsetsFieldY, (((width - width / 5) - 10) / 3), 20, Text.empty());
-        this.offsetXWidget.setText(Double.toString(spriteBlockEntity.offsetX));
-		this.offsetXWidget.setChangedListener(s -> {
-			if (Doubles.tryParse(s) instanceof Double parsed) {
-				spriteBlockEntity.offsetX = parsed;
-			}
-		});
-
-		this.offsetYWidget = new TextFieldWidget(this.client.textRenderer, width / 10 + (((width - width / 5) - 10) / 3) + 5, offsetsFieldY, (((width - width / 5) - 10) / 3), 20, Text.empty());
-        this.offsetYWidget.setText(Double.toString(spriteBlockEntity.offsetY));
-		this.offsetYWidget.setChangedListener(s -> {
-			if (Doubles.tryParse(s) instanceof Double parsed) {
-				spriteBlockEntity.offsetY = parsed;
-			}
-		});
-
-		this.offsetZWidget = new TextFieldWidget(this.client.textRenderer, width / 10 + 2 * ((((width - width / 5) - 10) / 3) + 5), offsetsFieldY, (((width - width / 5) - 10) / 3), 20, Text.empty());
-        this.offsetZWidget.setText(Double.toString(spriteBlockEntity.offsetZ));
-		this.offsetZWidget.setChangedListener(s -> {
-			if (Doubles.tryParse(s) instanceof Double parsed) {
-				spriteBlockEntity.offsetZ = parsed;
-			}
-		});
-
-		int spriteFieldY = containerTop + fontHeight + 30 + 5;
-		int spriteFieldWidth = (width - width / 5) - 130;
-
-		this.spriteWidget = new TextFieldWidget(this.client.textRenderer, width / 10, spriteFieldY, spriteFieldWidth, 20, Text.empty());
+		this.spriteWidget = new TextFieldWidget(this.client.textRenderer, width / 2 - 90, height / 2 - 55, 180, 20, Text.empty());
 		this.spriteWidget.setMaxLength(255);
 		this.spriteWidget.setText(spriteBlockEntity.getSprite());
 		this.spriteWidget.setChangedListener(string -> {
 			this.spriteBlockEntity.setSprite(this.spriteWidget.getText());
 		});
 
-		int pitchYawLabelY = spriteFieldY + 20 + 5;
-		int pitchYawFieldWidth = ((width - width / 5) - 5) / 2;
-
-        TextWidget pitchLabelWidget = new TextWidget(width / 10, pitchYawLabelY, pitchYawFieldWidth, 20, Text.translatable("gui.glowcase.pitch"), this.client.textRenderer);
-        TextWidget yawLabelWidget = new TextWidget(width / 10 + pitchYawFieldWidth + 5, pitchYawLabelY, pitchYawFieldWidth, 20, Text.translatable("gui.glowcase.yaw"), this.client.textRenderer);
-
-		int pitchYawFieldY = pitchYawLabelY + fontHeight + 10;
-		this.pitchWidget = new TextFieldWidget(this.client.textRenderer, width / 10, pitchYawFieldY, pitchYawFieldWidth, 20, Text.empty());
-		this.pitchWidget.setText(Float.toString(spriteBlockEntity.pitch));
-		this.pitchWidget.setChangedListener(s -> {
-			if (Floats.tryParse(s) instanceof Float parsed) {
-				spriteBlockEntity.pitch = parsed;
-			}
-		});
-
-		this.yawWidget = new TextFieldWidget(this.client.textRenderer, width / 10 + pitchYawFieldWidth + 5, pitchYawFieldY, pitchYawFieldWidth, 20, Text.empty());
-		this.yawWidget.setText(Float.toString(spriteBlockEntity.yaw));
-		this.yawWidget.setChangedListener(s -> {
-			if (Floats.tryParse(s) instanceof Float parsed) {
-				spriteBlockEntity.yaw = parsed;
-			}
-		});		
-
 		this.spriteWidgetHelpButton = ButtonWidget.builder(Text.literal("?"), action -> {})
-			.dimensions(this.spriteWidget.getX() + this.spriteWidget.getWidth() + 5, spriteFieldY, 20, 20)
+			.dimensions(spriteWidget.getX() + spriteWidget.getWidth() + 4, spriteWidget.getY(),
+				spriteWidget.getHeight(), spriteWidget.getHeight())
 			.build();
 
 		this.spriteHelpTooltipText = Tooltip.wrapLines(this.client, Text.translatable("gui.glowcase.screen.sprite_edit.sprite"));
+
+		this.rotationWidget = ButtonWidget.builder(Text.translatable("gui.glowcase.rotate"), (action) -> {
+			this.spriteBlockEntity.rotation = (this.spriteBlockEntity.rotation + 45) % 360;
+		}).dimensions(width / 2 - 90, height / 2 - 25, 180, 20).build();
 
 		this.zOffsetToggle = ButtonWidget.builder(Text.literal(this.spriteBlockEntity.zOffset.name()), action -> {
 			switch (spriteBlockEntity.zOffset) {
@@ -135,16 +74,9 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 			}
 
 			this.zOffsetToggle.setMessage(Text.literal(this.spriteBlockEntity.zOffset.name()));
-		}).dimensions(width / 10 + ((width - width / 5)) - 100, spriteFieldY, 100, 20).build();
+		}).dimensions(width / 2 - 90, height / 2 + 5, 180, 20).build();
 
-        int scaleColorLabelY = pitchYawLabelY + fontHeight + 30 + 5;
-		int halfWidth = (width - width / 5) / 2 - 2;
-
-        TextWidget scaleLabelWidget = new TextWidget(width / 10, scaleColorLabelY, halfWidth, 20, Text.translatable("gui.glowcase.scale"), this.client.textRenderer);
-        TextWidget colorLabelWidget = new TextWidget(width / 10 + halfWidth + 5, scaleColorLabelY, halfWidth, 20, Text.translatable("gui.glowcase.color"), this.client.textRenderer);
-
-        int scaleColorFieldY = scaleColorLabelY + fontHeight + 10;
-		this.colorEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10 + halfWidth + 5, scaleColorFieldY, halfWidth, 20, Text.empty());
+		this.colorEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 2 - 90, height / 2 + 35, 180, 20, Text.empty());
 		this.colorEntryWidget.setText("#" + String.format("%1$06X", this.spriteBlockEntity.color & 0x00FFFFFF));
 		this.colorEntryWidget.setChangedListener(string -> {
 			TextColor.parse(this.colorEntryWidget.getText()).ifSuccess(color -> {
@@ -152,31 +84,20 @@ public class SpriteBlockEditScreen extends GlowcaseScreen {
 			});
 		});
 
-        this.scaleEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 10, scaleColorFieldY, halfWidth, 20, Text.empty());
+		this.scaleEntryWidget = new TextFieldWidget(this.client.textRenderer, width / 2 - 90, height / 2 + 65, 180, 20, Text.empty());
 		this.scaleEntryWidget.setText(String.valueOf(this.spriteBlockEntity.scale));
-		this.scaleEntryWidget.setChangedListener(s -> {
-			if (Floats.tryParse(s) instanceof Float parsed) {
-				spriteBlockEntity.scale = parsed;
-			}
+		this.scaleEntryWidget.setChangedListener(string -> {
+			 try {
+				 this.spriteBlockEntity.scale = Float.parseFloat(string);
+			 } catch (NumberFormatException ignored) {}
 		});
 
-        this.addDrawableChild(offsetXLabel);
-        this.addDrawableChild(offsetYLabel);
-        this.addDrawableChild(offsetZLabel);
-        this.addDrawableChild(offsetXWidget);
-        this.addDrawableChild(offsetYWidget);
-        this.addDrawableChild(offsetZWidget);
-        this.addDrawableChild(spriteWidget);
-        this.addDrawableChild(spriteWidgetHelpButton);
-        this.addDrawableChild(zOffsetToggle);
-        this.addDrawableChild(pitchLabelWidget);
-        this.addDrawableChild(yawLabelWidget);
-        this.addDrawableChild(pitchWidget);
-        this.addDrawableChild(yawWidget);
-        this.addDrawableChild(scaleLabelWidget);
-        this.addDrawableChild(colorLabelWidget);
-        this.addDrawableChild(scaleEntryWidget);
-        this.addDrawableChild(colorEntryWidget);
+		this.addDrawableChild(this.spriteWidget);
+		this.addDrawableChild(this.spriteWidgetHelpButton);
+		this.addDrawableChild(this.rotationWidget);
+		this.addDrawableChild(this.zOffsetToggle);
+		this.addDrawableChild(this.colorEntryWidget);
+		this.addDrawableChild(this.scaleEntryWidget);
 
 		ResourceManager resourceManager = this.client.getResourceManager();
 		validSprites = allValidSprites(resourceManager);
