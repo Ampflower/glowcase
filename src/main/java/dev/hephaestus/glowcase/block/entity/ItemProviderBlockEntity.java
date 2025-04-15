@@ -18,6 +18,7 @@ import java.util.UUID;
 public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements InfiniteInventory, StackInteractable {
 	protected ItemStack stack = ItemStack.EMPTY;
 	protected GivesItem givesItem = GivesItem.ALWAYS;
+	protected boolean shouldRenderItem = true;
 	public long cooldown = 0;
 	protected final Map<UUID, Long> givenTimes = new HashMap<>();
 
@@ -52,6 +53,10 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 		return givesItem;
 	}
 
+	public boolean shouldRenderItem() {
+		return this.shouldRenderItem;
+	}
+
 	public void setGivesItem(GivesItem givesItem) {
 		this.givesItem = givesItem;
 		markDirty();
@@ -66,6 +71,7 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 		NbtCompound timesNbt = new NbtCompound();
 		givenTimes.forEach((id, tick) -> timesNbt.putLong(id.toString(), tick));
 		tag.put("given_times", timesNbt);
+		tag.putBoolean("should_render", this.shouldRenderItem);
 	}
 
 	@Override
@@ -84,6 +90,8 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 		for (String key : given.getKeys()) {
 			givenTimes.put(UUID.fromString(key), given.getLong(key));
 		}
+
+		this.shouldRenderItem = tag.getBoolean("should_render");
 	}
 
 	public void cycleGiveType() {
