@@ -123,7 +123,10 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 			itemStack.increment(getStack().getCount());
 			itemStack.capCount(itemStack.getMaxCount());
 			player.setStackInHand(Hand.MAIN_HAND, itemStack);
+		} else {
+			return;
 		}
+
 		if (!player.isCreative()) {
 			givenTimes.put(player.getUuid(), world.getTime());
 			markDirty();
