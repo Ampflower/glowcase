@@ -33,6 +33,9 @@ dependencies {
 
 	modCompileOnly libs.emi
 	modLocalRuntime libs.emi
+
+	modCompileOnly libs.modmenu
+	modLocalRuntime libs.modmenu
 }
 
 processResources {
