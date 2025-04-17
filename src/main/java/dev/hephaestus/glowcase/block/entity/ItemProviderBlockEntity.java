@@ -91,7 +91,7 @@ public class ItemProviderBlockEntity extends GlowcaseBlockEntity implements Infi
 			givenTimes.put(UUID.fromString(key), given.getLong(key));
 		}
 
-		this.invisible = tag.getBoolean("should_render");
+		this.invisible = tag.getBoolean("invisible");
 	}
 
 	public void cycleGiveType() {
