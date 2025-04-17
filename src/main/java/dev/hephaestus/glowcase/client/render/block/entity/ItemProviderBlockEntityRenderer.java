@@ -78,7 +78,7 @@ public record ItemProviderBlockEntityRenderer(BlockEntityRendererFactory.Context
 			matrices.scale(0.5F, 0.5F, 0.5F);
 			matrices.multiply(RotationAxis.POSITIVE_X.rotation(pitch));
 
-		if (entity.shouldRenderItem()) {
+		if (!entity.isInvisible()) {
 			matrices.push();
 			if (facing.getAxis() != Direction.Axis.Y) {
 				matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
