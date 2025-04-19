@@ -7,8 +7,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.*;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.sound.AbstractSoundInstance;
+import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.client.sound.SoundManager;
+import net.minecraft.client.sound.TickableSoundInstance;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
@@ -89,34 +92,39 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 
 	@Environment(EnvType.CLIENT)
 	public static void clientTick(World world, BlockPos pos, BlockState state, SoundPlayerBlockEntity entity) {
-		MinecraftClient mc = MinecraftClient.getInstance();
-		if (mc.player instanceof ClientPlayerEntity player) {
-			PositionedSoundLoop sound = new PositionedSoundLoop(
-				entity.soundId, entity.category,
-				entity.volume, entity.pitch, entity.repeatDelay,
-				entity.distance,
-				entity.relative,
-				entity.getSoundPos(),
-				entity.getSourcePos(),
-				player,
-				entity.getPos()
-			);
+		final MinecraftClient client = MinecraftClient.getInstance();
+		final SoundManager soundManager = client.getSoundManager();
 
-//			LOGGER.info("done? " + (entity.nowPlaying == null ? "null" : entity.nowPlaying.isDone()));
-			if (entity.nowPlaying == null || entity.nowPlaying.isDone() || entity.nowPlaying.isDifferentFrom(sound)) {
-				mc.getSoundManager().stop(entity.nowPlaying);
-//				LOGGER.info("playing");
-				if (sound.inRange()) {
-					if (entity.cancelOthers) mc.getSoundManager().stopSounds(null, entity.category);
-					mc.getSoundManager().play(sound);
-					entity.nowPlaying = sound;
-				}
+		final PositionedSoundLoop oldInstance = entity.nowPlaying;
+		if (oldInstance != null) {
+			if (oldInstance.isCompatible() && soundManager.isPlaying(oldInstance)) {
+				// no-op when already playing something
+				return;
 			}
+
+			soundManager.stop(oldInstance);
 		}
+
+		final Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+		final Vec3d sourcePos = entity.getSourcePos();
+
+		if (cameraPos.squaredDistanceTo(sourcePos) > entity.distanceSquared()) {
+			return;
+		}
+
+		if (entity.cancelOthers) {
+			soundManager.stopSounds(null, entity.category);
+		}
+
+		PositionedSoundLoop sound = new PositionedSoundLoop(entity);
+
+		entity.nowPlaying = sound;
+
+		soundManager.play(sound);
 	}
 
 	private Vec3d getSoundPos() {
-		if(relative) {
+		if (relative) {
 			return offset;
 		}
 
@@ -124,39 +132,31 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	}
 
 	private Vec3d getSourcePos() {
-		if(relative) {
+		if (relative) {
 			return pos.toCenterPos();
 		}
 
 		return pos.toCenterPos().add(offset);
 	}
 
-	// I don't think the repeat is necessary on this at this point
-	public static class PositionedSoundLoop extends PositionedSoundInstance implements TickableSoundInstance {
-		private final PlayerEntity player;
-		private final BlockPos soundBlockPos;
-		private final Vec3d pos;
+	private float distanceSquared() {
+		return this.distance * this.distance;
+	}
 
-		private final float distance;
+	// I don't think the repeat is necessary on this at this point
+	public static class PositionedSoundLoop extends AbstractSoundInstance implements TickableSoundInstance {
+		private final SoundPlayerBlockEntity soundBlock;
 
 		private boolean done;
 
-		public PositionedSoundLoop(Identifier id, SoundCategory category, float volume, float pitch, int repeatDelay, float distance, boolean relative, Vec3d soundPos, Vec3d pos, PlayerEntity player, BlockPos soundBlockPos) {
-			super(
-				id, category,
-				volume, pitch,
-				SoundInstance.createRandom(),
-				true, repeatDelay,
-				AttenuationType.NONE,
-				soundPos.x, soundPos.y, soundPos.z,
-				relative
-			);
-
-			this.pos = pos;
-			this.player = player;
-			this.soundBlockPos = soundBlockPos;
-			this.distance = distance;
+		public PositionedSoundLoop(SoundPlayerBlockEntity soundBlock) {
+			super(soundBlock.soundId, soundBlock.category, SoundInstance.createRandom());
+			this.repeat = true;
+			this.attenuationType = AttenuationType.NONE;
+			this.relative = soundBlock.relative;
+			this.soundBlock = soundBlock;
 			this.done = false;
+			this.copyData();
 		}
 
 		@Override
@@ -165,15 +165,44 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 
 		public void setDone() {
+			this.repeat = false;
 			this.done = true;
 		}
 
 		@Override
 		public void tick() {
-			// stops track-stacking when reloading the block
-			if (!inRange() || !(this.player.getWorld().getBlockEntity(this.soundBlockPos) instanceof SoundPlayerBlockEntity be && this == be.nowPlaying)) {
-				setDone();
+			if (this.soundBlock.nowPlaying != this) {
+				this.setDone();
+				return;
 			}
+
+			final MinecraftClient client = MinecraftClient.getInstance();
+
+			// If the worlds don't match, stop.
+			if (this.soundBlock.getWorld() != client.world) {
+				this.setDone();
+				return;
+			}
+
+			if (!inRange(client.player, client.gameRenderer.getCamera())) {
+				setDone();
+				return;
+			}
+
+			copyData();
+		}
+
+		private void copyData() {
+			this.setPos(soundBlock.getSoundPos());
+			this.volume = this.soundBlock.volume;
+			this.pitch = this.soundBlock.pitch;
+			this.repeatDelay = this.soundBlock.repeatDelay;
+		}
+
+		private void setPos(Vec3d pos) {
+			this.x = pos.getX();
+			this.y = pos.getY();
+			this.z = pos.getZ();
 		}
 
 		@Override
@@ -184,28 +213,30 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 
 		private float linearFalloff() {
-			float distanceToPlayer = (float) this.player.getPos().distanceTo(this.pos);
-			return 1 - (distanceToPlayer / distance);
+			final Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
+			float distanceToCamera = (float) this.soundBlock.getSourcePos().distanceTo(camera.getPos());
+			return 1 - (distanceToCamera / this.soundBlock.distance);
 		}
 
-		public boolean inRange() {
-			return this.player.squaredDistanceTo(this.pos) <= this.distance * this.distance;
+		public boolean inRange(ClientPlayerEntity player, Camera camera) {
+			final float maxDistSquared = this.soundBlock.distanceSquared();
+			final Vec3d sourcePos = this.soundBlock.getSourcePos();
+
+			if (camera.getPos().squaredDistanceTo(sourcePos) <= maxDistSquared) {
+				return true;
+			}
+
+			return player.squaredDistanceTo(sourcePos) <= maxDistSquared;
 		}
 
-		public boolean isDifferentFrom(PositionedSoundLoop other) {
-			return !(
-				other != null &&
-					this.id.equals(other.id) &&
-					this.category.equals(other.category) &&
-					this.volume == other.volume &&
-					this.pitch == other.pitch &&
-					this.repeatDelay == other.repeatDelay &&
-					this.distance == other.distance &&
-					this.relative == other.relative &&
-					this.x == other.x &&
-					this.y == other.y &&
-					this.z == other.z
-			);
+		public boolean isCompatible() {
+			if (this.isDone() || this.soundBlock.nowPlaying != this) {
+				return false;
+			}
+
+			return this.relative == this.soundBlock.relative &&
+				this.id.equals(this.soundBlock.soundId) &&
+				this.category.equals(this.soundBlock.category);
 		}
 	}
 }
