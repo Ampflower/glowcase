@@ -1,8 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ScreenBlockEntity;
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -15,7 +18,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ScreenBlock extends RotatableBlock implements BlockEntityProvider {
+public class ScreenBlock extends RotatableBlock {
+	public static final MapCodec<ScreenBlock> CODEC = createCodec(ScreenBlock::new);
+
+	public ScreenBlock() {
+		super();
+	}
+
+	public ScreenBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Override
 	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
 		return new ScreenBlockEntity(pos, state);
@@ -36,5 +49,10 @@ public class ScreenBlock extends RotatableBlock implements BlockEntityProvider {
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.screen_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

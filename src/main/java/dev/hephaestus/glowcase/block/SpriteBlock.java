@@ -1,10 +1,12 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.SpriteBlockEntity;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -23,11 +25,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SpriteBlock extends GlowcaseBlock implements BlockEntityProvider {
+public class SpriteBlock extends WaterloggableGlowcaseBlock {
+	public static final MapCodec<SpriteBlock> CODEC = createCodec(SpriteBlock::new);
 	public static final DirectionProperty FACING = Properties.FACING;
 
+
 	public SpriteBlock() {
-		super();
+		this(defaultSettings());
+	}
+
+	public SpriteBlock(AbstractBlock.Settings settings) {
+		super(settings);
 		this.setDefaultState(this.getDefaultState().with(FACING, Direction.UP));
 	}
 
@@ -72,5 +80,10 @@ public class SpriteBlock extends GlowcaseBlock implements BlockEntityProvider {
 		tooltip.add(Text.translatable("block.glowcase.sprite_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
 		tooltip.add(Text.translatable("block.glowcase.sprite_block.tooltip.1").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

@@ -1,9 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.OutlineBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,7 +17,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class OutlineBlock extends GlowcaseBlock implements BlockEntityProvider {
+public class OutlineBlock extends WaterloggableGlowcaseBlock {
+	public static final MapCodec<OutlineBlock> CODEC = createCodec(OutlineBlock::new);
+
+	public OutlineBlock() {
+		super();
+	}
+
+	public OutlineBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Nullable
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
@@ -32,5 +44,10 @@ public class OutlineBlock extends GlowcaseBlock implements BlockEntityProvider {
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.outline_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

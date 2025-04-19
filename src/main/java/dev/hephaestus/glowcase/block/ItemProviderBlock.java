@@ -1,9 +1,12 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ItemProviderBlockEntity;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +25,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -30,11 +32,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class ItemProviderBlock extends StackInteractableBlock {
-	private static final VoxelShape OUTLINE = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+	public static final MapCodec<ItemProviderBlock> CODEC = createCodec(ItemProviderBlock::new);
 	public static final DirectionProperty FACING = Properties.FACING;
 
 	public ItemProviderBlock() {
-		super();
+		this(defaultSettings());
+	}
+
+	public ItemProviderBlock(AbstractBlock.Settings settings) {
+		super(settings);
 		this.setDefaultState(this.getDefaultState().with(FACING, Direction.UP));
 	}
 
@@ -92,6 +98,11 @@ public class ItemProviderBlock extends StackInteractableBlock {
 	@Override
 	public VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		Vec3i facingOffset = state.get(FACING).getVector();
-		return OUTLINE.offset(-facingOffset.getX() / 2.0F, 0, -facingOffset.getZ() / 2.0F);
+		return HALF_CUBED.offset(-facingOffset.getX() / 2.0F, 0, -facingOffset.getZ() / 2.0F);
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }
