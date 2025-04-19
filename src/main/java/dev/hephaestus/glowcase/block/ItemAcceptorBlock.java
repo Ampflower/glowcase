@@ -2,7 +2,12 @@ package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ItemAcceptorBlockEntity;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.InventoryProvider;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -171,15 +176,6 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 	@Override
 	protected int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
 		return state.get(POWERED) && getOutputDirection(world, pos, state) == direction.getOpposite() ? 15 : 0;
-	}
-
-	@Override
-	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-		if (!state.isOf(newState.getBlock())) {
-			if (!world.isClient && state.get(POWERED) && world.getBlockTickScheduler().isQueued(pos, this)) {
-				this.updateNeighbors(world, pos, state.with(POWERED, false));
-			}
-		}
 	}
 
 	public Direction getOutputDirection(BlockView world, BlockPos pos, BlockState state) {
