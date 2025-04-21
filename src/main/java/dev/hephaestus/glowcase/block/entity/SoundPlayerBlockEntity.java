@@ -25,6 +25,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -37,6 +41,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 	public boolean relative = false;
 	public Vec3d offset = Vec3d.ZERO;
 	public boolean cancelOthers = false;
+	public PositionSampler volumeSampler = PositionSampler.CAMERA;
 
 	public PositionedSoundLoop nowPlaying = null;
 
@@ -66,6 +71,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		Vec3d.CODEC.encodeStart(ops, this.offset)
 			.resultOrPartial(LOGGER::error)
 			.ifPresent(result -> tag.put("offset", result));
+		tag.putString("volumeSampler", volumeSampler.name());
 	}
 
 	@Override
@@ -88,6 +94,13 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 			Vec3d.CODEC.parse(ops, tag.get("offset"))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(result -> this.offset = result);
+
+		if (tag.contains("volumeSampler", NbtElement.STRING_TYPE)) {
+			final PositionSampler sampler = PositionSampler.getByName(tag.getString("volumeSampler"));
+			if (sampler != null) {
+				this.volumeSampler = sampler;
+			}
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -141,6 +154,45 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 
 	private float distanceSquared() {
 		return this.distance * this.distance;
+	}
+
+
+	public enum PositionSampler {
+		CAMERA {
+			@Override
+			public Vec3d getPosition(final MinecraftClient client) {
+				return client.gameRenderer.getCamera().getPos();
+			}
+		},
+		PLAYER {
+			@Override
+			public Vec3d getPosition(final MinecraftClient client) {
+				if (client.player == null) {
+					return Vec3d.ZERO;
+				}
+				return client.player.getPos();
+			}
+		},
+		;
+
+		private static final Map<String, PositionSampler> lookup;
+
+		static {
+			final Map<String, PositionSampler> samplers = new HashMap<>();
+			for (final PositionSampler sampler : values()) {
+				samplers.put(sampler.name().toLowerCase(Locale.ROOT), sampler);
+			}
+			lookup = Map.copyOf(samplers);
+		}
+
+		public static PositionSampler getByName(String value) {
+			if (value == null) {
+				return null;
+			}
+			return lookup.get(value.toLowerCase(Locale.ROOT));
+		}
+
+		public abstract Vec3d getPosition(MinecraftClient client);
 	}
 
 	// I don't think the repeat is necessary on this at this point
@@ -213,8 +265,8 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 		}
 
 		private float linearFalloff() {
-			final Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-			float distanceToCamera = (float) this.soundBlock.getSourcePos().distanceTo(camera.getPos());
+			final Vec3d position = this.soundBlock.volumeSampler.getPosition(MinecraftClient.getInstance());
+			float distanceToCamera = (float) this.soundBlock.getSourcePos().distanceTo(position);
 			return 1 - (distanceToCamera / this.soundBlock.distance);
 		}
 
