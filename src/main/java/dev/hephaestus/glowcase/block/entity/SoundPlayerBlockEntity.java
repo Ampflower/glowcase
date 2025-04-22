@@ -223,7 +223,7 @@ public class SoundPlayerBlockEntity extends GlowcaseBlockEntity {
 
 		@Override
 		public void tick() {
-			if (this.soundBlock.nowPlaying != this) {
+			if (this.soundBlock.isRemoved() || this.soundBlock.nowPlaying != this) {
 				this.setDone();
 				return;
 			}
