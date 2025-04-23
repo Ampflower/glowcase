@@ -41,6 +41,6 @@ public record RecipeBlockEntityRenderer(BlockEntityRendererFactory.Context conte
 			if (rendered) return;
 		}
 
-		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
+		if (BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0.01F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
 	}
 }

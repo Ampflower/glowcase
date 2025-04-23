@@ -59,7 +59,7 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 		}
 
 		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
-		if (entity.lines.stream().allMatch(t -> t.getString().isBlank()) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
+		if (entity.lines.stream().allMatch(t -> t.getString().isBlank()) || BlockEntityRenderUtil.shouldRenderPlaceholder(entity.getPos())) BlockEntityRenderUtil.renderPlaceholderWithBlockRotation(entity, ITEM_TEXTURE, 1.0F, matrices, vertexConsumers, entity.zOffset == TextBlockEntity.ZOffset.CENTER ? 0.01F : entity.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F);
 	}
 
 	@Override

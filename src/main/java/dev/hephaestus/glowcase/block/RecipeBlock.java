@@ -70,7 +70,7 @@ public class RecipeBlock extends RotatableBlock implements BlockEntityProvider {
 	public VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		if (!(world.getBlockEntity(pos) instanceof RecipeBlockEntity be)) return VoxelShapes.empty();
 		float rotation = -(state.get(Properties.ROTATION) * 360) / 16.0F;
-		Vector3f offset = new Vector3f(0, 0, be.zOffset == TextBlockEntity.ZOffset.CENTER ? 0F : be.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F).rotate(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+		Vector3f offset = new Vector3f(0, 0, be.zOffset == TextBlockEntity.ZOffset.CENTER ? 0.01F : be.zOffset == TextBlockEntity.ZOffset.FRONT ? 0.4F : -0.4F).rotate(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
 		return OUTLINE.offset(offset.x, offset.y, offset.z);
 	}
 }
