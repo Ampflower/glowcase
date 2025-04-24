@@ -2,21 +2,26 @@ package dev.hephaestus.glowcase.client.render.block.entity;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
-import dev.hephaestus.glowcase.client.GlowcaseRenderLayers;
 import dev.hephaestus.glowcase.client.util.BlockEntityRenderUtil;
+import dev.hephaestus.glowcase.mixin.client.TextRendererAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.GlyphRenderer;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Style;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockEntity> {
 	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/text_block.png");
@@ -123,9 +128,14 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 			matrices.translate(dX, 0, 0);
 
 			if (entity.backgroundColor != 0 && width > 0) {
-				matrices.translate(0, 0, -0.025D);
+				matrices.push();
+				// Annoyingly, it kept getting rendered backwards.
+				// I thought the vertexes were misordered but that didn't do anything.
+				matrices.multiply(new Quaternionf().rotateLocalY(MathHelper.PI));
+				matrices.translate(-width, 0, -0.025D);
+
 				drawFillRect(matrices, vertexConsumers, (int) width + 5, (i + 1) * 12 - 2, -5, i * 12 - 2, entity.backgroundColor);
-				matrices.translate(0, 0, 0.025D);
+				matrices.pop();
 			}
 
 			textRenderer.draw(entity.lines.get(i), 0, i * 12, entity.color, entity.shadow, matrices.peek().getPositionMatrix(), vertexConsumers, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
@@ -142,15 +152,17 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 		float green = (float) (color >> 8 & 255) / 255.0F;
 		float blue = (float) (color & 255) / 255.0F;
 		float alpha = (float) (color >> 24 & 255) / 255.0F;
-		VertexConsumer consumer = vcp.getBuffer(GlowcaseRenderLayers.TEXT_PLATE);
-		Matrix4f matrix = matrices.peek().getPositionMatrix();
-		consumer.vertex(matrix, x1, y2, 0.0f)
-			.color(red, green, blue, alpha);
-		consumer.vertex(matrix, x2, y2, 0.0f)
-			.color(red, green, blue, alpha);
-		consumer.vertex(matrix, x2, y1, 0.0f)
-			.color(red, green, blue, alpha);
-		consumer.vertex(matrix, x1, y1, 0.0f)
-			.color(red, green, blue, alpha);
+
+		// Horrible up to no good hack to get proper translucency sorting :3
+		final GlyphRenderer renderer = ((TextRendererAccessor) MinecraftClient.getInstance().textRenderer)
+			.invokeGetFontStorage(Style.DEFAULT_FONT_ID).getRectangleRenderer();
+
+		final RenderLayer renderLayer = renderer.getLayer(TextLayerType.NORMAL);
+		final VertexConsumer consumer = vcp.getBuffer(renderLayer);
+		final Matrix4f matrix = matrices.peek().getPositionMatrix();
+
+		renderer.drawRectangle(new GlyphRenderer.Rectangle(
+			x1, y1, x2, y2, 0F, red, green, blue, alpha
+		), matrix, consumer, LightmapTextureManager.MAX_LIGHT_COORDINATE);
 	}
 }
