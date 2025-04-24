@@ -162,7 +162,7 @@ public class TextBlockEntityRenderer extends BakedBlockEntityRenderer<TextBlockE
 		final Matrix4f matrix = matrices.peek().getPositionMatrix();
 
 		renderer.drawRectangle(new GlyphRenderer.Rectangle(
-			x1, y1, x2, y2, 0F, red, green, blue, alpha
+			x1, y1, x2, y2, 0.2f, red, green, blue, alpha
 		), matrix, consumer, LightmapTextureManager.MAX_LIGHT_COORDINATE);
 	}
 }
