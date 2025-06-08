@@ -10,7 +10,7 @@ permissions:
   attestations: write
 
 jobs:
-  upload:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,7 +33,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: 'build/libs/*.jar;!build/libs/*-sources.jar;!build/libs/*-dev.jar'
+          subject-path: 'build/libs/*.jar, !build/libs/*-sources.jar, !build/libs/*-dev.jar'
 
       - name: Upload GitHub release
         uses: AButler/upload-release-assets@v2.0
