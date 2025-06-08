@@ -2,7 +2,7 @@ package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.StackInteractable;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,7 +13,15 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public abstract class StackInteractableBlock extends GlowcaseBlock implements BlockEntityProvider {
+public abstract class StackInteractableBlock extends WaterloggableGlowcaseBlock {
+	public StackInteractableBlock() {
+		super();
+	}
+
+	public StackInteractableBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Override
 	boolean canTarget(PlayerEntity player, BlockPos pos) {
 		if (!(player.getWorld().getBlockEntity(pos) instanceof StackInteractable be)) return false;

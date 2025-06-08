@@ -1,9 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.SoundPlayerBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -18,7 +20,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SoundPlayerBlock extends GlowcaseBlock implements BlockEntityProvider {
+public class SoundPlayerBlock extends WaterloggableGlowcaseBlock {
+	public static final MapCodec<SoundPlayerBlock> CODEC = createCodec(SoundPlayerBlock::new);
+
+	public SoundPlayerBlock() {
+		super();
+	}
+
+	public SoundPlayerBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
@@ -42,5 +54,10 @@ public class SoundPlayerBlock extends GlowcaseBlock implements BlockEntityProvid
 	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.sound_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

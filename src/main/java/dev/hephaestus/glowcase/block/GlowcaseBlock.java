@@ -2,8 +2,9 @@ package dev.hephaestus.glowcase.block;
 
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.GlowcaseBlockEntity;
-import net.minecraft.block.Block;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
@@ -24,12 +25,16 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class GlowcaseBlock extends Block {
+public abstract class GlowcaseBlock extends BlockWithEntity {
+	protected static final VoxelShape HALF_CUBED = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+
 	public GlowcaseBlock() {
-		super(Settings.create().nonOpaque().strength(-1, Integer.MAX_VALUE));
+		this(defaultSettings());
 	}
 
-	private static final VoxelShape PSEUDO_EMPTY = VoxelShapes.cuboid(0, -1000, 0, 0.1, -999.9, 0.1);
+	public GlowcaseBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
 
 	boolean canTarget(PlayerEntity player, BlockPos pos) {
 		return canEditGlowcase(player, pos) && player.getMainHandStack().isIn(Glowcase.ITEM_TAG);
@@ -80,7 +85,7 @@ public abstract class GlowcaseBlock extends Block {
 		) {
 			return targetedOutlineShape(state, world, pos, context);
 		} else {
-			return PSEUDO_EMPTY;
+			return VoxelShapes.empty();
 		}
 	}
 
@@ -96,6 +101,13 @@ public abstract class GlowcaseBlock extends Block {
 	}
 
 	public static boolean canEditGlowcase(PlayerEntity player, BlockPos pos) {
-		return player.isCreative() && player.canModifyAt(player.getWorld(), pos);
+		return player != null && player.isCreative() && player.canModifyAt(player.getWorld(), pos);
+	}
+
+	protected static AbstractBlock.Settings defaultSettings() {
+		return Settings.create()
+			.nonOpaque()
+			.dropsNothing()
+			.strength(-1, Float.MAX_VALUE);
 	}
 }

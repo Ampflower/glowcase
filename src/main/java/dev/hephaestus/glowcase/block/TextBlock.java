@@ -1,9 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.TextBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -22,7 +24,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TextBlock extends RotatableBlock implements BlockEntityProvider {
+public class TextBlock extends RotatableBlock {
+	public static final MapCodec<TextBlock> CODEC = createCodec(TextBlock::new);
+
+	public TextBlock() {
+		super();
+	}
+
+	public TextBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Override
 	protected boolean openEditScreen(BlockPos pos) {
 		Glowcase.proxy.openTextBlockEditScreen(pos);
@@ -62,5 +74,10 @@ public class TextBlock extends RotatableBlock implements BlockEntityProvider {
 				tooltip.add(Text.literal((line.asString().length() > 20 ? "%s...\"" : "%s").formatted(line.asString().substring(0, Math.min(line.asString().length(), 20)))).formatted(Formatting.DARK_PURPLE));
 			}
 		}
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

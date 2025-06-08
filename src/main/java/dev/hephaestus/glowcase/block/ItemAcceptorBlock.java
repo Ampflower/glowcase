@@ -1,10 +1,13 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ItemAcceptorBlockEntity;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.ShapeContext;
@@ -38,14 +41,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvider {
-	private static final VoxelShape OUTLINE = VoxelShapes.cuboid(0, 0, 0, 1, 1, 1);
+public class ItemAcceptorBlock extends GlowcaseBlock {
+	public static final MapCodec<ItemAcceptorBlock> CODEC = createCodec(ItemAcceptorBlock::new);
+	private static final VoxelShape OUTLINE = VoxelShapes.fullCube();
 	public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
 	public static final BooleanProperty POWERED = Properties.POWERED;
 
 	public ItemAcceptorBlock() {
-		super();
+		this(Settings.create()
+			.nonOpaque()
+			.dropsNothing()
+			.strength(-1, Float.MAX_VALUE));
+	}
+
+	public ItemAcceptorBlock(AbstractBlock.Settings settings) {
+		super(settings);
 		this.setDefaultState(this.getDefaultState().with(FACING, Direction.NORTH).with(POWERED, false));
+	}
+
+	@Override
+	protected BlockRenderType getRenderType(final BlockState state) {
+		return BlockRenderType.MODEL;
 	}
 
 	@Override
@@ -102,7 +118,7 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 			}
 
 			// Schedule redstone pulse
-			if(be.getPulse() > 0) world.scheduleBlockTick(pos, this, 2);
+			if (be.getPulse() > 0) world.scheduleBlockTick(pos, this, 2);
 		}
 		return ItemActionResult.SUCCESS;
 	}
@@ -212,5 +228,10 @@ public class ItemAcceptorBlock extends GlowcaseBlock implements BlockEntityProvi
 		tooltip.add(Text.translatable("block.glowcase.item_acceptor_block.tooltip.1").formatted(Formatting.BLUE));
 		tooltip.add(Text.translatable("block.glowcase.item_acceptor_block.tooltip.2").formatted(Formatting.BLUE));
 		tooltip.add(Text.translatable("block.glowcase.item_acceptor_block.tooltip.3").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

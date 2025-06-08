@@ -1,9 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.HyperlinkBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,19 +18,26 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class HyperlinkBlock extends GlowcaseBlock implements BlockEntityProvider {
-	private static final VoxelShape OUTLINE = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75);
+public class HyperlinkBlock extends WaterloggableGlowcaseBlock {
+	public static final MapCodec<HyperlinkBlock> CODEC = createCodec(HyperlinkBlock::new);
+
+	public HyperlinkBlock() {
+		super();
+	}
+
+	public HyperlinkBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
 
 	@Override
 	protected VoxelShape targetedOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return OUTLINE;
+		return HALF_CUBED;
 	}
 
 	@Override
@@ -61,5 +70,10 @@ public class HyperlinkBlock extends GlowcaseBlock implements BlockEntityProvider
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.hyperlink_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }

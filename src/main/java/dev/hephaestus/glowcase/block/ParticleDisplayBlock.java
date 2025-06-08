@@ -1,9 +1,11 @@
 package dev.hephaestus.glowcase.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.block.entity.ParticleDisplayBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -18,7 +20,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ParticleDisplayBlock extends GlowcaseBlock implements BlockEntityProvider {
+public class ParticleDisplayBlock extends WaterloggableGlowcaseBlock {
+	public static final MapCodec<ParticleDisplayBlock> CODEC = createCodec(ParticleDisplayBlock::new);
+
+	public ParticleDisplayBlock() {
+		super();
+	}
+
+	public ParticleDisplayBlock(AbstractBlock.Settings settings) {
+		super(settings);
+	}
+
 	@Override
 	public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 		if (!world.isClient()) return null;
@@ -40,5 +52,10 @@ public class ParticleDisplayBlock extends GlowcaseBlock implements BlockEntityPr
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
 		tooltip.add(Text.translatable("block.glowcase.particle_display_block.tooltip.0").formatted(Formatting.GRAY));
 		tooltip.add(Text.translatable("block.glowcase.generic.tooltip").formatted(Formatting.DARK_GRAY));
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return CODEC;
 	}
 }
