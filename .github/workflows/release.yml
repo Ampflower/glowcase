@@ -5,6 +5,10 @@ on:
     types:
       - published
 
+permissions:
+  id-token: write
+  attestations: write
+
 jobs:
   upload:
     runs-on: ubuntu-latest
