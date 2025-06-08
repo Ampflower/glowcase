@@ -1,6 +1,6 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "glowcase:item/hyperlink_block"
+		"layer0": "glowcase:item/config_link_block"
 	}
 }

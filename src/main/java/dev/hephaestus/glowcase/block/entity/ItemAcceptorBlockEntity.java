@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
@@ -13,7 +14,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 	private Identifier item = Identifier.ofVanilla("air");
@@ -42,11 +46,27 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 	public void readNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(tag, registryLookup);
 
-		setItem(Identifier.tryParse(tag.getString("item")));
-		this.count = tag.getInt("count");
-		this.pulse = tag.getInt("pulse");
+		if (tag.contains("item", NbtElement.STRING_TYPE)) {
+			setItem(Identifier.tryParse(tag.getString("item")));
+		}
+
+		if (tag.contains("count", NbtElement.NUMBER_TYPE)) {
+			this.count = tag.getInt("count");
+		}
+
+		if (tag.contains("pulse", NbtElement.NUMBER_TYPE)) {
+			this.pulse = tag.getInt("pulse");
+		}
+
 		this.isItemTag = tag.getBoolean("is_item_tag");
-		this.outputDirection = OutputDirection.valueOf(tag.getString("output_direction"));
+
+		if (tag.contains("output_direction", NbtElement.STRING_TYPE)) {
+			OutputDirection value = OutputDirection.getByName(tag.getString("output_direction"));
+
+			if (value != null) {
+				this.outputDirection = value;
+			}
+		}
 	}
 
 	public Identifier getItem() {
@@ -54,6 +74,10 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 	}
 
 	public void setItem(Identifier item) {
+		if (item == null) {
+			return;
+		}
+
 		this.item = item;
 
 		TagKey<Item> itemTag = TagKey.of(RegistryKeys.ITEM, item);
@@ -86,6 +110,25 @@ public class ItemAcceptorBlockEntity extends GlowcaseBlockEntity {
 
 	public enum OutputDirection
 	{
-		TOP, BACK, BOTTOM
+		TOP, BACK, BOTTOM;
+
+		private static final Map<String, OutputDirection> directions;
+
+		static {
+			final Map<String, OutputDirection> map = new HashMap<>();
+
+			for (final OutputDirection direction : OutputDirection.values()) {
+				map.put(direction.name().toLowerCase(Locale.ROOT), direction);
+			}
+
+			directions = Map.copyOf(map);
+		}
+
+		public static OutputDirection getByName(String name) {
+			if (name == null) {
+				return null;
+			}
+			return directions.get(name.toLowerCase(Locale.ROOT));
+		}
 	}
 }

@@ -26,6 +26,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'build/libs/*.jar;!build/libs/*-sources.jar;!build/libs/*-dev.jar'
+
       - name: Upload GitHub release
         uses: AButler/upload-release-assets@v2.0
         with:

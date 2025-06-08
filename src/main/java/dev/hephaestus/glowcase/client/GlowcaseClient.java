@@ -1,5 +1,8 @@
 package dev.hephaestus.glowcase.client;
 
+import java.util.List;
+import java.util.Stack;
+
 import com.google.common.collect.Lists;
 import dev.hephaestus.glowcase.Glowcase;
 import dev.hephaestus.glowcase.client.render.block.entity.BakedBlockEntityRenderer;
@@ -25,7 +28,7 @@ import dev.hephaestus.glowcase.item.ScrollableItem;
 import dev.hephaestus.glowcase.mixin.HandledScreenInvoker;
 import dev.hephaestus.glowcase.packet.C2SSlotScrolled;
 import dev.hephaestus.glowcase.util.EmiUtils;
-import dev.hephaestus.glowcase.util.EmiWorldRenderUtils;
+import dev.hephaestus.glowcase.client.util.EmiWorldRenderUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -50,12 +53,12 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 
-import java.util.List;
-
 public class GlowcaseClient implements ClientModInitializer {
 	public static final Boolean EMI_LOADED = FabricLoader.getInstance().isModLoaded("emi");
 	public static final ScreenImageCache screenImageCache = new ScreenImageCache();
 	public static final Identifier PROVIDER_CROSSHAIR_TEXTURE = Glowcase.id("hud/provider_crosshair");
+	// Use a stack so it can be more freely used if needed in more places
+	public static final Stack<Void> PREVENT_VEIL_DYNAMIC_BUFFER = new Stack<>();
 
 	private double accScroll = 0;
 
@@ -110,7 +113,7 @@ public class GlowcaseClient implements ClientModInitializer {
 			Glowcase.COLLECTION_CASE_ITEM.get()
 		);
 
-		WorldRenderEvents.AFTER_TRANSLUCENT.register(BakedBlockEntityRenderer.Manager::render);
+		WorldRenderEvents.AFTER_ENTITIES.register(BakedBlockEntityRenderer.Manager::render);
 		InvalidateRenderStateCallback.EVENT.register(BakedBlockEntityRenderer.Manager::reset);
 
 		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new NoteTextColorResource());

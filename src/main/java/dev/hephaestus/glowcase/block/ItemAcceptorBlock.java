@@ -194,15 +194,6 @@ public class ItemAcceptorBlock extends GlowcaseBlock {
 		return state.get(POWERED) && getOutputDirection(world, pos, state) == direction.getOpposite() ? 15 : 0;
 	}
 
-	@Override
-	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-		if (!state.isOf(newState.getBlock())) {
-			if (!world.isClient && state.get(POWERED) && world.getBlockTickScheduler().isQueued(pos, this)) {
-				this.updateNeighbors(world, pos, state.with(POWERED, false));
-			}
-		}
-	}
-
 	public Direction getOutputDirection(BlockView world, BlockPos pos, BlockState state) {
 		if (world.getBlockEntity(pos) instanceof ItemAcceptorBlockEntity blockEntity) {
 			return switch (blockEntity.outputDirection) {

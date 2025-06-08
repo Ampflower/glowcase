@@ -17,7 +17,7 @@ import net.minecraft.util.math.RotationAxis;
 
 public record ConfigLinkBlockEntityRenderer(
 	BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ConfigLinkBlockEntity> {
-	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/hyperlink_block.png");
+	public static Identifier ITEM_TEXTURE = Glowcase.id("textures/item/config_link_block.png");
 
 	public void render(ConfigLinkBlockEntity entity, float f, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
 		if (entity.getWorld() == null || entity.getWorld().getBlockState(entity.getPos()).isAir()) return;
